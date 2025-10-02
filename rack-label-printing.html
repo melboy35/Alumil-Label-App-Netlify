@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Rack Label Profile – Alumil</title>
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
+  <link rel="manifest" href="favicon/site.webmanifest">
+  <link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#ffc107">
+  <link rel="shortcut icon" href="favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#ffc107">
+  <meta name="msapplication-config" content="favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root { --header-h: 80px; }
+    html, body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    body{ transition:background-color .3s, color .3s; background:#2a2a2a; color:#d1d5db; }
+    .card{ background:#1a1a1a; border:1px solid #2f3340; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+    .subtitle-text{ color:#a1a1b5; }
+    .input-field{ background:#2a2a2a; border:1px solid #4b5563; color:#d1d5db; padding:.55rem .75rem; border-radius:.6rem; transition:border-color .2s, box-shadow .2s; }
+    .input-field:focus{ outline: none; border-color:#f59e0b; box-shadow:0 0 0 2px rgba(245,158,11,.35); }
+    .btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.675rem 1rem; border-radius:.75rem; border:1px solid transparent; font-weight:600; }
+    .btn-amber{ background:#f59e0b; color:#111827; border-color:#eab308; }
+    .btn-amber:hover{ filter:brightness(.95); }
+    .icon-btn{ display:inline-grid; place-items:center; height:38px; border-radius:10px; border:1px solid #3b4254; background:transparent; color:inherit; }
+    .icon-btn:hover{ background:#0f172a; }
+    .icon-btn.square{ width:38px; }
+    .chip{ display:inline-flex; align-items:center; gap:.375rem; padding:.25rem .6rem; border-radius:999px; font-size:.7rem; font-weight:700; }
+    .chip.ok{ background:rgba(16,185,129,.15); color:#10b981; }
+    .chip.warn{ background:rgba(251,191,36,.15); color:#f59e0b; }
+    .chip.bad{ background:rgba(239,68,68,.15); color:#ef4444; }
+
+    html[data-theme="light"] body { background:#f3f4f6; color:#374151; }
+    html[data-theme="light"] .card { background:#fff; border-color:#e5e7eb; box-shadow:0 6px 24px rgba(0,0,0,.08); }
+    html[data-theme="light"] .subtitle-text{ color:#6b7280; }
+    html[data-theme="light"] .input-field{ background:#fff; border-color:#d1d5db; color:#111827; }
+    html[data-theme="light"] .icon-btn{ border-color:#e5e7eb; }
+    html[data-theme="light"] .icon-btn:hover{ background:#f3f4f6; }
+
+    @keyframes header-glow{
+      0%,100%{ box-shadow:0 10px 15px -3px rgba(0,0,0,.2), 0 4px 6px -4px rgba(0,0,0,.2); }
+      50%{ box-shadow:0 12px 28px -6px rgba(245,158,11,.25), 0 6px 10px -5px rgba(245,158,11,.18); }
+    }
+    .animating{ animation: header-glow 4s ease-in-out infinite; }
+
+    .brand-full { display:none; }
+    .brand-short { display:inline; }
+    @media (min-width: 640px){
+      .brand-full { display:inline; }
+      .brand-short { display:none; }
+    }
+
+    .img-ph {
+      display:grid; place-items:center;
+      width:12rem; height:12rem;
+      border-radius:.75rem; border:1px dashed #475569;
+      background:#0b1220; color:#94a3b8; font-size:.9rem;
+    }
+
+    .seg { border:1px solid #3b4254; border-radius:12px; overflow:hidden; }
+    .seg > button{ padding:.55rem .9rem; font-weight:600; }
+    .seg > button:hover{ background:#0f172a; }
+    .seg [data-active="true"]{ background:#f59e0b; color:#0f172a; }
+
+    .kv > div:nth-child(odd){ color:var(--muted, #a1a1b5); font-size:.72rem; }
+    .kv > div:nth-child(even){ font-weight:600; }
+
+    .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.7); z-index:60; }
+    .modal.open{ display:flex; }
+    video#scanVideo{ width:100%; border-radius:12px; background:#000; }
+
+    @media print {
+      body { background:#fff; color:#111827; }
+      .card { border:none; box-shadow:none; }
+    }
+  </style>
+
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card dark animating">
+    <div class="flex items-center space-x-3 mb-4 sm:mb-0">
+      <img src="alumil-logo.svg" alt="Alumil logo" class="h-9 w-auto select-none" loading="eager" decoding="async">
+      <span class="brand-short">Alumil inventory sys....</span>
+      <span class="brand-full">Alumil Inventory System</span>
+    </div>
+      <nav class="flex items-center space-x-4 text-sm sm:text-base">
+        <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="admin.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/></svg>
+          Admin
+        </a>
+    <div class="flex items-center gap-2">
+      <button id="themeToggle" class="icon-btn square" aria-label="Toggle theme">
+        <i class="fa-regular fa-moon" id="themeIcon"></i>
+      </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
+    <!-- Page title row -->
+    <div class="flex items-center justify-between mb-6 gap-4">
+      <h1 class="text-3xl font-bold title-text">Rack Label Profile</h1>
+      <div class="flex items-center gap-3 text-xs sm:text-sm">
+        <span id="last-updated" class="hidden sm:inline subtitle-text"></span>
+        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border" id="data-pill">
+          <span id="data-indicator" class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+          <span id="data-source-text">Sample Data</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <section id="search-section" class="card p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-end">
+        <div>
+          <label class="block text-sm font-medium subtitle-text mb-1">Search Item</label>
+          <div class="relative flex items-center gap-2">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              <input id="q" type="search" placeholder="Type code, description, or system…" class="input-field w-full pl-12 pr-12" autocomplete="off"/>
+              <div id="sugWrap" class="absolute left-0 right-0 top-full mt-2 z-50 hidden">
+                <ul id="sugList" class="card p-2 max-h-72 overflow-y-auto divide-y divide-slate-700"></ul>
+              </div>
+              <button id="scanBtn" class="icon-btn square absolute right-1 top-1/2 -translate-y-1/2" title="Scan barcode">
+                <i class="fa-solid fa-camera"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="min-w-[220px]">
+          <label class="block text-sm font-medium subtitle-text mb-1">Item Type</label>
+          <select id="kindSel" class="input-field w-full">
+            <option value="profile" selected>Profile</option>
+            <option value="accessory">Accessory</option>
+          </select>
+        </div>
+      </div>
+      <p class="text-xs subtitle-text mt-3">Pick an item from the dropdown or scan a barcode to update the preview.</p>
+    </section>
+
+    <!-- Preview (Label 1 / Label 2) -->
+    <section id="previewSection" class="card p-6 mt-6">
+      <div class="flex items-center justify-between mb-4 gap-3">
+        <div class="font-semibold">Preview</div>
+        <div class="flex items-center gap-2">
+          <div class="seg inline-flex">
+            <button id="label1Btn" class="px-4 py-2" data-active="true">Label 1</button>
+            <button id="label2Btn" class="px-4 py-2" data-active="false">Label 2</button>
+          </div>
+          <button id="printBtn" class="btn btn-amber"><i class="fa-solid fa-print"></i> Print label</button>
+        </div>
+      </div>
+
+      <!-- Label 1 -->
+      <div id="label1" class="space-y-5">
+        <!-- Top fields -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="kv" id="wrap-l1-profile-desc">
+            <div>Profile Description</div>
+            <div id="l1-profile-desc">—</div>
+          </div>
+          <div class="kv" id="wrap-l1-profile-title">
+            <div>Profile Title</div>
+            <div id="l1-profile-title">—</div>
+          </div>
+          <div class="kv" id="wrap-l1-system">
+            <div>System</div>
+            <div id="l1-system">—</div>
+          </div>
+
+          <!-- Editable fields (never hidden on 0/empty) -->
+          <div class="kv" id="wrap-l1-length">
+            <div>Length</div>
+            <input id="l1-length-input" type="text" class="input-field w-full" placeholder="Enter length" />
+          </div>
+          <div class="kv" id="wrap-l1-warehouse">
+            <div>Warehouse No</div>
+            <input id="l1-warehouse-input" type="text" class="input-field w-full" placeholder="Enter warehouse no" />
+          </div>
+          <div class="kv" id="wrap-l1-rack">
+            <div>Rack No</div>
+            <input id="l1-rack-input" type="text" class="input-field w-full" placeholder="Enter rack no" />
+          </div>
+
+          <div class="kv" id="wrap-l1-alloy">
+            <div>Alloy</div>
+            <div id="l1-alloy">—</div>
+          </div>
+        </div>
+
+        <!-- Sides 1–4 -->
+        <div id="wrap-l1-sides">
+          <div class="text-xs subtitle-text mb-2">Sides (1–4)</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="card p-3" id="wrap-l1-side-1"><div class="text-xs subtitle-text">Side 1</div><div id="l1-side-1" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-side-2"><div class="text-xs subtitle-text">Side 2</div><div id="l1-side-2" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-side-3"><div class="text-xs subtitle-text">Side 3</div><div id="l1-side-3" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-side-4"><div class="text-xs subtitle-text">Side 4</div><div id="l1-side-4" class="font-semibold">—</div></div>
+          </div>
+        </div>
+
+        <!-- Polyamide 1–6 -->
+        <div id="wrap-l1-poly">
+          <div class="text-xs subtitle-text mb-2">Polyamide (1–6)</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="card p-3" id="wrap-l1-poly-1"><div class="text-xs subtitle-text">Polyamide 1</div><div id="l1-poly-1" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-poly-2"><div class="text-xs subtitle-text">Polyamide 2</div><div id="l1-poly-2" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-poly-3"><div class="text-xs subtitle-text">Polyamide 3</div><div id="l1-poly-3" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-poly-4"><div class="text-xs subtitle-text">Polyamide 4</div><div id="l1-poly-4" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-poly-5"><div class="text-xs subtitle-text">Polyamide 5</div><div id="l1-poly-5" class="font-semibold">—</div></div>
+            <div class="card p-3" id="wrap-l1-poly-6"><div class="text-xs subtitle-text">Polyamide 6</div><div id="l1-poly-6" class="font-semibold">—</div></div>
+          </div>
+        </div>
+
+        <!-- Image at bottom -->
+        <div class="pt-2">
+          <div class="text-xs subtitle-text mb-2">Profile Image</div>
+          <img id="l1-img" src="" class="w-64 h-64 object-contain rounded-lg border border-slate-700 bg-white hidden" alt="">
+          <div id="l1-img-ph" class="img-ph">No image</div>
+        </div>
+      </div>
+
+      <!-- Label 2 -->
+      <div id="label2" class="space-y-4 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="kv" id="wrap-l2-code">
+            <div>Code</div>
+            <div id="l2-code">—</div>
+          </div>
+          <div class="kv" id="wrap-l2-status">
+            <div>Status</div>
+            <div id="l2-status">—</div>
+          </div>
+          <div class="kv" id="wrap-l2-suppliers">
+            <div>Supplier(s)</div>
+            <div id="l2-suppliers">—</div>
+          </div>
+          <div class="kv" id="wrap-l2-ware-rack">
+            <div>Warehouse / Rack</div>
+            <div id="l2-ware-rack">—</div>
+          </div>
+        </div>
+        <div id="wrap-l2-desc">
+          <div class="text-xs subtitle-text mb-2">Description</div>
+          <div id="l2-desc" class="font-semibold">—</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scanner Modal -->
+  <div id="scannerModal" class="modal">
+    <div class="card w-[min(92vw,520px)] p-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold">Scan Barcode</div>
+        <div class="flex gap-2">
+          <button id="flipCamBtn" class="icon-btn square" title="Switch camera"><i class="fa-solid fa-rotate"></i></button>
+          <button id="closeScannerBtn" class="icon-btn square" title="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <video id="scanVideo" playsinline autoplay muted class="w-full rounded-lg border border-slate-700 bg-black"></video>
+      <div class="text-xs subtitle-text mt-2">
+        Tips: Point the camera at the barcode (Code128/EAN/UPC/QR supported). If scanning isn’t available, you’ll be asked to type the code.
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="statusMessage" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white bg-emerald-600/90 opacity-0 transition-opacity"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (id) => document.getElementById(id);
+      const s = (v) => (v==null ? '' : String(v));
+      const isZeroLike = (v) => {
+        const t = s(v).trim();
+        return !t || /^0(?:\.0+)?$/.test(t);
+      };
+
+      /* THEME */
+      const themeToggle = $('themeToggle');
+      const themeIcon = $('themeIcon');
+      function applyThemeIcon(theme){ themeIcon.className = theme === 'dark' ? 'fa-regular fa-sun' : 'fa-regular fa-moon'; }
+      function getTheme(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
+      function setTheme(next){
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('alumil:theme', next); localStorage.setItem('theme', next); } catch(e){}
+        applyThemeIcon(next);
+      }
+      applyThemeIcon(getTheme());
+      themeToggle.addEventListener('click', ()=> setTheme(getTheme()==='light'?'dark':'light'));
+
+      /* UI refs */
+      const q = $('q');
+      const kindSel = $('kindSel');
+      const sugWrap = $('sugWrap');
+      const sugList = $('sugList');
+      const printBtn = $('printBtn');
+
+      // Editable fields (Label 1)
+      const lenInput = $('l1-length-input');
+      const whInput  = $('l1-warehouse-input');
+      const rackInput= $('l1-rack-input');
+
+      const label1Btn = $('label1Btn');
+      const label2Btn = $('label2Btn');
+      const label1 = $('label1');
+      const label2 = $('label2');
+
+      function setActiveLabel(which){
+        const is1 = which === 1;
+        label1Btn.dataset.active = is1 ? 'true' : 'false';
+        label2Btn.dataset.active = is1 ? 'false' : 'true';
+        label1.classList.toggle('hidden', !is1);
+        label2.classList.toggle('hidden', is1);
+      }
+      label1Btn.addEventListener('click', ()=> setActiveLabel(1));
+      label2Btn.addEventListener('click', ()=> setActiveLabel(2));
+
+      function toast(msg, color){
+        const el = document.getElementById('statusMessage');
+        el.textContent = msg;
+        el.style.backgroundColor = color || 'rgba(16,185,129,.92)';
+        el.style.opacity = 1;
+        setTimeout(()=>{ el.style.opacity = 0; }, 1800);
+      }
+
+      /* NORMALIZATION */
+      const KNOWN_SUPPLIERS = ['Elite','Arabian','Qalex','Napco','TALCO','Classic','Eastern','Supplier A','Supplier B','Supplier C','Supplier D','Supplier E','Supplier F'];
+      function normStr(x){ return x==null ? '' : String(x).trim(); }
+
+      function normalizeProfile(row){
+        const m = {}; for (const k in row) m[k.toLowerCase()] = row[k];
+        const get = (...keys)=>{ for (const kk of keys){ if (m[kk]!=null && String(m[kk]).trim()!=='') return String(m[kk]).trim(); } return ''; };
+
+        const pretty = (str)=>str.replace(/\s+/g,' ').trim().toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+        const cleanSupplierHeader = (header)=>{
+          const h = header.toLowerCase().trim();
+          let base = null; for (const sup of KNOWN_SUPPLIERS){ const s=sup.toLowerCase(); if (h.startsWith(s)) { base = sup; break; } }
+          return base ? pretty(base) : null;
+        };
+
+        const profile = {
+          profile_code : get('profile code','item code','code','profilecode','profile_code'),
+          description  : get('description','item description','desc','descr'),
+          profile_title: get('profile title','title'),
+          system       : get('system','system name'),
+          inventory    : get('inventory','category','status'),
+          rack_no      : get('rack no','rack','rackno'),
+          warehouse_no : get('warehouse no','warehouse','wh','warehouse code'),
+          comments     : get('comments','mrp comments','remark','remarks'),
+          alloy        : get('alloy','g'),
+          finish       : get('finish','j'),
+          length       : get('length','d','supported length'),
+          image        : get('image url','image'),
+          suppliers    : {}, sides:{}, polyamide:{}
+        };
+
+        Object.keys(m).forEach(k=>{
+          const cleaned = cleanSupplierHeader(k);
+          if (!cleaned) return;
+          const val = normStr(m[k]); if (!val || val==='0') return;
+          if (profile.suppliers[cleaned]) {
+            const set = new Set(String(profile.suppliers[cleaned]).split(' / ').map(x=>x.trim()).filter(Boolean));
+            if (!set.has(val)) set.add(val);
+            profile.suppliers[cleaned] = Array.from(set).join(' / ');
+          } else profile.suppliers[cleaned] = val;
+        });
+
+        Object.keys(m).forEach(k=>{ const mx = k.match(/^side\s*([1-4])$/i) || k.match(/^sides?\s*([1-4])$/i) || k.match(/^side_([1-4])$/i); if (mx){ const v = normStr(m[k]); if (v) profile.sides[mx[1]] = v; }});
+        Object.keys(m).forEach(k=>{ const mx = k.match(/^(polyamide|poly|pa)\s*_?([1-6])$/i); if (mx){ const v = normStr(m[k]); if (v) profile.polyamide[mx[2]] = v; }});
+        return profile;
+      }
+
+      function normalizeAccessory(row){
+        const m = {}; for (const k in row) m[k.toLowerCase()] = row[k];
+        return {
+          code          : normStr(m.code || m.itemcode || m['accessory code']),
+          description   : normStr(m.description || m.itemdescription),
+          accessory_type: normStr(m.accessory_type || m['accessory type'] || m.type),
+          supplier_name : normStr(m['supplier name'] || m.supplier_name || m.supplier || m.vendor || m.brand),
+          status        : normStr(m.status || m.inventory || m.category),
+          uom           : normStr(m.uom),
+          supplier_code : normStr(m.supplier_code || m['supplier code']),
+          warehouse_no  : normStr(m.warehouse_no || m['warehouse no'] || m.warehouse || m.wh),
+          rack_no       : normStr(m.rack_no || m['rack no'] || m.rack || m.rackno),
+          image         : normStr(m.image || m['image url']),
+          supplier_codes: row.supplier_codes || {},
+          other_color_codes: row.other_color_codes || {}
+        };
+      }
+
+      function toArray(x){ if (Array.isArray(x)) return x; if (x && typeof x === 'object' && Array.isArray(x.rows)) return x.rows; return []; }
+
+      /* SAMPLE (fallback) */
+      const sampleData = {
+        inventory: [
+          { profile_code:'M11500', description:'SLIDING THERMALLY BROKEN SYSTEM WITH LIFT AND SLIDE FUNCTION', system:'SMARTIA M11500', alloy:'EN AW-6063', finish:'Anodized', length:'5.80', inventory:'OK', rack_no:'A1', warehouse_no:'W1', comments:'Main profile for sliding doors.', suppliers:{ 'Elite':'25257+25363','Supplier B':'S11500-B' }, sides:{'1':'Left','2':'Right','3':'Top','4':'Bottom'}, polyamide:{'1':'20mm','2':'18mm','3':'22mm'} },
+          { profile_code:'M11520', description:'SLIDING NON-THERMALLY BROKEN SYSTEM', system:'SUPREME M11520', alloy:'EN AW-6060', finish:'Powder Coated', length:'0', inventory:'LOW', rack_no:'B2', warehouse_no:'W1', comments:'Lightweight sliding profile.', suppliers:{ 'Supplier C':'S11520-C' }, sides:{'1':'Left','2':'Right'}, polyamide:{'1':'15mm'} }
+        ],
+        accessories: [
+          { code:'A100', description:'LOCKING MECHANISM FOR LIFT & SLIDE', accessory_type:'Locking', supplier:'Supplier L', uom:'Ea', supplier_code:'S-L100', supplier_name:'Locksmith Inc.', status:'OK', mrp_comments:'Standard locking accessory.', warehouse_no:'W1', rack_no:'Z1' }
+        ]
+      };
+
+      let data = sampleData;
+
+      /* Hydrate from cache (if present) */
+      (function initFromCache(){
+        try{
+          const cached = localStorage.getItem('excelCache');
+          if (cached){
+            const p = JSON.parse(cached);
+            const rawProfiles = toArray(p.inventory).length ? p.inventory
+                                : toArray(p.profiles).length ? p.profiles
+                                : Array.isArray(p.inventory) ? p.inventory
+                                : Array.isArray(p.profiles) ? p.profiles : [];
+            const rawAccessories = Array.isArray(p.accessories) ? p.accessories : toArray(p.accessories);
+            const normProfiles = rawProfiles.map(normalizeProfile).filter(r => s(r.profile_code) || s(r.description));
+            const normAccessories = rawAccessories.map(normalizeAccessory).filter(a => s(a.code) || s(a.description));
+            data = { inventory: normProfiles, accessories: normAccessories, lastUpdated: p.lastUpdated };
+
+            $('data-source-text').textContent = 'Live Data';
+            $('data-indicator').classList.remove('bg-orange-500'); $('data-indicator').classList.add('bg-green-500');
+            if (p.lastUpdated){ $('last-updated').textContent = 'Last updated: ' + new Date(p.lastUpdated).toLocaleString(); $('last-updated').classList.remove('hidden'); }
+          } else {
+            $('data-source-text').textContent = 'Sample Data';
+            $('data-indicator').classList.add('bg-orange-500');
+          }
+        }catch(e){
+          $('data-source-text').textContent = 'Sample Data';
+          $('data-indicator').classList.add('bg-orange-500');
+        }
+      })();
+
+      const INVget = () => (data.inventory || []);
+      const ACCget = () => (data.accessories || []);
+
+      /* Suggestions */
+      function renderSuggestion(rec, kind){
+        const code = kind==='profile' ? s(rec.profile_code) : s(rec.code);
+        const desc = s(rec.description);
+        const minor = kind==='profile' ? s(rec.system) : s(rec.supplier_name);
+        const li = document.createElement('li');
+        li.className = 'px-3 py-2 hover:bg-black/20 rounded cursor-pointer';
+        li.innerHTML = `
+          <div class="font-medium truncate">${desc || code || '—'}</div>
+          <div class="text-xs subtitle-text truncate">${code}${minor ? ' • ' + minor : ''}</div>
+        `;
+        li.addEventListener('click', ()=>{
+          q.value = (kind==='profile' ? desc : code) || '';
+          if (kind==='profile') updatePreviewWithProfile(rec); else updatePreviewWithAccessory(rec);
+          sugWrap.classList.add('hidden');
+        });
+        sugList.appendChild(li);
+      }
+
+      function updateSuggestions(){
+        const query = s(q.value).trim().toLowerCase();
+        const kind = kindSel.value;
+        if (!query){ sugWrap.classList.add('hidden'); return; }
+
+        let list = [];
+        if (kind==='profile'){
+          list = INVget().filter(r =>
+            s(r.profile_code).toLowerCase().includes(query) ||
+            s(r.description).toLowerCase().includes(query) ||
+            s(r.system).toLowerCase().includes(query)
+          );
+        } else {
+          list = ACCget().filter(a =>
+            s(a.code).toLowerCase().includes(query) ||
+            s(a.description).toLowerCase().includes(query) ||
+            s(a.supplier_name).toLowerCase().includes(query)
+          );
+        }
+
+        sugList.innerHTML = '';
+        (list.slice(0,10)).forEach(item => renderSuggestion(item, kind));
+        sugWrap.classList.toggle('hidden', list.length===0);
+      }
+      q.addEventListener('input', updateSuggestions);
+      q.addEventListener('focus', updateSuggestions);
+      document.addEventListener('click',(e)=>{ if (!q.closest('div.relative')?.contains(e.target)) sugWrap.classList.add('hidden'); });
+
+      /* Image helper (Label 1) */
+      function setL1Image(src){
+        const img = $('l1-img');
+        const ph  = $('l1-img-ph');
+        if (!src || !String(src).trim()){
+          img.src=''; img.classList.add('hidden'); ph.classList.remove('hidden'); return;
+        }
+        img.onload = ()=>{ img.classList.remove('hidden'); ph.classList.add('hidden'); };
+        img.onerror = ()=>{ img.src=''; img.classList.add('hidden'); ph.classList.remove('hidden'); };
+        img.src = src;
+      }
+
+      /* Show/hide helpers (hide when 0/empty) */
+      function setField(wrapperId, valueId, value){
+        const wrap = $(wrapperId);
+        if (!wrap) return;
+        const valEl = valueId ? $(valueId) : null;
+        if (isZeroLike(value)){
+          wrap.style.display = 'none';
+          if (valEl) valEl.textContent = '—';
+        } else {
+          wrap.style.display = '';
+          if (valEl) valEl.textContent = s(value);
+        }
+      }
+      function setCardField(cardWrapperId, valueId, value){
+        const wrap = $(cardWrapperId);
+        const valEl = $(valueId);
+        if (!wrap || !valEl) return false;
+        if (isZeroLike(value)){
+          wrap.style.display = 'none';
+          valEl.textContent = '—';
+          return false;
+        } else {
+          wrap.style.display = '';
+          valEl.textContent = s(value);
+          return true;
+        }
+      }
+
+      /* Editable field setters (never hide on 0/empty) */
+      function setEditable(inputEl, val){
+        inputEl.value = (val==null ? '' : String(val));
+        inputEl.setAttribute('value', inputEl.value);
+      }
+      [lenInput, whInput, rackInput].forEach(el=>{
+        el.addEventListener('input', (e)=> e.currentTarget.setAttribute('value', e.currentTarget.value || ''));
+      });
+
+      /* Label 1 population (Profiles) */
+      function updatePreviewWithProfile(p){
+        // Top static fields
+        setField('wrap-l1-profile-desc','l1-profile-desc', p.description);
+        setField('wrap-l1-profile-title','l1-profile-title', p.profile_title);
+        setField('wrap-l1-system','l1-system', p.system);
+
+        // Alloy (hide when 0)
+        setField('wrap-l1-alloy','l1-alloy', p.alloy);
+
+        // Editable (always visible)
+        $('wrap-l1-length').style.display = '';
+        $('wrap-l1-warehouse').style.display = '';
+        $('wrap-l1-rack').style.display = '';
+        setEditable(lenInput, p.length);
+        setEditable(whInput, p.warehouse_no);
+        setEditable(rackInput, p.rack_no);
+
+        // Sides 1–4 (hide cards whose value is 0)
+        let anySide = false;
+        for (let i=1;i<=4;i++){
+          const v = p.sides?.[String(i)];
+          anySide = setCardField(`wrap-l1-side-${i}`, `l1-side-${i}`, v) || anySide;
+        }
+        $('wrap-l1-sides').style.display = anySide ? '' : 'none';
+
+        // Polyamide 1–6 (hide cards whose value is 0)
+        let anyPoly = false;
+        for (let i=1;i<=6;i++){
+          const v = p.polyamide?.[String(i)];
+          anyPoly = setCardField(`wrap-l1-poly-${i}`, `l1-poly-${i}`, v) || anyPoly;
+        }
+        $('wrap-l1-poly').style.display = anyPoly ? '' : 'none';
+
+        // Image
+        setL1Image(p.image);
+
+        // Label 2 (general)
+        setField('wrap-l2-code','l2-code', p.profile_code);
+        setField('wrap-l2-status','l2-status', p.inventory);
+        const suppliersList = Object.keys(p.suppliers||{}).filter(k => p.suppliers[k] && p.suppliers[k] !== '0').join(', ');
+        setField('wrap-l2-suppliers','l2-suppliers', suppliersList || '');
+        const wareRack = `${s(p.warehouse_no)||''}${(p.warehouse_no||p.rack_no)?' / ':''}${s(p.rack_no)||''}`;
+        setField('wrap-l2-ware-rack','l2-ware-rack', wareRack);
+        setField('wrap-l2-desc','l2-desc', p.description);
+
+        setActiveLabel(1);
+      }
+
+      /* Accessory -> Label 2; Label 1 is not used */
+      function updatePreviewWithAccessory(a){
+        ['wrap-l1-profile-desc','wrap-l1-profile-title','wrap-l1-system','wrap-l1-alloy','wrap-l1-sides','wrap-l1-poly'].forEach(id=> $(id).style.display='none');
+        $('wrap-l1-length').style.display='none';
+        $('wrap-l1-warehouse').style.display='none';
+        $('wrap-l1-rack').style.display='none';
+        setL1Image(null);
+
+        setField('wrap-l2-code','l2-code', a.code);
+        setField('wrap-l2-status','l2-status', a.status);
+        setField('wrap-l2-suppliers','l2-suppliers', a.supplier_name);
+        const wr = `${s(a.warehouse_no)||''}${(a.warehouse_no||a.rack_no)?' / ':''}${s(a.rack_no)||''}`;
+        setField('wrap-l2-ware-rack','l2-ware-rack', wr);
+        setField('wrap-l2-desc','l2-desc', a.description);
+
+        setActiveLabel(2);
+      }
+
+      /* Type change => clear */
+      kindSel.addEventListener('change', ()=>{
+        q.value = '';
+        sugWrap.classList.add('hidden');
+        ['wrap-l1-profile-desc','wrap-l1-profile-title','wrap-l1-system','wrap-l1-alloy','wrap-l1-sides','wrap-l1-poly',
+         'wrap-l2-code','wrap-l2-status','wrap-l2-suppliers','wrap-l2-ware-rack','wrap-l2-desc'
+        ].forEach(id=> { const el=$(id); if(el) el.style.display='none'; });
+        setL1Image(null);
+      });
+
+      /* PRINT CONNECTOR (unchanged) */
+      (function connectLabel1Print(){
+        const txt = (id) => (document.getElementById(id)?.textContent ?? '').trim();
+        const val = (id) => (document.getElementById(id)?.value ?? '').trim();
+        const readField = (inputId, textId) => (val(inputId) !== '' ? val(inputId) : txt(textId));
+
+        function buildLabel1Payload(){
+          const description   = txt('l1-profile-desc');
+          const profile_title = txt('l1-profile-title');
+          const system        = txt('l1-system');
+          const alloy         = txt('l1-alloy');
+          const length       = readField('l1-length-input',    'l1-length');
+          const warehouse_no = readField('l1-warehouse-input', 'l1-warehouse');
+          const rack_no      = readField('l1-rack-input',      'l1-rack');
+          const sides = {}; for (let i=1;i<=4;i++){ const t = txt(`l1-side-${i}`); if (t) sides[String(i)] = t; }
+          const polyamide = {}; for (let i=1;i<=6;i++){ const t = txt(`l1-poly-${i}`); if (t) polyamide[String(i)] = t; }
+          let image = ''; const imgEl = $('l1-img'); if (imgEl && !imgEl.classList.contains('hidden') && imgEl.src) image = imgEl.src;
+          return { description, profile_title, system, length, alloy, warehouse_no, rack_no, sides, polyamide, image };
+        }
+
+        function openLabel1Print(){
+          const payload = buildLabel1Payload();
+          const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+          const url = `Label 1 – Print.html?data=${encoded}&autoprint=1`;
+          const w = window.open(url, '_blank', 'noopener,noreferrer');
+          if (!w) alert('Popup blocked. Please allow popups to print the label.');
+        }
+
+        printBtn.replaceWith(printBtn.cloneNode(true));
+        document.getElementById('printBtn').addEventListener('click', openLabel1Print);
+      })();
+
+      /* ---------- BARCODE SCANNER ---------- */
+      const scannerModal = $('scannerModal');
+      const video = $('scanVideo');
+      const closeScannerBtn = $('closeScannerBtn');
+      const flipCamBtn = $('flipCamBtn');
+      let detector = null;
+      let stream = null;
+      let rafId = null;
+      let facingMode = 'environment';
+
+      async function ensureDetector(){
+        if ('BarcodeDetector' in window){
+          const formats = ['code_128','ean_13','ean_8','qr_code','upc_a','upc_e','code_39','itf','codabar'];
+          detector = new window.BarcodeDetector({formats});
+          return true;
+        }
+        return false;
+      }
+      async function startCamera(){
+        if (stream){ stopCamera(); }
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio:false });
+        video.srcObject = stream;
+        await video.play();
+      }
+      function stopCamera(){
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        if (video) video.pause();
+        if (stream){
+          stream.getTracks().forEach(t=> t.stop());
+          stream = null;
+        }
+      }
+      function openScanner(){ scannerModal.classList.add('open'); }
+      function closeScanner(){ scannerModal.classList.remove('open'); stopCamera(); }
+
+      async function loopDetect(){
+        if (!detector || !video || video.readyState < 2){ rafId = requestAnimationFrame(loopDetect); return; }
+        try{
+          const barcodes = await detector.detect(video);
+          if (barcodes && barcodes.length){
+            const code = (barcodes[0].rawValue || '').trim();
+            if (code){ onBarcode(code); return; }
+          }
+        }catch(e){ /* keep trying */ }
+        rafId = requestAnimationFrame(loopDetect);
+      }
+
+      function onBarcode(code){
+        closeScanner();
+        q.value = code;
+        toast('Barcode: ' + code);
+        const kind = kindSel.value;
+        if (kind === 'profile'){
+          const rec = INVget().find(p => s(p.profile_code).toLowerCase() === code.toLowerCase());
+          if (rec){ updatePreviewWithProfile(rec); return; }
+        } else {
+          const recA = ACCget().find(a => s(a.code).toLowerCase() === code.toLowerCase());
+          if (recA){ updatePreviewWithAccessory(recA); return; }
+        }
+        updateSuggestions();
+        sugWrap.classList.remove('hidden');
+      }
+
+      document.getElementById('scanBtn').addEventListener('click', async ()=>{
+        try{
+          const supported = await ensureDetector();
+          if (!supported){
+            const manual = prompt('Scanning not supported on this device/browser. Type the barcode value:');
+            if (manual){ onBarcode(manual); }
+            return;
+          }
+          await startCamera();
+          openScanner();
+          loopDetect();
+        }catch(err){
+          console.error(err);
+          toast('Unable to access camera. Enter the code manually.', 'rgba(245,158,11,.95)');
+          const manual = prompt('Type the barcode value:');
+          if (manual){ onBarcode(manual); }
+        }
+      });
+      closeScannerBtn.addEventListener('click', closeScanner);
+      flipCamBtn.addEventListener('click', async ()=>{
+        facingMode = (facingMode === 'environment') ? 'user' : 'environment';
+        try{ await startCamera(); }catch(e){ toast('Cannot switch camera.', 'rgba(245,158,11,.95)'); }
+      });
+
+      (function init(){ setActiveLabel(1); })();
+    });
+  </script>
+
+<!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+<div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
+  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
+      <path d="M20 7h-9"/>
+      <path d="M14 17h-5"/>
+      <circle cx="17" cy="17" r="3"/>
+      <circle cx="7" cy="7" r="3"/>
+    </svg>
+    <span>Admin</span>
+  </button>
+  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+    </svg>
+  </button>
+  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
+      <path d="m7.5 4.27 9 5.15"/>
+      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"/>
+      <path d="m3.29 7.39 8.31 3.23"/>
+      <path d="m12 22.95 8.71-3.26"/>
+    </svg>
+    <span>Rack Label</span>
+  </button>
+  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.3-4.3"/>
+    </svg>
+    <span>Search</span>
+  </button>
+</nav>
+<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
+  <small>Alumil Inventory App @2025</small>
+</footer>
+<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<style>
+  .alumil-bottom-nav {
+    position: fixed; left: 0; right: 0;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    margin: 0 auto; z-index: 60;
+    display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    align-items: center; max-width: 720px;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, .92); color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,.08); border-radius: 16px;
+    backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
+  .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
+  .alumil-bottom-nav .nav-btn i { width: 22px; height: 22px; display:inline-block; }
+  .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
+  html[data-theme="light"] .alumil-bottom-nav .nav-btn:hover { background: rgba(0,0,0,.04); }
+  .scan-btn { position: relative; width: 56px; height: 56px; display: inline-grid; place-items: center; border-radius: 14px; border: 0; background: #facc15; color: #111827; box-shadow: 0 0 0 0 rgba(250,204,21,0); transition: transform .15s, box-shadow .2s; }
+  .scan-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 8px rgba(250,204,21,.2); }
+  .scan-btn:active { transform: translateY(0); }
+  .scan-btn i { width: 28px; height: 28px; }
+  .alumil-footer { position: fixed; left:0; right:0; bottom: 0; z-index: 50; display:flex; align-items:center; justify-content:center; min-height: 24px; background: #0b1220; color:#cbd5e1; border-top: 1px solid rgba(255,255,255,.08); padding-bottom: env(safe-area-inset-bottom, 0px); font-size: 12px; letter-spacing: .02em; }
+  html[data-theme="light"] .alumil-footer { background:#f8fafc; color:#334155; border-top-color: rgba(0,0,0,.06); }
+  @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
+  .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+</style>
+<script>
+(function(){
+  function routeByCode(raw){
+    if(!raw) return;
+    const code = String(raw).trim();
+    if(!code) return;
+    const isAcc = /(\bACC\b|^ACC-|ACC\d|ACCESS|ACCS)/i.test(code);
+    const target = isAcc ? 'acc-label-printing.html' : 'profile-label-printing.html';
+    const url = target + '?code=' + encodeURIComponent(code);
+    window.location.href = url;
+  }
+  // Keyboard wedge capture
+  (function(){
+    let buf = '', last = 0;
+    window.addEventListener('keydown', (e) => {
+      const now = Date.now();
+      if(now - last > 250) buf = '';
+      last = now;
+      if(e.key === 'Enter'){
+        if(buf.length >= 4){ routeByCode(buf); }
+        buf = ''; return;
+      }
+      if(e.ctrlKey || e.metaKey || e.altKey) return;
+      if(e.key && e.key.length === 1){ buf += e.key; }
+    }, true);
+  })();
+  // Hidden input focus via big button
+  const scanBtn = document.getElementById('alumil-scan-btn');
+  const scanInput = document.getElementById('alumil-scan-input');
+  if(scanBtn && scanInput){
+    scanBtn.addEventListener('click', () => {
+      scanInput.value = ''; scanInput.focus();
+      try {
+        if(!document.getElementById('alumil-scan-toast')){
+          const t = document.createElement('div');
+          t.id = 'alumil-scan-toast';
+          t.textContent = 'Ready to scan… (press Enter when done)';
+          t.style.position='fixed'; t.style.left='50%'; t.style.bottom='90px'; t.style.transform='translateX(-50%)';
+          t.style.background='rgba(0,0,0,.72)'; t.style.color='#fff'; t.style.font='600 12px/1.1 Inter,system-ui';
+          t.style.padding='8px 12px'; t.style.borderRadius='10px'; t.style.zIndex=80;
+          document.body.appendChild(t); setTimeout(()=>{ t.remove(); }, 2000);
+        }
+      } catch(e){}
+    });
+    scanInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        routeByCode(scanInput.value);
+        scanInput.blur();
+      }
+    });
+  }
+  // Active tab highlight
+  try{
+    const here = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('#alumil-bottom-nav .nav-btn').forEach(btn => {
+      const k = btn.getAttribute('data-nav'); if(!k) return;
+      const map = { home:'home.html', admin:'admin.html', rack:'rack-label-printing.html', search:'search-inventory.html' };
+      if(map[k] && here === map[k].toLowerCase()){ btn.style.fontWeight='800'; btn.style.opacity='1'; }
+      else { btn.style.opacity='.85'; }
+    });
+  }catch(e){}
+})();
+</script>
+
+
+<script>
+// Versioned global bootstrap (SharePoint + Config)
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3";
+  async function j(u){
+  // If we're pointing at a SharePoint Excel link, emulate the old JSON API:
+  if ((typeof BASE === "string") && BASE.includes("sharepoint.com")) {
+    // Ensure loader + workbook
+    if (typeof loadWorkbook !== "function") {
+      throw new Error("XLSX loader not found. Ensure xlsx.full.min.js and js/sharepoint_loader.js are loaded.");
+    }
+    if (!window.__SP_WB_LOADED__) {
+      await loadWorkbook(BASE);
+      window.__SP_WB_LOADED__ = true;
+    }
+    // Extract sheet=Name from the URL and return rows from that sheet
+    try {
+      const qs = (u.split("?")[1] || "");
+      const params = new URLSearchParams(qs);
+      const sheet = params.get("sheet") || "Config";
+      const rows = getSheetJSON(sheet);
+      return rows || [];
+    } catch (e) {
+      console.error("SharePoint sheet load failed:", e);
+      return [];
+    }
+  }
+
+  // Fallback: original JSON fetch behavior
+  const r = await fetch(u, {mode:'cors'});
+  if(!r.ok) throw 0;
+  return r.json();
+}
+
+); if(!r.ok) throw 0; return r.json(); }
+
+  // 1) Local cache + version
+  let local = {}, localVersion = null;
+  try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
+
+  // 2) Remote config (version, sheet names)
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows || []).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch (_){
+    // no Config found -> force refresh
+  }
+
+  const remoteVersion = cfg.version || null;
+  const hasData = (Array.isArray(local?.profiles) && local.profiles.length) || (Array.isArray(local?.accessories) && local.accessories.length);
+
+  // 3) If same version and have data -> keep cache
+  if (remoteVersion && localVersion && remoteVersion === localVersion && hasData) return;
+
+  // 4) Fetch fresh data from configured sheets
+  try {
+    const urlP = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetProfiles || 'Profile');
+    const urlA = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetAccessories || 'Accessories');
+    const [p, a] = await Promise.all([ j(urlP), j(urlA) ]);
+    const profiles = Array.isArray(p) ? p : (p?.data || []);
+    const accessories = Array.isArray(a) ? a : (a?.data || []);
+
+    localStorage.setItem('excelCache', JSON.stringify({
+      profiles, accessories,
+      version: remoteVersion,
+      fileName: `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`,
+      loadedAt: new Date().toISOString()
+    }));
+    console.log('[bootstrap] excelCache updated to version', remoteVersion);
+  } catch (e) {
+    console.warn('Versioned bootstrap failed:', e);
+  }
+});
+</script>
+
+  <script src="js/sharepoint_loader.js"></script>
+</body>
+</html>

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Profile Label Printing</title>
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#ffc107">
+  <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase Overlay -->
+  <script src="assets/js/supabase-overlay.js"></script>
+
+  <!-- Instant theme boot (prevents flash) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap');
+
+    /* -------- Base (dark defaults) -------- */
+    body{font-family:'Inter',sans-serif;transition:background-color .3s,color .3s;background:#2a2a2a;color:#d1d5db}
+    .card{background:#1a1a1a;box-shadow:0 10px 15px -3px rgb(0 0 0 / .2),0 4px 6px -4px rgb(0 0 0 / .2)}
+    .title-text{color:#fff}
+    .subtitle-text{color:#94a3b8}
+    .icon-color{color:#ffc107}
+
+    .btn-primary{background:#ffc107;color:#1a1a1a;font-weight:600;padding:.75rem 1.5rem;border-radius:.5rem;transition:background-color .3s,transform .2s}
+    .btn-primary:hover{background:#f59e0b;transform:translateY(-2px)}
+    .input-field{background:#2a2a2a;border:1px solid #4b5563;color:#d1d5db;padding:.5rem;border-radius:.5rem;transition:border-color .2s,box-shadow .2s}
+    .input-field:focus{outline:none;border-color:#ffc107;box-shadow:0 0 0 2px rgba(255,193,7,.5)}
+
+    /* Light theme overrides */
+    html[data-theme="light"] body { background:#f3f4f6; color:#374151; }
+    html[data-theme="light"] .card { background:#ffffff; border-color:#e5e7eb; box-shadow:0 6px 24px rgba(0,0,0,.08); }
+    html[data-theme="light"] .title-text{ color:#1f2937; }
+    html[data-theme="light"] .subtitle-text{ color:#6b7280; }
+    html[data-theme="light"] .input-field{ background:#ffffff; border-color:#d1d5db; color:#111827; }
+
+    /* Mobile safety */
+    html,body{max-width:100%;overflow-x:clip}
+    img,video{max-width:100%;height:auto;display:block}
+    section[id]{scroll-margin-top:calc(var(--header-h,80px) + 16px)}
+
+    /* Uniform image holder */
+    .img-holder{
+      width: 240px; height: 160px; background:#fff; border:1px solid #e5e7eb; border-radius:.5rem;
+      display:flex; align-items:center; justify-content:center; margin:0 auto; overflow:hidden;
+    }
+    .img-holder img{width:100%;height:100%;object-fit:contain;background:#fff;}
+
+    /* Suggestions dropdown — both themes */
+    .suggestions-list{
+      position:absolute;z-index:20;width:100%;
+      background:#0b1220;color:#e5e7eb;border:1px solid #334155;
+      border-top:none;border-radius:0 0 .75rem .75rem;
+      box-shadow:0 8px 24px rgba(0,0,0,.35);
+      max-height:220px;overflow:auto
+    }
+    .suggestions-list li{
+      padding:.75rem 1rem;cursor:pointer;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      color:inherit; line-height:1.4;
+    }
+    .suggestions-list li:last-child{border-bottom:none}
+    .suggestions-list li:hover,
+    .suggestions-list li[aria-selected="true"],
+    .suggestions-list li.is-active{ background:#111827;color:#ffffff; }
+    html[data-theme="light"] .suggestions-list{
+      background:#ffffff;color:#111827;border:1px solid #d1d5db;
+      box-shadow:0 12px 24px rgba(0,0,0,.08);
+    }
+    html[data-theme="light"] .suggestions-list li{ border-bottom:1px solid #e5e7eb;color:inherit; }
+    html[data-theme="light"] .suggestions-list li:hover,
+    html[data-theme="light"] .suggestions-list li[aria-selected="true"],
+    html[data-theme="light"] .suggestions-list li.is-active{ background:#f3f4f6;color:#111827; }
+
+    /* Subtle glow */
+    @keyframes header-glow{0%,100%{box-shadow:0 10px 15px -3px rgb(0 0 0 / .2),0 4px 6px -4px rgb(0 0 0 / .2)}50%{box-shadow:0 10px 20px -5px rgba(255,193,7,.2),0 6px 10px -5px rgba(255,193,7,.2)}}
+    .animating{animation:header-glow 3s infinite ease-in-out}
+
+    /* Status dot */
+    .dot{width:.5rem;height:.5rem;border-radius:9999px;background:#ef4444}
+    .dot.ok{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.8)}
+
+    /* Header icon button */
+    .icon-btn{ display:inline-grid; place-items:center; width:38px; height:38px; border-radius:10px; border:1px solid #3b4254; }
+    .icon-btn:hover{ background:#0f172a; }
+    html[data-theme="light"] .icon-btn{ border-color:#e5e7eb; }
+    html[data-theme="light"] .icon-btn:hover{ background:#f3f4f6; }
+
+    /* Scan button — SAME STYLE as accessories page */
+    .btn-scan{
+      width:44px;height:44px;border-radius:12px;display:inline-grid;place-items:center;
+      background:#facc15; color:#111827; border:none;
+      box-shadow:0 0 0 0 rgba(250,204,21,0);
+      transition:transform .15s, box-shadow .2s, background .2s;
+    }
+    .btn-scan:hover{
+      background:#f59e0b;
+      box-shadow:0 0 0 6px rgba(250,204,21,.18);
+    }
+    .btn-scan:active{ transform:translateY(1px) scale(.98); }
+    html[data-theme="light"] .btn-scan{ color:#111827; }
+
+    .no-scroll{overflow:hidden;touch-action:none}
+
+    /* Scanner modal */
+    .modal{
+      display:none; position:fixed; inset:0; z-index:100;
+      place-items:center; padding:16px;
+      background:rgba(0,0,0,.6);
+      -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+      opacity:0; transition:opacity .2s; overscroll-behavior:contain;
+    }
+    .modal.open{display:grid;opacity:1}
+    .modal-panel{
+      width:92vw; max-width:720px; background:#111827; border:1px solid #374151; border-radius:1rem; padding:1rem;
+      max-height:min(90svh,720px); max-height:calc(100dvh - 2rem); overflow:auto;
+      padding-bottom:calc(1rem + env(safe-area-inset-bottom));
+    }
+    .video-wrap{position:relative;overflow:hidden;border-radius:.75rem;background:#000}
+    #scanVideo{width:100%;height:auto;display:block}
+    .scan-line{position:absolute;left:0;right:0;top:50%;height:2px;background:#22c55e;box-shadow:0 0 12px #22c55e;animation:scan 2s linear infinite}
+    @keyframes scan{0%{top:15%}50%{top:85%}100%{top:15%}}
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+    }
+  
+/* --- Fixed bottom navigation always visible --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+#alumil-bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+#alumil-fixed-footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  z-index: 999 !important;
+}
+body {
+  position: relative;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+</style>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+<header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card dark animating">
+        <div class="flex items-center space-x-3 mb-4 sm:mb-0">
+            <img src="alumil-logo.svg" alt="Alumil logo" class="h-9 w-auto select-none" loading="eager" decoding="async">
+            <span class="brand-title font-semibold text-2xl tracking-tight">Alumil Inventory System</span>
+        </div>
+        <nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </a>
+            <a href="admin.html" class="flex items-center icon-color font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg> Admin
+            </a>
+        
+<div class="flex items-center gap-2">
+      <!-- Theme toggle -->
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+        <i class="fa-regular fa-moon" id="themeIcon"></i>
+      </button>
+
+</nav>
+    </header>
+
+  <!-- Header -->
+  <div class="min-h-screen font-sans antialiased p-4 sm:p-8">
+    
+
+  <!-- Main -->
+  <main class="container mx-auto mt-24 p-4 sm:p-8">
+    <!-- Title row + live total -->
+    <div class="flex items-center justify-between mb-6 gap-4">
+      <h1 class="text-3xl font-bold title-text">Print Profile Labels</h1>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-sm subtitle-text">
+          <span class="dot" id="conn-dot" aria-hidden="true"></span>
+          <span id="conn-status">Not Connected</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 text-sm" aria-live="polite" title="Total profiles loaded">
+          Total Profiles: <span id="total-profiles">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search + Scan -->
+    <section class="card p-6 rounded-xl mb-8 flex flex-col sm:flex-row items-center gap-4">
+      <div class="relative flex-grow w-full">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <!-- NOTE: Search by Description only -->
+        <input id="searchInput" class="w-full pl-10 pr-4 py-2 input-field" placeholder="Search by Description only…" autocomplete="off">
+        <ul id="suggestions" class="suggestions-list hidden"></ul>
+      </div>
+      <!-- Icon-only Scan button (same as accessories page) -->
+      <button id="scanButton" class="btn-scan" aria-label="Scan barcode" title="Scan">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             class="lucide lucide-scan">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+          <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        </svg>
+      </button>
+    </section>
+
+    <!-- Form + Preview -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Form -->
+      <div class="card p-6 rounded-xl">
+        <h2 class="text-xl font-semibold title-text mb-4">Profile Details</h2>
+        <form id="profileForm" class="space-y-4" autocomplete="off">
+          <div>
+            <label for="Code" class="block text-sm font-medium subtitle-text">Code</label>
+            <input id="Code" class="mt-1 block w-full input-field" placeholder="e.g., PR-18…" readonly>
+          </div>
+          <div>
+            <label for="Discription" class="block text-sm font-medium subtitle-text">Discription</label>
+            <input id="Discription" class="mt-1 block w-full input-field" placeholder="e.g., AL350…" readonly>
+          </div>
+          <div>
+            <label for="Quantity" class="block text-sm font-medium subtitle-text">Quantity</label>
+            <input id="Quantity" type="text" class="mt-1 block w-full input-field" placeholder="Enter accessories count (text)">
+          </div>
+          <div>
+            <label for="Length" class="block text-sm font-medium subtitle-text">Length</label>
+            <input id="Length" type="text" class="mt-1 block w-full input-field" placeholder="Enter length (text)">
+          </div>
+          <div>
+            <label for="Alloy" class="block text-sm font-medium subtitle-text">Alloy</label>
+            <input id="Alloy" class="mt-1 block w-full input-field" placeholder="e.g., 606…" readonly>
+          </div>
+          <div>
+            <label for="Finish" class="block text-sm font-medium subtitle-text">Finish</label>
+            <input id="Finish" class="mt-1 block w-full input-field" placeholder="e.g., MILLFIN…" readonly>
+          </div>
+          <div>
+            <label for="labelSize" class="block text-sm font-medium subtitle-text">Print Label Size (mm)</label>
+            <select id="labelSize" class="mt-1 block w-full input-field">
+              <option value="" disabled selected>-- Select Size (W x H) --</option>
+              <option value="160x110">160 x 110 mm</option>
+              <option value="150x100">150 x 100 mm</option>
+              <option value="200x150">200 x 150 mm</option>
+              <option value="250x200">250 x 200 mm</option>
+            </select>
+          </div>
+          <div>
+            <label for="Remarks" class="block text-sm font-medium subtitle-text">Remarks</label>
+            <input id="Remarks" class="mt-1 block w-full input-field" placeholder="(optional) Notes for this label…)">
+          </div>
+          <button type="button" id="printViewButton" class="btn-primary w-full sm:w-auto">Print View</button>
+        </form>
+      </div>
+
+      <!-- Preview -->
+      <div class="card p-10 rounded-xl">
+        <h2 class="text-xl font-semibold title-text mb-6">Profile Preview</h2>
+        <div class="text-center space-y-4">
+          <div class="img-holder">
+            <img id="profileImage" src="https://placehold.co/240x160/ffffff/111111?text=No+Image" alt="Profile Image" loading="lazy" decoding="async">
+          </div>
+          <div class="space-y-1">
+            <p class="text-lg font-bold title-text" id="previewDescription">Description: —</p>
+            <p class="font-medium subtitle-text" id="previewProfileTitle">Profile Title: —</p>
+            <p class="font-medium subtitle-text" id="previewAlloy">Alloy: —</p>
+            <p class="font-medium subtitle-text" id="previewFinish">Finish: —</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Message Box -->
+    <div id="message-box" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card z-50 text-center" role="alertdialog" aria-modal="true" aria-labelledby="msg-title" aria-describedby="message-text">
+      <h3 id="msg-title" class="text-xl font-semibold mb-4">Message</h3>
+      <p class="text-lg mb-4" id="message-text"></p>
+      <button id="message-ok" class="btn-primary">OK</button>
+    </div>
+  </main>
+
+  <!-- Scanner Modal -->
+  <div id="scanModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="scanTitle" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="flex items-center justify-between mb-3">
+        <h2 id="scanTitle" class="text-lg font-semibold title-text">Scan Barcode</h2>
+        <button id="closeScan" class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800">Close</button>
+      </div>
+      <div class="video-wrap">
+        <video id="scanVideo" playsinline muted autoplay></video>
+        <div class="scan-line"></div>
+      </div>
+      <div class="mt-3 flex items-center justify-between text-sm subtitle-text">
+        <div>Point camera at the barcode…</div>
+        <button id="flipCamera" class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800">Flip camera</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Theme: toggle + sync ===== */
+    (function(){
+      const $ = (id) => document.getElementById(id);
+      const btn = $('themeToggle');
+      const icon = $('themeIcon');
+
+      function getTheme(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
+      function applyIcon(t){ if (icon) icon.className = (t === 'dark') ? 'fa-regular fa-sun' : 'fa-regular fa-moon'; }
+      function setTheme(t){
+        document.documentElement.setAttribute('data-theme', t);
+        try { localStorage.setItem('alumil:theme', t); localStorage.setItem('theme', t); } catch(e){}
+        applyIcon(t);
+        try { const ch = new BroadcastChannel('alumil-cache'); ch.postMessage({ type: 'theme-updated', payload: { theme: t } }); } catch(e){}
+      }
+      applyIcon(getTheme());
+      if (btn) btn.addEventListener('click', () => setTheme(getTheme() === 'light' ? 'dark' : 'light'));
+      try{
+        const ch = new BroadcastChannel('alumil-cache');
+        ch.onmessage = (ev) => {
+          if (ev && ev.data && ev.data.type === 'theme-updated'){
+            const t = ev.data.payload?.theme || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+            applyIcon(t);
+          }
+        };
+      }catch(e){}
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'alumil:theme' || e.key === 'theme'){
+          const t = (e.newValue || 'light').replace(/"/g,'');
+          document.documentElement.setAttribute('data-theme', t);
+          applyIcon(t);
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    /* ============== Helpers / normalization ============== */
+    function pick(o, keys){
+      for (const k of keys){
+        if (o && Object.prototype.hasOwnProperty.call(o, k) && o[k] != null && String(o[k]).trim() !== '') return String(o[k]);
+      }
+      return '';
+    }
+    const looksLikeUrl = (v) => typeof v === 'string' && /^https?:\/\/\S+/i.test(v.trim());
+    function normalizeImageURL(url){
+      if (!url) return '';
+      let u = url.trim();
+      const g1 = u.match(/https?:\/\/drive\.google\.com\/file\/d\/([^/]+)\/view/i);
+      if (g1) return `https://drive.google.com/uc?export=view&id=${g1[1]}`;
+      const g2 = u.match(/https?:\/\/drive\.google\.com\/open\?id=([^&]+)/i);
+      if (g2) return `https://drive.google.com/uc?export=view&id=${g2[1]}`;
+      if (/dropbox\.com/i.test(u)){ u = u.replace('www.dropbox.com','dl.dropboxusercontent.com'); u = u.replace(/(\?|&)dl=\d/,''); return u; }
+      if (/\.sharepoint\.com/i.test(u) || /1drv\.ms/i.test(u)){ if (/\?/.test(u)){ if (!/[?&]download=1/i.test(u)) u += '&download=1'; u = u.replace(/[?&]web=1/i,'&download=1'); } else { u += '?download=1'; } u = u.replace(/ /g,'%20'); return u; }
+      if (location.protocol === 'https:' && /^http:\/\//i.test(u)) u = u.replace(/^http:\/\//i,'https://');
+      return u;
+    }
+    function findImageUrl(row){
+      const preferred = ['Image','ImageURL','Image Url','Image Link','ImageLink','Image_URL','Image_Link','Img','IMG','Photo','Picture','PictureURL','Picture URL','PhotoURL','Photo URL','Thumbnail','Thumb','Preview','PreviewURL'];
+      for (const k of preferred){
+        if (Object.prototype.hasOwnProperty.call(row,k)){
+          const v=row[k];
+          if (looksLikeUrl(v)) return v.trim();
+          if (v && typeof v==='object'){
+            if (looksLikeUrl(v.hyperlink)) return v.hyperlink.trim();
+            if (looksLikeUrl(v.text)) return v.text.trim();
+          }
+        }
+      }
+      for (const key of Object.keys(row)){
+        if (/(image|img|photo|picture)/i.test(key)){
+          const v=row[key];
+          if (looksLikeUrl(v)) return v.trim();
+          if (v && typeof v==='object'){
+            if (looksLikeUrl(v.hyperlink)) return v.hyperlink.trim();
+            if (looksLikeUrl(v.text)) return v.text.trim();
+          }
+        }
+      }
+      for (const key of Object.keys(row)){ const v=row[key]; if (looksLikeUrl(v)) return v.trim(); }
+      return '';
+    }
+
+    /* ============== Load profiles from excelCache ============== */
+    function loadProfiles(){
+      const out = [];
+      try{
+        const cache = JSON.parse(localStorage.getItem('excelCache') || '{}');
+        const arr = Array.isArray(cache?.profiles) ? cache.profiles : [];
+        if (arr.length){
+          arr.forEach(r=>{
+            const code = pick(r, ['Code','ItemCode','ProfileCode','Profile Code','Code No']);
+            const description = pick(r, ['Description','Profile Description','ProfileDescription','Discription','Desc']);
+            const alloy = pick(r, ['Alloy','Alloy/Temper','Material']);
+            const finish = pick(r, ['Finish','Surface','Surface Finish','Treatment']);
+            const length = pick(r, ['Length','Len','ProfileLength']);
+            const barcode = pick(r, ['Barcode','BARCODE','barcode','EAN','GTIN']) || code;
+            const image = normalizeImageURL(findImageUrl(r));
+            /* Profile Title from column H */
+            const profileTitle = pick(r, ['Profile Title','ProfileTitle']);
+            if (code || description){
+              out.push({code, description, profileTitle, alloy, finish, length, barcode, image});
+            }
+          });
+        }
+      }catch(e){ console.warn('excelCache parse failed:', e); }
+      return out;
+    }
+
+    let PROFILE_DATA = loadProfiles();
+
+    /* ============== DOM refs ============== */
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsList = document.getElementById('suggestions');
+
+    const CodeInput = document.getElementById('Code');
+    const DiscriptionInput = document.getElementById('Discription');
+    const QuantityInput = document.getElementById('Quantity');
+    const LengthInput = document.getElementById('Length');
+    const AlloyInput = document.getElementById('Alloy');
+    const FinishInput = document.getElementById('Finish');
+    const labelSizeInput = document.getElementById('labelSize');
+    const RemarksInput = document.getElementById('Remarks');
+
+    const profileImage = document.getElementById('profileImage');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewProfileTitle = document.getElementById('previewProfileTitle');
+    const previewAlloy = document.getElementById('previewAlloy');
+    const previewFinish = document.getElementById('previewFinish');
+
+    const totalProfilesEl = document.getElementById('total-profiles');
+    const connDot = document.getElementById('conn-dot');
+    const connStatus = document.getElementById('conn-status');
+
+    function setConn(ok){ connDot.classList.toggle('ok', ok); connStatus.textContent = ok ? 'Connected' : 'Not Connected'; }
+    function updateTotals(){ totalProfilesEl.textContent = String(PROFILE_DATA.length || 0); setConn(PROFILE_DATA.length > 0); }
+    updateTotals();
+
+    /* ============== Suggestions (Description only) ============== */
+    function renderSuggestions(query){
+      suggestionsList.innerHTML = '';
+      const q = (query||'').trim().toLowerCase();
+      if (!q){ suggestionsList.classList.add('hidden'); return; }
+      const results = PROFILE_DATA.filter(p => (p.description||'').toLowerCase().includes(q)).slice(0, 80);
+      if (!results.length){ suggestionsList.classList.add('hidden'); return; }
+      results.forEach(profile=>{
+        const li = document.createElement('li');
+        li.textContent = profile.description || '(no description)';
+        li.addEventListener('mousedown', e => e.preventDefault());
+        li.addEventListener('click', ()=>{
+          searchInput.value = profile.description || '';
+          updateFormAndPreview(profile);
+          suggestionsList.classList.add('hidden');
+        });
+        suggestionsList.appendChild(li);
+      });
+      suggestionsList.classList.remove('hidden');
+    }
+
+    function updateFormAndPreview(item){
+      const placeholder = 'https://placehold.co/240x160/ffffff/111111?text=No+Image';
+      if (!item){
+        CodeInput.value = '';
+        DiscriptionInput.value = '';
+        AlloyInput.value = '';
+        FinishInput.value = '';
+        profileImage.referrerPolicy = 'no-referrer';
+        profileImage.src = placeholder;
+        previewDescription.textContent = 'Description: —';
+        previewProfileTitle.textContent = 'Profile Title: —';
+        previewAlloy.textContent = 'Alloy: —';
+        previewFinish.textContent = 'Finish: —';
+        return;
+      }
+      CodeInput.value = item.code || '';
+      DiscriptionInput.value = item.description || '';
+      AlloyInput.value = item.alloy || '';
+      FinishInput.value = item.finish || '';
+      if (item.length && !isNaN(item.length)) { LengthInput.value = Number(item.length); }
+
+      profileImage.referrerPolicy = 'no-referrer';
+      profileImage.onerror = () => { profileImage.src = placeholder; };
+      profileImage.src = item.image || placeholder;
+
+      previewDescription.textContent = 'Description: ' + (item.description || '—');
+      previewProfileTitle.textContent = 'Profile Title: ' + (item.profileTitle || '—');
+      previewAlloy.textContent = 'Alloy: ' + (item.alloy || '—');
+      previewFinish.textContent = 'Finish: ' + (item.finish || '—');
+    }
+
+    searchInput.addEventListener('input', (e)=>{
+      const query = e.target.value;
+      renderSuggestions(query);
+      const exact = PROFILE_DATA.find(p => (p.description||'').toLowerCase() === (query||'').toLowerCase());
+      if (exact) updateFormAndPreview(exact);
+    });
+    document.addEventListener('click', (e)=>{
+      if (!suggestionsList.contains(e.target) && e.target !== searchInput){
+        suggestionsList.classList.add('hidden');
+      }
+    });
+
+    /* ============== Message box ============== */
+    function showMessage(msg){
+      document.getElementById('message-text').textContent = msg;
+      document.getElementById('message-box').classList.remove('hidden');
+      document.body.classList.add('no-scroll');
+    }
+    function hideMessage(){
+      document.getElementById('message-box').classList.add('hidden');
+      document.body.classList.remove('no-scroll');
+    }
+    document.getElementById('message-ok').addEventListener('click', hideMessage);
+    window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && !document.getElementById('scanModal').classList.contains('open')) hideMessage(); });
+
+    /* ============== Print view ============== */
+    document.getElementById('printViewButton').addEventListener('click', ()=>{
+      const Code = (CodeInput.value||'').trim();
+      const Discription = (DiscriptionInput.value||'').trim();
+      if (!Discription){
+        showMessage('Please select a Profile by Description first.');
+        return;
+      }
+      const found = PROFILE_DATA.find(p => (p.description||'') === Discription) || PROFILE_DATA.find(p => (p.code||'') === Code);
+      if (!found){
+        showMessage('Selected profile was not found in loaded data.');
+        return;
+      }
+
+      const quantityText = (QuantityInput.value || '').trim();
+      const lengthText = (LengthInput.value || '').trim();
+
+      const payload = {
+        code: Code || found.code || '',
+        description: Discription || found.description || '',
+        profileTitle: found.profileTitle || '',
+        alloy: (AlloyInput.value||'').trim(),
+        finish: (FinishInput.value||'').trim(),
+        quantityText,
+        lengthText,
+        barcode: found.barcode || found.code || '',
+        image: found.image || '',
+        remarks: (RemarksInput.value||'').trim(),
+        labelSize: (labelSizeInput.value||'').trim() || '160x110'
+      };
+      localStorage.setItem('profilePrintData', JSON.stringify(payload));
+      window.open('profile-print-preview.html', '_blank');
+    });
+
+    /* ============== Header spacer ============== */
+    (function(){
+      function adjust(){
+        const header=document.getElementById('header');
+        const main=document.querySelector('main');
+        if (header&&main){
+          const h=header.offsetHeight;
+          document.documentElement.style.setProperty('--header-h', h+'px');
+          main.style.marginTop=(h+16)+'px';
+        }
+      }
+      window.addEventListener('resize', adjust, {passive:true});
+      if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', adjust); else adjust();
+      setTimeout(adjust,100); setTimeout(adjust,300);
+    })();
+
+    /* ============== Scanner (HTTPS/localhost) ============== */
+    const scanModal = document.getElementById('scanModal');
+    const closeScan = document.getElementById('closeScan');
+    const flipCamera = document.getElementById('flipCamera');
+    const videoEl = document.getElementById('scanVideo');
+
+    let stream = null, stopReader = null, devicesList = [], currentDeviceIndex = -1, usingNative = false;
+
+    function openScanModal(){ scanModal.classList.add('open'); scanModal.setAttribute('aria-hidden','false'); document.body.classList.add('no-scroll'); }
+    function closeScanModal(){ scanModal.classList.remove('open'); scanModal.setAttribute('aria-hidden','true'); document.body.classList.remove('no-scroll'); }
+
+    async function listCameras(){ try { const all = await navigator.mediaDevices.enumerateDevices(); return all.filter(d => d.kind === 'videoinput'); } catch { return []; } }
+
+    function onScanError(err){
+      console.error(err);
+      const name = (err && err.name) || '';
+      if (name === 'NotAllowedError' || name === 'SecurityError'){ showMessage('Camera permission denied. Allow camera access and try again.'); }
+      else if (name === 'NotFoundError' || name === 'OverconstrainedError'){ showMessage('No usable camera found on this device.'); }
+      else { showMessage('Could not start camera scanner. See console for details.'); }
+      stopScan();
+    }
+
+    async function startScan(){
+      const okOrigin = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if (!okOrigin){ showMessage('Camera requires HTTPS or http://localhost.\nTip: use VS Code “Live Server” or a local HTTPS server.'); return; }
+      openScanModal();
+
+      if ('BarcodeDetector' in window){
+        try { usingNative = true; await startNativeDetector(); return; } catch (e) { console.warn('Native BarcodeDetector failed, falling back to ZXing:', e); }
+      }
+      usingNative = false;
+      try { await startZXing(); } catch (e) { onScanError(e); }
+    }
+
+    async function stopScan(){
+      if (stopReader){ try{ stopReader(); }catch{} stopReader = null; }
+      if (stream){ try { stream.getTracks().forEach(t => t.stop()); } catch {} stream = null; }
+      closeScanModal();
+    }
+
+    async function startNativeDetector(){
+      devicesList = await listCameras();
+      const constraints = { video: { facingMode: { ideal: 'environment' } }, audio: false };
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      videoEl.srcObject = stream;
+      await new Promise(res => { videoEl.onloadedmetadata = () => res(); setTimeout(res, 250); });
+      try { await videoEl.play(); } catch {}
+
+      const detector = new BarcodeDetector({ formats: ['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','qr_code'] });
+      let rafId;
+      const tick = async () => {
+        try{
+          const codes = await detector.detect(videoEl);
+          if (codes && codes.length){
+            const text = codes[0].rawValue || '';
+            onBarcode(text);
+            return;
+          }
+        } catch(e){}
+        rafId = requestAnimationFrame(tick);
+      };
+      tick();
+      stopReader = () => { if (rafId) cancelAnimationFrame(rafId); };
+    }
+
+    async function loadZXing(){
+      if (window.ZXing) return;
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    async function startZXing(){
+      await loadZXing();
+      devicesList = await listCameras();
+      let deviceId;
+      const env = devicesList.find(d => /back|rear|environment/i.test(d.label));
+      currentDeviceIndex = devicesList.indexOf(env ?? devicesList[0] ?? null);
+      if (currentDeviceIndex >= 0) deviceId = devicesList[currentDeviceIndex].deviceId;
+
+      const reader = new ZXing.BrowserMultiFormatReader();
+      const controls = await reader.decodeFromVideoDevice(deviceId || undefined, videoEl, (result, err) => {
+        if (result && result.getText()){ onBarcode(result.getText()); }
+      });
+      stopReader = () => { try{ controls?.stop(); reader.reset(); } catch {} };
+    }
+
+    async function flipCam(){
+      if (usingNative){
+        await stopScan();
+        setTimeout(() => startScan(), 50);
+        return;
+      }
+      if (!devicesList.length) return;
+      currentDeviceIndex = (currentDeviceIndex + 1) % devicesList.length;
+      const nextId = devicesList[currentDeviceIndex].deviceId;
+
+      if (stopReader){ try { stopReader(); } catch {} stopReader = null; }
+      const reader = new ZXing.BrowserMultiFormatReader();
+      const controls = await reader.decodeFromVideoDevice(nextId, videoEl, (result, err) => {
+        if (result && result.getText()){ onBarcode(result.getText()); }
+      });
+      stopReader = () => { try{ controls?.stop(); reader.reset(); } catch {} };
+    }
+
+    function onBarcode(text){
+      const trimmed = String(text||'').trim();
+      const found =
+        PROFILE_DATA.find(p => p.barcode && p.barcode.trim() === trimmed) ||
+        PROFILE_DATA.find(p => p.code && p.code.trim() === trimmed);
+      if (found){
+        updateFormAndPreview(found);
+        searchInput.value = found.description || '';
+        stopScan();
+      } else {
+        showMessage(`Scanned: ${trimmed}\nNo matching profile found.`);
+      }
+    }
+
+    // scanner controls
+    document.getElementById('scanButton').addEventListener('click', () => startScan());
+    document.getElementById('closeScan').addEventListener('click', () => stopScan());
+    document.getElementById('flipCamera').addEventListener('click', () => flipCam());
+    window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && scanModal.classList.contains('open')) stopScan(); });
+  </script>
+
+<!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+<div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
+  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
+      <path d="M20 7h-9"/>
+      <path d="M14 17h-5"/>
+      <circle cx="17" cy="17" r="3"/>
+      <circle cx="7" cy="7" r="3"/>
+    </svg>
+    <span>Admin</span>
+  </button>
+  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+    </svg>
+  </button>
+  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
+      <path d="m7.5 4.27 9 5.15"/>
+      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"/>
+      <path d="m3.29 7.39 8.31 3.23"/>
+      <path d="m12 22.95 8.71-3.26"/>
+    </svg>
+    <span>Rack Label</span>
+  </button>
+  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.3-4.3"/>
+    </svg>
+    <span>Search</span>
+  </button>
+</nav>
+<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
+  <small>Alumil Inventory App @2025</small>
+</footer>
+<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<style>
+  .alumil-bottom-nav {
+    position: fixed; left: 0; right: 0;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    margin: 0 auto; z-index: 60;
+    display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    align-items: center; max-width: 720px;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, .92); color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,.08); border-radius: 16px;
+    backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
+  .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
+  .alumil-bottom-nav .nav-btn i { width: 22px; height: 22px; display:inline-block; }
+  .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
+  html[data-theme="light"] .alumil-bottom-nav .nav-btn:hover { background: rgba(0,0,0,.04); }
+  .scan-btn { position: relative; width: 56px; height: 56px; display: inline-grid; place-items: center; border-radius: 14px; border: 0; background: #facc15; color: #111827; box-shadow: 0 0 0 0 rgba(250,204,21,0); transition: transform .15s, box-shadow .2s; }
+  .scan-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 8px rgba(250,204,21,.2); }
+  .scan-btn:active { transform: translateY(0); }
+  .scan-btn i { width: 28px; height: 28px; }
+  .alumil-footer { position: fixed; left:0; right:0; bottom: 0; z-index: 50; display:flex; align-items:center; justify-content:center; min-height: 24px; background: #0b1220; color:#cbd5e1; border-top: 1px solid rgba(255,255,255,.08); padding-bottom: env(safe-area-inset-bottom, 0px); font-size: 12px; letter-spacing: .02em; }
+  html[data-theme="light"] .alumil-footer { background:#f8fafc; color:#334155; border-top-color: rgba(0,0,0,.06); }
+  @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
+  .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+</style>
+<script>
+(function(){
+  function routeByCode(raw){
+    if(!raw) return;
+    const code = String(raw).trim();
+    if(!code) return;
+    const isAcc = /(\bACC\b|^ACC-|ACC\d|ACCESS|ACCS)/i.test(code);
+    const target = isAcc ? 'acc-label-printing.html' : 'profile-label-printing.html';
+    const url = target + '?code=' + encodeURIComponent(code);
+    window.location.href = url;
+  }
+  // Keyboard wedge capture
+  (function(){
+    let buf = '', last = 0;
+    window.addEventListener('keydown', (e) => {
+      const now = Date.now();
+      if(now - last > 250) buf = '';
+      last = now;
+      if(e.key === 'Enter'){
+        if(buf.length >= 4){ routeByCode(buf); }
+        buf = ''; return;
+      }
+      if(e.ctrlKey || e.metaKey || e.altKey) return;
+      if(e.key && e.key.length === 1){ buf += e.key; }
+    }, true);
+  })();
+  // Hidden input focus via big button
+  const scanBtn = document.getElementById('alumil-scan-btn');
+  const scanInput = document.getElementById('alumil-scan-input');
+  if(scanBtn && scanInput){
+    scanBtn.addEventListener('click', () => {
+      scanInput.value = ''; scanInput.focus();
+      try {
+        if(!document.getElementById('alumil-scan-toast')){
+          const t = document.createElement('div');
+          t.id = 'alumil-scan-toast';
+          t.textContent = 'Ready to scan… (press Enter when done)';
+          t.style.position='fixed'; t.style.left='50%'; t.style.bottom='90px'; t.style.transform='translateX(-50%)';
+          t.style.background='rgba(0,0,0,.72)'; t.style.color='#fff'; t.style.font='600 12px/1.1 Inter,system-ui';
+          t.style.padding='8px 12px'; t.style.borderRadius='10px'; t.style.zIndex=80;
+          document.body.appendChild(t); setTimeout(()=>{ t.remove(); }, 2000);
+        }
+      } catch(e){}
+    });
+    scanInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        routeByCode(scanInput.value);
+        scanInput.blur();
+      }
+    });
+  }
+  // Active tab highlight
+  try{
+    const here = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('#alumil-bottom-nav .nav-btn').forEach(btn => {
+      const k = btn.getAttribute('data-nav'); if(!k) return;
+      const map = { home:'home.html', admin:'admin.html', rack:'rack-label-printing.html', search:'search-inventory.html' };
+      if(map[k] && here === map[k].toLowerCase()){ btn.style.fontWeight='800'; btn.style.opacity='1'; }
+      else { btn.style.opacity='.85'; }
+    });
+  }catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+  try{
+    var path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var home = document.querySelector('[data-nav="home"]');
+    var admin = document.querySelector('[data-nav="admin"]');
+    function addActive(el){ if(!el) return; el.classList.add('text-yellow-400'); el.classList.add('font-semibold'); }
+    if(path === 'admin.html'){ addActive(admin); }
+    else if(path === 'home.html' || path === 'index.html' || path === ''){ addActive(home); }
+  }catch(e){}
+  try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
+})();
+</script>
+
+
+<script>
+// Versioned global bootstrap (SharePoint + Config)
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3";
+  async function j(u){
+  // If we're pointing at a SharePoint Excel link, emulate the old JSON API:
+  if ((typeof BASE === "string") && BASE.includes("sharepoint.com")) {
+    // Ensure loader + workbook
+    if (typeof loadWorkbook !== "function") {
+      throw new Error("XLSX loader not found. Ensure xlsx.full.min.js and js/sharepoint_loader.js are loaded.");
+    }
+    if (!window.__SP_WB_LOADED__) {
+      await loadWorkbook(BASE);
+      window.__SP_WB_LOADED__ = true;
+    }
+    // Extract sheet=Name from the URL and return rows from that sheet
+    try {
+      const qs = (u.split("?")[1] || "");
+      const params = new URLSearchParams(qs);
+      const sheet = params.get("sheet") || "Config";
+      const rows = getSheetJSON(sheet);
+      return rows || [];
+    } catch (e) {
+      console.error("SharePoint sheet load failed:", e);
+      return [];
+    }
+  }
+
+  // Fallback: original JSON fetch behavior
+  const r = await fetch(u, {mode:'cors'});
+  if(!r.ok) throw 0;
+  return r.json();
+}
+
+); if(!r.ok) throw 0; return r.json(); }
+
+  // 1) Local cache + version
+  let local = {}, localVersion = null;
+  try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
+
+  // 2) Remote config (version, sheet names)
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows || []).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch (_){
+    // no Config found -> force refresh
+  }
+
+  const remoteVersion = cfg.version || null;
+  const hasData = (Array.isArray(local?.profiles) && local.profiles.length) || (Array.isArray(local?.accessories) && local.accessories.length);
+
+  // 3) If same version and have data -> keep cache
+  if (remoteVersion && localVersion && remoteVersion === localVersion && hasData) return;
+
+  // 4) Fetch fresh data from configured sheets
+  try {
+    const urlP = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetProfiles || 'Profile');
+    const urlA = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetAccessories || 'Accessories');
+    const [p, a] = await Promise.all([ j(urlP), j(urlA) ]);
+    const profiles = Array.isArray(p) ? p : (p?.data || []);
+    const accessories = Array.isArray(a) ? a : (a?.data || []);
+
+    localStorage.setItem('excelCache', JSON.stringify({
+      profiles, accessories,
+      version: remoteVersion,
+      fileName: `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`,
+      loadedAt: new Date().toISOString()
+    }));
+    console.log('[bootstrap] excelCache updated to version', remoteVersion);
+  } catch (e) {
+    console.warn('Versioned bootstrap failed:', e);
+  }
+});
+</script>
+
+  <script src="js/sharepoint_loader.js"></script>
+</body>
+</html>

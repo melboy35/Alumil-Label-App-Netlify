@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512">
+  <!-- Yellow chevron/arrow favicon based on Alumil branding -->
+  <rect width="512" height="512" fill="transparent"/>
+  <path d="M93 94 L419 256 L93 418" fill="#FFD700" stroke="#FF9900" stroke-width="24" stroke-linejoin="round"/>
+</svg>

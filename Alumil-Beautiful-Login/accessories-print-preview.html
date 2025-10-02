@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Accessories Label – Print Preview (100×50)</title>
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#ffc107">
+  <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+  
+  <!-- Tailwind only for the (admin) control bar -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+  <style>
+    :root{
+      /* Fixed label size */
+      --label-w-mm: 100;
+      --label-h-mm: 50;
+
+      /* Comfortable defaults (used if no admin prefs) */
+      --photo-col: 38%;     /* image column width */
+      --photo-h-pct: 68%;   /* image box height (auto-tuned if no admin prefs) */
+      --img-zoom: 1;
+
+      --bc-height-px: 42;
+      --bc-width-px: 2;
+
+      /* Details typography (admin slider sets these) */
+      --kv-base-pt: 8.0;    /* grid + keys */
+      --v-base-pt: 7.8;     /* values */
+
+      --logo-mm: 8;
+
+      /* NEW: shared dimensions for key/value layout */
+      --k-col-w-mm: 24;     /* width of the key column (mm) */
+      --kv-gap-mm: 2;       /* gap between key and value (mm) */
+    }
+
+    html, body { margin:0; padding:0; background:#111827; color:#e5e7eb; }
+    .page { min-height:100vh; display:grid; place-items:center; padding:12px; }
+
+    /* Label */
+    .label {
+      width: calc(var(--label-w-mm) * 1mm);
+      height: calc(var(--label-h-mm) * 1mm);
+      background:#fff; color:#111827;
+      border-radius:10px;
+      box-shadow:0 12px 24px rgba(0,0,0,.35);
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      overflow:hidden;
+    }
+
+    /* Header */
+    .head {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:6px 10px; border-bottom:1px solid #e5e7eb;
+    }
+    .brand img { height: calc(var(--logo-mm) * 1mm); width:auto; display:block; }
+    .barcode-wrap { min-width:36mm; max-width:80mm; display:flex; flex-direction:column; align-items:center; gap:1mm; }
+    .barcode-wrap svg { width:100%; height:auto; }
+    .code-under { font:9pt/1.1 ui-monospace,monospace; text-align:center; }
+
+    /* Body: 2 columns */
+    .body {
+      display:grid;
+      grid-template-columns: var(--photo-col) calc(100% - var(--photo-col));
+      gap: 3mm;
+      padding: 6px;
+      align-items: stretch;         /* let both columns fill height */
+    }
+
+    /* Image column */
+    .photo-wrap { display:flex; flex-direction:column; gap:3px; height:100%; }
+    .photo-box {
+      height: calc(var(--photo-h-pct) * 1%);   /* tuned automatically if no admin prefs */
+      border:1px solid #e5e7eb; border-radius:8px; padding:4px;
+      background:#fff; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .photo-box img {
+      max-width:100%; max-height:100%;
+      object-fit:contain; display:block;
+      transform-origin:center center;
+    }
+    .photo-box[data-zoom="on"] img {
+      width:auto; height:auto; transform: scale(var(--img-zoom));
+    }
+
+    /* Details column (compact, wraps under key) */
+    .kv { display:grid; gap:1.5px; align-content:start; font-size: calc(var(--kv-base-pt) * 1pt); }
+    .row { display:flex; align-items:flex-start; gap: calc(var(--kv-gap-mm) * 1mm); min-width:0; }
+    .k { color:#374151; min-width: calc(var(--k-col-w-mm) * 1mm); font-weight:600; flex-shrink:0; white-space:nowrap; }
+    .v { color:#111827; font-weight:600; flex:1; min-width:0; white-space:normal; word-break:break-word; overflow:hidden; text-overflow:ellipsis; line-height:1.2; font-size: calc(var(--v-base-pt) * 1pt); margin-top:1px; }
+
+    /* NEW: Hanging label row — used for Description so wrapped lines start under the label */
+    .row--hang { position: relative; display:block; min-width:0; }
+    .row--hang .v {
+      display:block;
+      /* indent ONLY the first line so it starts after the key width + gap */
+      text-indent: calc((var(--k-col-w-mm) + var(--kv-gap-mm)) * 1mm);
+      line-height:1.2;
+    }
+    .row--hang::before {
+      content: attr(data-k);
+      position:absolute;
+      left:0; top:0;
+      width: calc(var(--k-col-w-mm) * 1mm);
+      color:#374151; font-weight:600; white-space:nowrap;
+      line-height:1.2;  /* match the value line-height */
+    }
+
+    /* Footer */
+    .foot { border-top:1px solid #e5e7eb; font-size:7.8pt; padding:6px 10px; display:flex; justify-content:space-between; color:#374151; }
+
+    /* Print */
+    @media print {
+      @page { size: 100mm 50mm; margin:0; }
+      body { background:#fff; }
+      .controls { display:none !important; }
+      .page { padding:0; }
+      .label { box-shadow:none; }
+    }
+
+    /* Admin bar is hidden for non-admins */
+    .controls {
+      position:fixed; inset-inline:0; bottom:0;
+      background:rgba(17,24,39,.92); color:#e5e7eb;
+      backdrop-filter:blur(6px);
+      border-top:1px solid rgba(255,255,255,.12);
+      padding:10px;
+    }
+    .controls .inner { max-width:1100px; margin:0 auto; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+    .grp { display:flex; align-items:center; gap:8px; }
+    .grp label { font-size:12px; color:#cbd5e1; }
+    .spacer { flex:1 1 auto; }
+
+    body.no-admin .controls { display:none; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="label" aria-label="Printable label 100×50 mm">
+      <!-- HEADER -->
+      <div class="head">
+        <div class="brand"><img src="alumil-logo.svg" alt="Alumil"></div>
+        <div class="barcode-wrap">
+          <svg id="barcode"></svg>
+          <div id="code-under" class="code-under">—</div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="body">
+        <!-- IMAGE -->
+        <div class="photo-wrap">
+          <div id="photoBox" class="photo-box" data-zoom="off">
+            <img id="item-photo" src="https://placehold.co/480x320/ffffff/111111?text=No+Image" alt="Accessory image">
+          </div>
+        </div>
+
+        <!-- DETAILS (Description uses hanging-label layout) -->
+        <div id="kv" class="kv">
+          <!-- NEW: hanging row so wrapped lines start under the "Description" label -->
+          <div class="row row--hang" data-k="Description"><div id="v-desc" class="v">—</div></div>
+
+          <div class="row"><div class="k">Type</div><div id="v-type" class="v">—</div></div>
+          <div class="row"><div class="k">Quantity</div><div id="v-qty" class="v">—</div></div>
+          <div class="row"><div class="k">Remarks</div><div id="v-remarks" class="v">—</div></div>
+          <div class="row"><div class="k">Generated</div><div id="v-generated" class="v">—</div></div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="foot">
+        <div>Alumil Inventory</div>
+        <div id="foot-right">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN-ONLY CONTROLS (override when needed) -->
+  <div class="controls">
+    <div class="inner">
+      <div class="grp">
+        <label>Image width</label>
+        <input id="imgW" type="range" min="30" max="60" step="1" value="38">
+        <span id="imgWVal" class="text-xs text-gray-300">38%</span>
+      </div>
+      <div class="grp">
+        <label>Image height</label>
+        <input id="imgH" type="range" min="40" max="95" step="1" value="68">
+        <span id="imgHVal" class="text-xs text-gray-300">68%</span>
+      </div>
+      <div class="grp">
+        <label class="inline-flex items-center gap-2">
+          <input id="zoomToggle" type="checkbox">
+          Keep box size & zoom image
+        </label>
+        <label>Zoom</label>
+        <input id="imgZoom" type="range" min="100" max="220" step="5" value="100" disabled>
+        <span id="imgZoomVal" class="text-xs text-gray-300">100%</span>
+      </div>
+
+      <div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
+
+      <div class="grp">
+        <label>Barcode height</label>
+        <input id="bcH" type="range" min="28" max="70" step="2" value="42">
+        <label>Thickness</label>
+        <input id="bcW" type="range" min="1" max="4" step="0.2" value="2">
+      </div>
+
+      <div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
+
+      <div class="grp">
+        <label>Details size</label>
+        <input id="kvSize" type="range" min="6.5" max="9.5" step="0.1" value="8.0">
+        <span id="kvSizeVal" class="text-xs text-gray-300">8.0pt</span>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="grp">
+        <button id="btnResetLayout" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reset image layout</button>
+        <button id="btnReload" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reload</button>
+        <button id="btnPrint" class="px-3 py-1.5 rounded bg-amber-500 text-black font-semibold text-sm">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Admin gate ---------- */
+    function isAdmin() {
+      try {
+        if (localStorage.getItem('alumil:isAdmin') === '1') return true;
+        if (/\badmin=1\b/i.test(location.search)) return true;
+      } catch {}
+      return false;
+    }
+    function applyAdminGate(){
+      document.body.classList.toggle('no-admin', !isAdmin());
+    }
+    applyAdminGate();
+    window.addEventListener('storage', (e)=> {
+      if (e.key === 'alumil:isAdmin') applyAdminGate();
+    });
+
+    /* ---------- Helpers for image prefs ---------- */
+    function hasImagePrefs(){
+      try {
+        return (
+          localStorage.getItem('apv:imgW') != null ||
+          localStorage.getItem('apv:imgH') != null ||
+          localStorage.getItem('apv:zoomOn') != null ||
+          localStorage.getItem('apv:imgZoom') != null
+        );
+      } catch { return false; }
+    }
+    function applyImagePrefsFromStorage(){
+      try{
+        const w = localStorage.getItem('apv:imgW');
+        if (w) document.documentElement.style.setProperty('--photo-col', w + '%');
+
+        const h = localStorage.getItem('apv:imgH');
+        if (h) document.documentElement.style.setProperty('--photo-h-pct', h);
+
+        const zOn = localStorage.getItem('apv:zoomOn') === '1';
+        const photoBox = document.getElementById('photoBox');
+        if (photoBox) photoBox.setAttribute('data-zoom', zOn ? 'on' : 'off');
+
+        const z = localStorage.getItem('apv:imgZoom');
+        if (z) document.documentElement.style.setProperty('--img-zoom', (parseInt(z,10)/100).toString());
+      }catch{}
+    }
+
+    /* ---------- Data + rendering ---------- */
+    function getPayload(){
+      try{ return JSON.parse(localStorage.getItem('accessoryPrintData')||'{}'); }
+      catch{ return {}; }
+    }
+
+    function renderBarcode(value){
+      const width = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bc-width-px'))||2;
+      const height = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bc-height-px'))||42;
+      try{
+        JsBarcode("#barcode", value||"-", { format:"code128", lineColor:"#111827", width, height, displayValue:false, margin:2 });
+      }catch(e){
+        const bc = document.getElementById('barcode');
+        bc.replaceWith(Object.assign(document.createElement('div'), {textContent:'BARCODE', style:'font:12px monospace;'}));
+      }
+    }
+
+    function fillFromPayload(p){
+      const ph = 'https://placehold.co/480x320/ffffff/111111?text=No+Image';
+      const img = document.getElementById('item-photo');
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => { img.src = ph; };
+      img.src = (p.image || '').trim() || ph;
+
+      document.getElementById('v-desc').textContent = (p.description||'').trim() || '—';
+      document.getElementById('v-type').textContent = (p.type||'').trim() || '—';
+      document.getElementById('v-qty').textContent = (p.printQuantity||'').toString().trim() || '—';
+      document.getElementById('v-remarks').textContent = (p.remarks||'').trim() || '—';
+      document.getElementById('foot-right').textContent = (p.description||'').trim() || '—';
+      document.getElementById('code-under').textContent = (p.code||'').trim() || '—';
+
+      renderBarcode((p.barcode||p.code||'').trim() || '-');
+
+      document.getElementById('v-generated').textContent = new Date().toLocaleString(undefined,{hour12:false});
+
+      requestAnimationFrame(autoFitDetails);
+
+      // If admin saved a layout, apply it (for everyone). Otherwise, fall back to comfy auto-fit.
+      if (hasImagePrefs()){
+        requestAnimationFrame(applyImagePrefsFromStorage);
+      } else {
+        requestAnimationFrame(fitImageBoxComfort);
+      }
+    }
+
+    /* ---------- Auto-fit details (shrink fonts if overflow) ---------- */
+    function autoFitDetails(){
+      const kv = document.getElementById('kv');
+      if (!kv) return;
+
+      const cs = getComputedStyle(document.documentElement);
+      let basePt = parseFloat(cs.getPropertyValue('--kv-base-pt')) || 8.0;
+      let valPt  = parseFloat(cs.getPropertyValue('--v-base-pt')) || 7.8;
+
+      const minPt = 6.2;
+      let guard = 0;
+
+      function applySizes(){
+        kv.style.fontSize = basePt + 'pt';
+        kv.querySelectorAll('.v').forEach(el => el.style.fontSize = valPt + 'pt');
+      }
+      applySizes();
+
+      while (kv.scrollHeight > kv.clientHeight && basePt > minPt && valPt > minPt && guard < 24){
+        basePt -= 0.2;
+        valPt  -= 0.2;
+        applySizes();
+        guard++;
+      }
+    }
+
+    /* ---------- Comfy auto-fit (only when no admin prefs) ---------- */
+    function fitImageBoxComfort() {
+      if (hasImagePrefs()) return; // don’t override admin prefs
+      const pct = 68; // comfy height %
+      document.documentElement.style.setProperty('--photo-h-pct', String(pct));
+    }
+    window.addEventListener('resize', ()=>{ if (!hasImagePrefs()) fitImageBoxComfort(); }, {passive:true});
+
+    /* ---------- Admin controls ---------- */
+    const imgW = document.getElementById('imgW');
+    const imgWVal = document.getElementById('imgWVal');
+    const imgH = document.getElementById('imgH');
+    const imgHVal = document.getElementById('imgHVal');
+    const zoomToggle = document.getElementById('zoomToggle');
+    const imgZoom = document.getElementById('imgZoom');
+    const imgZoomVal = document.getElementById('imgZoomVal');
+    const photoBox = document.getElementById('photoBox');
+    const bcH = document.getElementById('bcH');
+    const bcW = document.getElementById('bcW');
+    const kvSize = document.getElementById('kvSize');
+    const kvSizeVal = document.getElementById('kvSizeVal');
+    const btnResetLayout = document.getElementById('btnResetLayout');
+
+    function bindAdminControls(){
+      if (document.body.classList.contains('no-admin')) return;
+
+      imgW.addEventListener('input', e=>{
+        const v = e.target.value;
+        document.documentElement.style.setProperty('--photo-col', v + '%');
+        imgWVal.textContent = v + '%';
+        try{ localStorage.setItem('apv:imgW', v); }catch{}
+      });
+      imgH.addEventListener('input', e=>{
+        const v = e.target.value;
+        document.documentElement.style.setProperty('--photo-h-pct', v);
+        imgHVal.textContent = v + '%';
+        try{ localStorage.setItem('apv:imgH', v); }catch{}
+      });
+      zoomToggle.addEventListener('change', ()=>{
+        const on = zoomToggle.checked;
+        photoBox.setAttribute('data-zoom', on ? 'on' : 'off');
+        imgZoom.disabled = !on;
+        try{ localStorage.setItem('apv:zoomOn', on ? '1':'0'); }catch{}
+      });
+      imgZoom.addEventListener('input', e=>{
+        const z = Math.max(100, Math.min(220, parseInt(e.target.value,10)||100));
+        document.documentElement.style.setProperty('--img-zoom', (z/100).toString());
+        imgZoomVal.textContent = z + '%';
+        try{ localStorage.setItem('apv:imgZoom', String(z)); }catch{}
+      });
+      bcH.addEventListener('input', e=>{
+        document.documentElement.style.setProperty('--bc-height-px', e.target.value);
+        const p = getPayload(); renderBarcode((p.barcode||p.code||'-').trim());
+        try{ localStorage.setItem('apv:bcH', e.target.value); }catch{}
+      });
+      bcW.addEventListener('input', e=>{
+        document.documentElement.style.setProperty('--bc-width-px', e.target.value);
+        const p = getPayload(); renderBarcode((p.barcode||p.code||'-').trim());
+        try{ localStorage.setItem('apv:bcW', e.target.value); }catch{}
+      });
+      kvSize.addEventListener('input', e=>{
+        const pt = parseFloat(e.target.value)||8.0;
+        const vPt = Math.max(6.2, pt - 0.2);
+        document.documentElement.style.setProperty('--kv-base-pt', pt.toString());
+        document.documentElement.style.setProperty('--v-base-pt', vPt.toString());
+        kvSizeVal.textContent = pt.toFixed(1) + 'pt';
+        try{
+          localStorage.setItem('apv:kvPt', pt.toString());
+          localStorage.setItem('apv:vPt', vPt.toString());
+        }catch{}
+        requestAnimationFrame(autoFitDetails);
+      });
+
+      btnResetLayout.addEventListener('click', ()=>{
+        ['apv:imgW','apv:imgH','apv:zoomOn','apv:imgZoom'].forEach(k=>localStorage.removeItem(k));
+        // fall back to comfy fit for everyone
+        fitImageBoxComfort();
+      });
+    }
+
+    function restoreAdminPrefsIntoUI(){
+      // Only called for admins; image prefs themselves are applied for everyone via applyImagePrefsFromStorage()
+      try{
+        const w = localStorage.getItem('apv:imgW'); if (w){ imgW.value=w; imgWVal.textContent=w+'%'; }
+        const h = localStorage.getItem('apv:imgH'); if (h){ imgH.value=h; imgHVal.textContent=h+'%'; }
+        const zOn = localStorage.getItem('apv:zoomOn') === '1';
+        zoomToggle.checked = zOn; imgZoom.disabled = !zOn;
+        const z = localStorage.getItem('apv:imgZoom'); if (z){ imgZoom.value=z; imgZoomVal.textContent=z+'%'; }
+        const kpt = localStorage.getItem('apv:kvPt'); const vpt = localStorage.getItem('apv:vPt');
+        if (kpt){ kvSize.value=kpt; kvSizeVal.textContent=parseFloat(kpt).toFixed(1)+'pt'; document.documentElement.style.setProperty('--kv-base-pt', kpt); }
+        if (vpt){ document.documentElement.style.setProperty('--v-base-pt', vpt); }
+      }catch{}
+    }
+
+    /* ---------- Init ---------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Always apply saved image prefs first (for everyone)
+      if (hasImagePrefs()) applyImagePrefsFromStorage(); else fitImageBoxComfort();
+
+      // If admin: mirror prefs into sliders and bind controls
+      if (!document.body.classList.contains('no-admin')){
+        restoreAdminPrefsIntoUI();
+        bindAdminControls();
+      }
+
+      fillFromPayload(getPayload());
+    });
+
+    // Admin buttons
+    document.getElementById('btnReload')?.addEventListener('click', ()=> fillFromPayload(getPayload()));
+    document.getElementById('btnPrint')?.addEventListener('click', ()=> window.print());
+  </script>
+
+<script>
+// Versioned global bootstrap (SharePoint + Config)
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3";
+  async function j(u){
+  // If we're pointing at a SharePoint Excel link, emulate the old JSON API:
+  if ((typeof BASE === "string") && BASE.includes("sharepoint.com")) {
+    // Ensure loader + workbook
+    if (typeof loadWorkbook !== "function") {
+      throw new Error("XLSX loader not found. Ensure xlsx.full.min.js and js/sharepoint_loader.js are loaded.");
+    }
+    if (!window.__SP_WB_LOADED__) {
+      await loadWorkbook(BASE);
+      window.__SP_WB_LOADED__ = true;
+    }
+    // Extract sheet=Name from the URL and return rows from that sheet
+    try {
+      const qs = (u.split("?")[1] || "");
+      const params = new URLSearchParams(qs);
+      const sheet = params.get("sheet") || "Config";
+      const rows = getSheetJSON(sheet);
+      return rows || [];
+    } catch (e) {
+      console.error("SharePoint sheet load failed:", e);
+      return [];
+    }
+  }
+
+  // Fallback: original JSON fetch behavior
+  const r = await fetch(u, {mode:'cors'});
+  if(!r.ok) throw 0;
+  return r.json();
+}
+
+); if(!r.ok) throw 0; return r.json(); }
+
+  // 1) Local cache + version
+  let local = {}, localVersion = null;
+  try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
+
+  // 2) Remote config (version, sheet names)
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows || []).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch (_){
+    // no Config found -> force refresh
+  }
+
+  const remoteVersion = cfg.version || null;
+  const hasData = (Array.isArray(local?.profiles) && local.profiles.length) || (Array.isArray(local?.accessories) && local.accessories.length);
+
+  // 3) If same version and have data -> keep cache
+  if (remoteVersion && localVersion && remoteVersion === localVersion && hasData) return;
+
+  // 4) Fetch fresh data from configured sheets
+  try {
+    const urlP = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetProfiles || 'Profile');
+    const urlA = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetAccessories || 'Accessories');
+    const [p, a] = await Promise.all([ j(urlP), j(urlA) ]);
+    const profiles = Array.isArray(p) ? p : (p?.data || []);
+    const accessories = Array.isArray(a) ? a : (a?.data || []);
+
+    localStorage.setItem('excelCache', JSON.stringify({
+      profiles, accessories,
+      version: remoteVersion,
+      fileName: `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`,
+      loadedAt: new Date().toISOString()
+    }));
+    console.log('[bootstrap] excelCache updated to version', remoteVersion);
+  } catch (e) {
+    console.warn('Versioned bootstrap failed:', e);
+  }
+});
+</script>
+
+  <script src="js/sharepoint_loader.js"></script>
+</body>
+</html>

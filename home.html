@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Alumil Inventory System</title>
+
+  <!-- Comprehensive Favicon Setup -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
+  <meta name="msapplication-TileColor" content="#ffc107">
+  <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase Overlay -->
+  <script src="assets/js/supabase-overlay.js"></script>
+
+  <style>
+    /* Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap');
+
+    body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s, font-family 0.3s; }
+
+    /* font persistence helpers */
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .font-roboto { font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif; }
+    .font-open-sans { font-family: 'Open Sans', system-ui, -apple-system, Segoe UI, sans-serif; }
+
+    /* Theme (default light) */
+    body.dark { background-color: #2a2a2a; color: #d1d5db; }
+    body.light { background-color: #ffffff; color: #1f2937; }
+
+    .card.dark { background-color: #1a1a1a; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2); }
+    .card.light { background-color: #ffffff; box-shadow: 0 10px 15px -3px rgb(229 231 235 / 0.5), 0 4px 6px -4px rgb(229 231 235 / 0.5); }
+
+    .accent-text.dark { color: #ffffff; }
+    .accent-text.light { color: #1f2937; }
+    .icon-color.dark { color: #ffc107; }
+    .icon-color.light { color: #4b5563; }
+    .title-text.dark { color: #ffffff; }
+    .title-text.light { color: #1f2937; }
+    .subtitle-text.dark { color: #94a3b8; }
+    .subtitle-text.light { color: #6b7280; }
+    .hover-text.dark:hover { color: #ffc107; }
+    .hover-text.light:hover { color: #f59e0b; }
+    .glow-hover.dark:hover { box-shadow: 0 10px 15px -3px rgb(255 193 7 / 0.2), 0 4px 6px -4px rgb(255 193 7 / 0.2); }
+    .glow-hover.light:hover { box-shadow: 0 10px 15px -3px rgb(251 191 36 / 0.8), 0 4px 6px -4px rgb(251 191 36 / 0.8); }
+
+    .summary-card.dark { background: linear-gradient(135deg, #1f2937, #111827); }
+    .summary-card.light { background: linear-gradient(135deg, #f9fafb, #e5e7eb); }
+
+    .greeting-animation { opacity: 0; animation: fadeIn 1s forwards; animation-delay: 0.5s; }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    @keyframes header-glow {
+      0%, 100% { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2); }
+      50% { box-shadow: 0 10px 20px -5px rgba(255, 193, 7, 0.2), 0 6px 10px -5px rgba(255, 193, 7, 0.2); }
+    }
+    .card.dark.animating { animation: header-glow 3s infinite ease-in-out; }
+
+    /* --- Mobile safety (design-neutral) --- */
+    html, body { max-width: 100%; overflow-x: clip; }
+    img, video { max-width: 100%; height: auto; display: block; }
+    section[id] { scroll-margin-top: calc(var(--header-h, 80px) + 16px); }
+
+    /* --- FIXED MODALS --- */
+    .modal { display: none; position: fixed; inset: 0; z-index: 100; place-items: center; padding: 16px; background: rgba(0,0,0,.55); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); opacity: 0; transition: opacity .22s ease; overscroll-behavior: contain; }
+    .modal.open { display: grid; opacity: 1; }
+
+    .modal-content { width: 100%; max-width: 640px; padding: 2rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); transform: scale(.96) translateY(6px); opacity: 0; transition: transform .22s cubic-bezier(.215,.61,.355,1), opacity .22s; position: relative; max-height: min(90svh, 700px); max-height: calc(100dvh - 2rem); overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); }
+    .modal.open .modal-content { transform: scale(1) translateY(0); opacity: 1; }
+
+    .modal-content.dark { background:#1a1a1a; color:#d1d5db; }
+    .modal-content.light { background:#ffffff; color:#111827; }
+
+    .close-button { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: inherit; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+    .close-button:hover { color:#f59e0b; }
+
+    .no-scroll { overflow: hidden; touch-action: none; }
+
+    @media (prefers-reduced-motion: reduce){ * { animation-duration:0.01ms!important; transition-duration:0.01ms!important; } }
+  
+    /* --- Fixed bottom navigation always visible --- */
+    html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+    #alumil-bottom-nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; padding-bottom: env(safe-area-inset-bottom); }
+    #alumil-fixed-footer { position: fixed !important; bottom: 0 !important; width: 100% !important; z-index: 999 !important; }
+    body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch; }
+
+    /* === Full-bleed header on mobile (no side gaps) === */
+    #header { left: 0; right: 0; }
+    @media (max-width: 640px) {
+      #header { border-radius: 0 !important; }
+    }
+    /* Respect iOS safe areas while keeping full-bleed */
+    @supports (padding: max(0px)) {
+      #header { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+    }
+  </style>
+
+  <!-- EARLY: Sync <html data-theme> so mobile bottom nav + footer can style immediately -->
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body class="light">
+  <!-- NOTE: remove horizontal padding on mobile so header can touch edges; keep for >=sm -->
+  <div class="min-h-screen font-sans antialiased px-0 sm:px-8 py-4">
+    <!-- Header -->
+    <header id="header" class="app-header fixed top-0 inset-x-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-none sm:rounded-xl shadow-lg card dark animating">
+      <div class="flex items-center space-x-3 mb-4 sm:mb-0">
+        <img src="alumil-logo.svg" alt="Alumil logo" class="h-9 w-auto select-none" loading="eager" decoding="async">
+        <span class="brand-title font-semibold text-2xl tracking-tight">Alumil Inventory System</span>
+      </div>
+      <nav class="flex items-center space-x-4 text-sm sm:text-base">
+        <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="admin.html" id="admin-link" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg>
+          Admin
+        </a>
+        <button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" onclick="handleLogout()" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+        </a>
+
+        <button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
+          <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main -->
+    <main class="container mx-auto mt-24 px-4 sm:px-8" id="main" role="main" aria-labelledby="dashboardTitle">
+      <section id="greeting" class="p-6 rounded-xl shadow-lg mb-6 card dark" aria-labelledby="dashboardTitle" aria-live="polite">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div>
+            <h1 id="dashboardTitle" class="text-4xl font-bold title-text dark greeting-animation">Good morning!</h1>
+            <p class="subtitle-text dark mt-2 greeting-animation">Welcome to your inventory dashboard. Here's a quick overview of today's status.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" aria-label="Inventory summary">
+        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+          <div class="flex items-center justify-center mb-4">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M10 16h30l8 8v24H10z"/><path d="M18 24h16v16H18z"/><path d="M34 24l6 6M34 40l6-6"/><path d="M40 16v8h8"/></svg>
+          </div>
+          <h3 id="total-profiles" class="text-4xl font-bold text-yellow-500">0</h3>
+          <p class="mt-2 text-sm text-gray-400">Total Profile</p>
+        </div>
+
+        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+          <div class="flex items-center justify-center mb-4">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><g opacity="0.9"><circle cx="22" cy="22" r="5"/><path d="M22 12v3M22 29v3M12 22h3M29 22h3M16 16l2 2M28 28l2 2M16 28l2-2M28 16l-2 2"/></g><g><circle cx="38" cy="38" r="6"/><path d="M38 26v4M38 50v4M26 38h4M50 38h4M30 30l3 3M46 46l3 3M30 46l3-3M46 30l-3 3"/></g></svg>
+          </div>
+          <h3 id="total-accessories" class="text-4xl font-bold text-red-500">0</h3>
+          <p class="mt-2 text-sm text-gray-400">Total Accessories</p>
+        </div>
+
+        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+          <div class="flex items-center justify-center mb-4">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M12 10v44M52 10v44"/><path d="M12 18h40M12 32h40M12 46h40"/><rect x="16" y="13.5" width="12" height="7" rx="1.2"/><rect x="36" y="13.5" width="12" height="7" rx="1.2"/><rect x="16" y="27.5" width="12" height="7" rx="1.2"/><rect x="36" y="27.5" width="12" height="7" rx="1.2"/><rect x="24" y="41.5" width="16" height="7" rx="1.2"/><path d="M10 54h44"/></svg>
+          </div>
+          <h3 id="total-racks" class="text-4xl font-bold text-green-500">0</h3>
+          <p class="mt-2 text-sm text-gray-400">Total Racks</p>
+        </div>
+
+        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+          <div class="flex items-center justify-center mb-4">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><rect x="14" y="12" width="36" height="40" rx="4"/><rect x="24" y="6" width="16" height="8" rx="2"/><path d="M26 10h12"/><rect x="18" y="20" width="12" height="12" rx="1.5"/><path d="M20 22h3M25 22h3M20 26h3M25 26h3M23 24h3M23 28h3"/><path d="M34 23h12M34 28h12M18 38h28M18 43h28"/></svg>
+          </div>
+          <h3 id="total-bincard" class="text-4xl font-bold text-gray-400">0</h3>
+          <p class="mt-2 text-sm text-gray-400">Bin card</p>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <a href="search-inventory.html" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover">
+          <div class="mr-4 mt-1 icon-color dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold title-text dark">Search Inventory – Alumil</h3>
+            <p class="text-sm subtitle-text dark">Quickly find items using keywords or barcodes.</p>
+          </div>
+        </a>
+
+        <a href="bin-card.html" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Bin card Inventory">
+          <div class="mr-4 mt-1 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-square"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold title-text dark">Bin card Inventory</h3>
+            <p class="text-sm subtitle-text dark">Record and label a new item in your bin card inventory.</p>
+          </div>
+        </a>
+
+        <a href="javascript:void(0)" onclick="showPrintModal()" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Open print options" aria-controls="printModal">
+          <div class="mr-4 mt-1 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold title-text dark">Print Labels</h3>
+            <p class="text-sm subtitle-text dark">Generate and print labels for items or locations.</p>
+          </div>
+        </a>
+      </section>
+    </main>
+  </div>
+
+  <!-- Print Options Modal -->
+  <div id="printModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="printModalTitle" aria-describedby="printModalDesc" aria-hidden="true">
+    <div class="modal-content light">
+      <button class="close-button" onclick="hidePrintModal()" aria-label="Close print options">&times;</button>
+      <h2 id="printModalTitle" class="text-2xl font-bold title-text dark mb-2 text-center">Print Options</h2>
+      <p id="printModalDesc" class="subtitle-text dark mb-6 text-center">Choose what you’d like to print.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <a href="javascript:void(0)" onclick="showPrintOptionModal()" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Open label printing options" aria-controls="printOptionModal">
+          <div class="mb-4 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 14 3h5a2 2 0 0 1 2 2v5a2 2 0 0 1-.586 1.414L12 19.414a2 2 0 0 1-2.828 0L2.586 12.586a2 2 0 0 1 0-2.828z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold title-text dark">Label Printing</h3>
+          <p class="text-sm subtitle-text dark text-center mt-2">Print labels for specific items.</p>
+        </a>
+
+        <!-- Rack labeling -->
+        <a href="rack-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Rack labeling">
+          <div class="mb-4 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M6 16v.01"/><path d="M10 16v.01"/><path d="M14 16v.01"/><path d="M18 16v.01"/><path d="M6 20v.01"/><path d="M10 20v.01"/><path d="M14 20v.01"/><path d="M18 20v.01"/><rect width="8" height="8" x="14" y="2" rx="2"/><path d="M18 14v.01"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold title-text dark">Rack Labeling</h3>
+          <p class="text-sm subtitle-text dark text-center mt-2">Generate labels for storage racks.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Type Modal -->
+  <div id="printOptionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="printTypeTitle" aria-describedby="printTypeDesc" aria-hidden="true">
+    <div class="modal-content light">
+      <button class="close-button" onclick="hidePrintOptionModal()" aria-label="Close print type options">&times;</button>
+      <h2 id="printTypeTitle" class="text-2xl font-bold title-text dark mb-2 text-center">Select Type</h2>
+      <p id="printTypeDesc" class="subtitle-text dark mb-6 text-center">Pick what kind of label you want to print.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <a href="profile-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Print profile label">
+          <div class="mb-4 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler"><path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"/><path d="M2.25 10.5h19.5"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold title-text dark">Profile</h3>
+          <p class="text-sm subtitle-text dark text-center mt-2">Print a label for a profile.</p>
+        </a>
+
+        <a href="acc-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Print accessories label">
+          <div class="mb-4 icon-color dark">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-nuts"><path d="M12 2v20"/><path d="M17 5v14"/><path d="M7 5v14"/><path d="M19 8v8"/><path d="M5 8v8"/><path d="M21 12v.01"/><path d="M3 12v.01"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold title-text dark">Accessories</h3>
+          <p class="text-sm subtitle-text dark text-center mt-2">Print a label for an accessory.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Box -->
+  <div id="message-box" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card dark z-50 text-center" role="alertdialog" aria-labelledby="message-title" aria-describedby="message-text" aria-modal="true" aria-hidden="true">
+    <h3 id="message-title" class="text-xl font-semibold mb-4">Message</h3>
+    <p class="text-lg mb-4" id="message-text"></p>
+    <button onclick="hideMessage()" class="btn-primary px-4 py-2 rounded bg-amber-500 text-black font-medium focus:outline-none focus:ring-2 focus:ring-amber-300" aria-label="Close message">OK</button>
+  </div>
+
+  <!-- Greeting -->
+  <script>
+    function getGreeting(){ const hour = new Date().getHours(); if (hour < 12) return 'Good morning'; if (hour < 18) return 'Good afternoon'; return 'Good evening'; }
+    document.addEventListener('DOMContentLoaded', () => {
+      const greetingElement = document.getElementById('greeting').querySelector('h1');
+      const userName = 'John Doe';
+      greetingElement.textContent = `${getGreeting()}, ${userName}!`;
+    });
+  </script>
+
+  <!-- Modal + focus + message box (uses .open class) -->
+  <script>
+    const printModal = document.getElementById('printModal');
+    const printOptionModal = document.getElementById('printOptionModal');
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+
+    let lastFocusedElement = null;
+    const FOCUSABLE_SEL = 'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+    // Theme sync: flip dark/light AND keep <html data-theme> in sync for mobile nav/footer
+    function updateThemeClasses(isDark){
+      const add = isDark ? 'dark' : 'light';
+      const remove = isDark ? 'light' : 'dark';
+      document.body.classList.remove(remove);
+      document.body.classList.add(add);
+      // Ensure components that rely on .dark/.light swap
+      document.querySelectorAll('.card, .summary-card, .title-text, .subtitle-text, .icon-color, .glow-hover, .modal-content')
+        .forEach(el => { el.classList.remove(remove); el.classList.add(add); });
+      // CRITICAL: update <html data-theme> so mobile bottom nav + footer follow theme
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      // Persist
+      try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch(e) {}
+    }
+
+    function applySavedTheme(){
+      const saved = localStorage.getItem('theme') || 'light';
+      updateThemeClasses(saved === 'dark');
+    }
+    // Apply early to avoid flash
+    applySavedTheme();
+
+    function trapTab(e){ if (e.key !== 'Tab') return; const modalEl = e.currentTarget; const focusables = Array.from(modalEl.querySelectorAll(FOCUSABLE_SEL)).filter(el => !el.hasAttribute('disabled')); if (!focusables.length) return; const first = focusables[0]; const last = focusables[focusables.length - 1]; if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); } else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); } }
+    function escToClose(e){ if (e.key === 'Escape') { if (printOptionModal.classList.contains('open')) hidePrintOptionModal(); else if (printModal.classList.contains('open')) hidePrintModal(); else if (!messageBox.classList.contains('hidden')) hideMessage(); } }
+
+    function openModal(modalEl){ applySavedTheme(); lastFocusedElement = document.activeElement; document.body.classList.add('no-scroll'); modalEl.classList.add('open'); modalEl.setAttribute('aria-hidden','false'); modalEl.addEventListener('keydown', trapTab); modalEl.addEventListener('keydown', escToClose); const focusables = modalEl.querySelectorAll(FOCUSABLE_SEL); (focusables[0] || modalEl).focus(); }
+    function closeModal(modalEl){ modalEl.classList.remove('open'); modalEl.setAttribute('aria-hidden','true'); modalEl.removeEventListener('keydown', trapTab); modalEl.removeEventListener('keydown', escToClose); document.body.classList.remove('no-scroll'); if (lastFocusedElement) lastFocusedElement.focus(); }
+
+    function showPrintModal(){ openModal(printModal); }
+    function hidePrintModal(){ closeModal(printModal); }
+    function showPrintOptionModal(){ hidePrintModal(); openModal(printOptionModal); }
+    function hidePrintOptionModal(){ closeModal(printOptionModal); }
+
+    function showMessage(message){ messageText.textContent = message; messageBox.classList.remove('hidden'); messageBox.focus(); }
+    function hideMessage(){ messageBox.classList.add('hidden'); }
+
+    // click outside to close
+    window.addEventListener('click', (e) => { if (e.target === printModal) hidePrintModal(); if (e.target === printOptionModal) hidePrintOptionModal(); });
+  </script>
+
+  <!-- Header margin-top fixer (keeps content clear of the fixed header) -->
+  <script>
+    (function () {
+      try {
+        var header = document.getElementById("header") || document.querySelector("header");
+        if (!header) return;
+        if (!header.id) header.id = "header";
+        function mainEl(){ return document.getElementById("main") || document.querySelector("main"); }
+        function bump(){ var m=mainEl(); if(!m) return; m.style.marginTop=(header.offsetHeight+16)+'px'; }
+        ["resize","orientationchange"].forEach(function(e){ window.addEventListener(e,bump,{passive:true}); });
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bump); else bump();
+        setTimeout(bump,120); setTimeout(bump,300);
+      } catch(e){ console.warn("alumil header fix error:", e); }
+    })();
+  </script>
+
+  <!-- Totals: auto-update from localStorage (profiles, accessories, racks, bin card) -->
+  <script>
+    (function () {
+      function toArray(x){
+        return Array.isArray(x) ? x : (x && Array.isArray(x.rows) ? x.rows : []);
+      }
+      function readCache(){
+        try { const raw = localStorage.getItem('excelCache'); return raw ? JSON.parse(raw) : null; }
+        catch { return null; }
+      }
+      function getProfilesAndAccessories(){
+        const cache = readCache() || {};
+        const profilesRaw =
+          (Array.isArray(cache.inventory) && cache.inventory.length) ? cache.inventory :
+          (Array.isArray(cache.profiles) && cache.profiles.length) ? cache.profiles :
+          toArray(cache.inventory).length ? toArray(cache.inventory) :
+          toArray(cache.profiles);
+        const accessoriesRaw =
+          (Array.isArray(cache.accessories) && cache.accessories.length) ? cache.accessories :
+          toArray(cache.accessories);
+
+        return {
+          profiles: Array.isArray(profilesRaw) ? profilesRaw : [],
+          accessories: Array.isArray(accessoriesRaw) ? accessoriesRaw : []
+        };
+      }
+      function pick(obj, keys){
+        for (const k of keys){ if (obj && obj[k] != null && String(obj[k]).trim() !== '') return String(obj[k]).trim(); }
+        return '';
+      }
+      function collectRack(value){
+        const v = String(value||'').trim();
+        if (!v || v === '0' || v.toLowerCase() === 'na' || v.toLowerCase() === 'n/a') return null;
+        return v;
+      }
+      function getTotals(){
+        const { profiles, accessories } = getProfilesAndAccessories();
+        const racks = new Set();
+        profiles.forEach(p=>{
+          const r = pick(p, ['rack_no','Rack No','rack','Rack','RACK','RACK NO','rackno','rack no']);
+          const v = collectRack(r); if (v) racks.add(v);
+        });
+        accessories.forEach(a=>{
+          const r = pick(a, ['rack_no','Rack No','rack','Rack','RACK','RACK NO','rackno','rack no']);
+          const v = collectRack(r); if (v) racks.add(v);
+        });
+
+        let bin = 0;
+        ['bincard','alumil:bincard','binCard','binCardItems','alumil:bin'].forEach(key=>{
+          try{
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            const v = JSON.parse(raw);
+            if (Array.isArray(v)) bin += v.length;
+            else if (v && Array.isArray(v.items)) bin += v.items.length;
+          }catch{}
+        });
+
+        return {
+          profiles: profiles.length,
+          accessories: accessories.length,
+          racks: racks.size,
+          bin
+        };
+      }
+      function applyTotals(){
+        const t = getTotals();
+        const map = {
+          'total-profiles': t.profiles,
+          'total-accessories': t.accessories,
+          'total-racks': t.racks,
+          'total-bincard': t.bin
+        };
+        Object.entries(map).forEach(([id,val])=>{
+          const el = document.getElementById(id);
+          if (el) el.textContent = String(val || 0);
+        });
+      }
+
+      // Initial + live wiring
+      document.addEventListener('DOMContentLoaded', applyTotals);
+      window.addEventListener('focus', applyTotals);
+      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) applyTotals(); });
+      window.addEventListener('storage', (e)=>{
+        if (!e.key) return;
+        const k = e.key.toLowerCase();
+        if (k.includes('excelcache') || k.includes('bincard')) applyTotals();
+      });
+      // Optional: broadcast channel if uploader posts message
+      try {
+        const bc = new BroadcastChannel('alumil-excel');
+        bc.onmessage = (ev)=>{ if (ev && (ev.data === 'excelCache:updated' || ev.data?.type === 'excelCache:update')) applyTotals(); };
+      } catch(e){}
+    })();
+  </script>
+
+  <!-- Theme + Font init -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme
+      const theme = (localStorage.getItem('theme') || 'light');
+      updateThemeClasses(theme === 'dark');
+
+      // Font
+      const preferredFont = localStorage.getItem('preferredFont') || 'Inter';
+      document.body.classList.remove('font-inter','font-roboto','font-open-sans');
+      if (preferredFont === 'Roboto') document.body.classList.add('font-roboto');
+      else if (preferredFont === 'Open Sans') document.body.classList.add('font-open-sans');
+      else document.body.classList.add('font-inter');
+    });
+  </script>
+
+  <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+  <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+  <nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
+    <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2"><path d="M20 7h-9"/><path d="M14 17h-5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      <span>Admin</span>
+    </button>
+    <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+    </button>
+    <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51Z"/><path d="m3.29 7.39 8.31 3.23"/><path d="m12 22.95 8.71-3.26"/></svg>
+      <span>Rack Label</span>
+    </button>
+    <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>Search</span>
+    </button>
+  </nav>
+  <footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
+    <small>Alumil Inventory App @2025</small>
+  </footer>
+  <input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+  <style>
+    .alumil-bottom-nav { position: fixed; left: 0; right: 0; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; z-index: 60; display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr; align-items: center; max-width: 720px; padding: 10px 12px; background: rgba(15, 23, 42, .92); color: #e5e7eb; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
+    .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
+    .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
+    html[data-theme="light"] .alumil-bottom-nav .nav-btn:hover { background: rgba(0,0,0,.04); }
+    .scan-btn { position: relative; width: 56px; height: 56px; display: inline-grid; place-items: center; border-radius: 14px; border: 0; background: #facc15; color: #111827; box-shadow: 0 0 0 0 rgba(250,204,21,0); transition: transform .15s, box-shadow .2s; }
+    .scan-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 8px rgba(250,204,21,.2); }
+    .scan-btn:active { transform: translateY(0); }
+    .alumil-footer { position: fixed; left:0; right:0; bottom: 0; z-index: 50; display:flex; align-items:center; justify-content:center; min-height: 24px; background: #0b1220; color:#cbd5e1; border-top: 1px solid rgba(255,255,255,.08); padding-bottom: env(safe-area-inset-bottom, 0px); font-size: 12px; letter-spacing: .02em; }
+    html[data-theme="light"] .alumil-footer { background:#f8fafc; color:#334155; border-top-color: rgba(0,0,0,.06); }
+    @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
+    .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  </style>
+  <script>
+    (function(){
+      function routeByCode(raw){ if(!raw) return; const code = String(raw).trim(); if(!code) return; const isAcc = /(\bACC\b|^ACC-|ACC\d|ACCESS|ACCS)/i.test(code); const target = isAcc ? 'acc-label-printing.html' : 'profile-label-printing.html'; const url = target + '?code=' + encodeURIComponent(code); window.location.href = url; }
+      // Keyboard wedge capture
+      (function(){ let buf = '', last = 0; window.addEventListener('keydown', (e) => { const now = Date.now(); if(now - last > 250) buf = ''; last = now; if(e.key === 'Enter'){ if(buf.length >= 4){ routeByCode(buf); } buf = ''; return; } if(e.ctrlKey || e.metaKey || e.altKey) return; if(e.key && e.key.length === 1){ buf += e.key; } }, true); })();
+      // Hidden input focus via big button
+      const scanBtn = document.getElementById('alumil-scan-btn');
+      const scanInput = document.getElementById('alumil-scan-input');
+      if(scanBtn && scanInput){
+        scanBtn.addEventListener('click', () => {
+          scanInput.value = ''; scanInput.focus();
+          try { if(!document.getElementById('alumil-scan-toast')){ const t = document.createElement('div'); t.id = 'alumil-scan-toast'; t.textContent = 'Ready to scan… (press Enter when done)'; t.style.position='fixed'; t.style.left='50%'; t.style.bottom='90px'; t.style.transform='translateX(-50%)'; t.style.background='rgba(0,0,0,.72)'; t.style.color='#fff'; t.style.font='600 12px/1.1 Inter,system-ui'; t.style.padding='8px 12px'; t.style.borderRadius='10px'; t.style.zIndex=80; document.body.appendChild(t); setTimeout(()=>{ t.remove(); }, 2000); } } catch(e){}
+        });
+        scanInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); routeByCode(scanInput.value); scanInput.blur(); } });
+      }
+      // Active tab highlight
+      try{ const here = location.pathname.split('/').pop().toLowerCase(); document.querySelectorAll('#alumil-bottom-nav .nav-btn').forEach(btn => { const k = btn.getAttribute('data-nav'); if(!k) return; const map = { home:'home.html', admin:'admin.html', rack:'rack-label-printing.html', search:'search-inventory.html' }; if(map[k] && here === map[k].toLowerCase()){ btn.style.fontWeight='800'; btn.style.opacity='1'; } else { btn.style.opacity='.85'; } }); }catch(e){}
+    })();
+  </script>
+
+  <!-- Theme toggle (icon swap + <html data-theme> sync) -->
+  <script>
+    (function(){
+      var MOON = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      var SUN  = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+
+      function getSaved(){ return localStorage.getItem('theme') || 'light'; }
+      function isDark(){ return getSaved() === 'dark'; }
+
+      function setIcon(){ var btn = document.getElementById('theme-toggle'); if(!btn) return; btn.innerHTML = isDark() ? SUN : MOON; }
+
+      function applySaved(){ updateThemeClasses(isDark()); setIcon(); }
+
+      function toggleTheme(){ var next = isDark() ? 'light' : 'dark'; localStorage.setItem('theme', next); updateThemeClasses(next === 'dark'); setIcon(); }
+
+      document.addEventListener('DOMContentLoaded', function(){ applySaved(); var btn = document.getElementById('theme-toggle'); if (btn) btn.addEventListener('click', toggleTheme); });
+    })();
+  </script>
+
+  <script>
+    (function(){
+      try{
+        var path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        var home = document.querySelector('[data-nav="home"]');
+        var admin = document.querySelector('[data-nav="admin"]');
+        function addActive(el){ if(!el) return; el.classList.add('text-yellow-400'); el.classList.add('font-semibold'); }
+        if(path === 'admin.html'){ addActive(admin); }
+        else if(path === 'home.html' || path === 'index.html' || path === ''){ addActive(home); }
+      }catch(e){}
+      try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
+    })();
+  </script>
+
+<script>
+// Versioned global bootstrap (SharePoint + Config)
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3";
+  async function j(u){
+  // If we're pointing at a SharePoint Excel link, emulate the old JSON API:
+  if ((typeof BASE === "string") && BASE.includes("sharepoint.com")) {
+    // Ensure loader + workbook
+    if (typeof loadWorkbook !== "function") {
+      throw new Error("XLSX loader not found. Ensure xlsx.full.min.js and js/sharepoint_loader.js are loaded.");
+    }
+    if (!window.__SP_WB_LOADED__) {
+      await loadWorkbook(BASE);
+      window.__SP_WB_LOADED__ = true;
+    }
+    // Extract sheet=Name from the URL and return rows from that sheet
+    try {
+      const qs = (u.split("?")[1] || "");
+      const params = new URLSearchParams(qs);
+      const sheet = params.get("sheet") || "Config";
+      const rows = getSheetJSON(sheet);
+      return rows || [];
+    } catch (e) {
+      console.error("SharePoint sheet load failed:", e);
+      return [];
+    }
+  }
+
+  // Fallback: original JSON fetch behavior
+  const r = await fetch(u, {mode:'cors'});
+  if(!r.ok) throw 0;
+  return r.json();
+}
+
+); if(!r.ok) throw 0; return r.json(); }
+
+  // 1) Local cache + version
+  let local = {}, localVersion = null;
+  try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
+
+  // 2) Remote config (version, sheet names)
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows || []).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch (_){
+    // no Config found -> force refresh
+  }
+
+  const remoteVersion = cfg.version || null;
+  const hasData = (Array.isArray(local?.profiles) && local.profiles.length) || (Array.isArray(local?.accessories) && local.accessories.length);
+
+  // 3) If same version and have data -> keep cache
+  if (remoteVersion && localVersion && remoteVersion === localVersion && hasData) return;
+
+  // 4) Fetch fresh data from configured sheets
+  try {
+    const urlP = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetProfiles || 'Profile');
+    const urlA = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetAccessories || 'Accessories');
+    const [p, a] = await Promise.all([ j(urlP), j(urlA) ]);
+    const profiles = Array.isArray(p) ? p : (p?.data || []);
+    const accessories = Array.isArray(a) ? a : (a?.data || []);
+
+    localStorage.setItem('excelCache', JSON.stringify({
+      profiles, accessories,
+      version: remoteVersion,
+      fileName: `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`,
+      loadedAt: new Date().toISOString()
+    }));
+    console.log('[bootstrap] excelCache updated to version', remoteVersion);
+  } catch (e) {
+    console.warn('Versioned bootstrap failed:', e);
+  }
+});
+</script>
+
+  <script src="js/sharepoint_loader.js"></script>
+  
+  <!-- Authentication and Role-based Navigation -->
+  <script>
+    async function handleLogout() {
+      if (window.SupabaseAPI) {
+        await window.SupabaseAPI.signOut();
+      }
+      location.href = 'login.html';
+    }
+    
+    // Check authentication and show appropriate navigation
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.SupabaseAPI) {
+        const user = await window.SupabaseAPI.getCurrentUser();
+        const logoutBtn = document.getElementById('logout-btn');
+        const adminLink = document.getElementById('admin-link');
+        
+        if (user) {
+          // Show logout button
+          if (logoutBtn) logoutBtn.style.display = 'flex';
+          
+          // Check if user is admin and show admin link
+          const isAdminUser = await window.SupabaseAPI.isAdmin();
+          if (isAdminUser && adminLink) {
+            adminLink.style.display = 'flex';
+          }
+        } else {
+          // Not authenticated, redirect to login
+          location.href = 'login.html';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

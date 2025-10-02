@@ -1,0 +1,1786 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="description" content="Alumil Admin Panel for inventory management, Excel import, and label printing.">
+    <title>Alumil Admin Panel</title>
+    <!-- Comprehensive Favicon Setup -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
+    <meta name="msapplication-TileColor" content="#ffc107">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" defer></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase Overlay -->
+    <script src="assets/js/supabase-overlay.js"></script>
+    <script src="/js/auth-helper.js"></script>
+    <script src="/js/data-sync.js"></script>
+  <script src="/js/user-display.js"></script>
+  <script src="/js/activity-logger.js"></script>
+
+    <!-- Ensure the CSS selectors that depend on html[data-theme] have the attribute ASAP -->
+    <script>
+      (function(){
+        try {
+          var t = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+
+    <style>
+        /* --- Fonts & Theme surface (no per-element theme classes to avoid FOUC) --- */
+        .font-roboto { font-family: Roboto, sans-serif; }
+        .font-open-sans { font-family: 'Open Sans', sans-serif; }
+        body { font-family: Inter, sans-serif; transition: background-color .3s, color .3s, font-family .3s; }
+        html[data-theme="dark"] body { background: #2a2a2a; color: #d1d5db; }
+        html[data-theme="light"] body { background: #f3f4f6; color: #374151; }
+
+        /* Neutral card surface (now keyed to html[data-theme]) */
+        .card { border-radius: 0.75rem; }
+        html[data-theme="dark"] .card { background-color: #1a1a1a; box-shadow: 0 8px 24px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.18); }
+        html[data-theme="light"] .card { background-color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06); }
+
+        html[data-theme="dark"] .accent-text { color: #fff; }
+        html[data-theme="light"] .accent-text { color: #1f2937; }
+        .icon-color { color: #ffc107; }
+        html[data-theme="dark"] .title-text { color: #fff; }
+        html[data-theme="light"] .title-text { color: #1f2937; }
+        html[data-theme="dark"] .subtitle-text { color: #94a3b8; }
+        html[data-theme="light"] .subtitle-text { color: #6b7280; }
+        html[data-theme="dark"] .hover-text:hover { color: #ffc107; }
+        html[data-theme="light"] .hover-text:hover { color: #f59e0b; }
+        html[data-theme="dark"] .border-color { border-color: #334155; }
+        html[data-theme="light"] .border-color { border-color: #e5e7eb; }
+        html[data-theme="dark"] .stat-label { color: #94a3b8; }
+        html[data-theme="light"] .stat-label { color: #6b7280; }
+        html[data-theme="dark"] .info-label { color: #fff; }
+        html[data-theme="light"] .info-label { color: #1f2937; }
+        html[data-theme="dark"] .info-value { color: #64748b; }
+        html[data-theme="light"] .info-value { color: #6b7280; }
+
+        .greeting-animation { opacity: 0; animation: fadeIn 1s forwards; animation-delay: .5s; }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Header glow animation (kept subtle + disabled in light to avoid "glow under header") */
+        @keyframes header-glow {
+            0%, 100% { box-shadow: 0 10px 15px -3px rgb(0 0 0 / .20), 0 4px 6px -4px rgb(0 0 0 / .20); }
+            50% { box-shadow: 0 10px 22px -5px rgba(251,191,36,.16), 0 8px 14px -6px rgba(251,191,36,.16); }
+        }
+        /* Only animate in dark mode (prevents amber glow below header in light) */
+        html[data-theme="dark"] #header.animating { animation: header-glow 3s infinite ease-in-out; }
+        html[data-theme="light"] #header.animating { animation: none; }
+        .card.animating { animation: none !important; }
+
+        .connected-status { animation: pulse-glow 2s cubic-bezier(.4, 0, .6, 1) infinite; }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,193,7,.4); }
+            50% { box-shadow: 0 0 10px 5px rgba(255,193,7,.8); }
+        }
+
+        .modal-overlay { background-color: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+
+        .app-header {
+            background: linear-gradient(180deg, rgba(15,23,42,.85) 0, rgba(2,6,23,.85) 100%);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            -webkit-backdrop-filter: saturate(180%) blur(10px);
+            backdrop-filter: saturate(180%) blur(10px);
+        }
+        html[data-theme="light"] .app-header {
+            background: linear-gradient(180deg, rgb(255 255 255) 0, rgb(243 244 246) 100%);
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .chip-dot { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; background: #6b7280; }
+
+        /* Logout button styling */
+        #logout-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-radius: 6px;
+            transform: translateY(-1px);
+        }
+
+        /* --- Mobile safety & CLS guards (design-neutral) --- */
+        html, body { max-width: 100%; overflow-x: clip; }
+        img, video { max-width: 100%; height: auto; display: block; }
+        section[id] { scroll-margin-top: calc(var(--header-h, 80px) + 16px); }
+        body.modal-open { overflow: hidden; touch-action: none; }
+        #data-management-modal,
+        #system-settings-modal {
+            max-height: min(90svh, 700px);
+            max-height: calc(100dvh - 2rem);
+            padding-bottom: calc(24px + env(safe-area-inset-bottom));
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+        }
+
+        /* ===========================
+        HOME-LIKE GLOWING CARDS (KPI summary)
+        =========================== */
+        .summary-card { border-radius: 0.75rem; }
+        html[data-theme="dark"] .summary-card {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            box-shadow: 0 8px 24px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.18);
+        }
+        html[data-theme="light"] .summary-card {
+            background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+            box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
+        }
+
+        /* Hover glow aura (amber, like Home) */
+        .glow-hover { transition: transform .2s ease, box-shadow .25s ease; }
+        html[data-theme="dark"] .glow-hover:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 10px 15px -3px rgba(255,193,7,.20),
+                0 4px 6px -4px rgba(255,193,7,.20),
+                0 14px 28px rgba(0,0,0,.34);
+        }
+        html[data-theme="light"] .glow-hover:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 10px 15px -3px rgba(251,191,36,.30),
+                0 4px 6px -4px rgba(251,191,36,.30),
+                0 14px 28px rgba(251,191,36,.10);
+        }
+
+/* --- Fixed bottom navigation always visible --- */
+html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+#alumil-bottom-nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; padding-bottom: env(safe-area-inset-bottom); }
+#alumil-fixed-footer { position: fixed !important; bottom: 0 !important; width: 100% !important; z-index: 999 !important; }
+body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch; }
+
+</style>
+</head>
+
+<body class="light">
+<div class="min-h-screen font-sans antialiased p-4 sm:p-8">
+    <header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card animating">
+        <div class="flex items-center space-x-3 mb-4 sm:mb-0">
+            <img src="alumil-logo.svg" alt="Alumil logo" class="h-9 w-auto select-none" loading="eager" decoding="async">
+            <span class="brand-title font-semibold text-lg sm:text-xl lg:text-2xl tracking-tight leading-tight">Alumil Inventory System</span>
+        </div>
+        <nav class="flex items-center space-x-4 text-sm sm:text-base">
+            <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </a>
+            <a href="admin.html" class="flex items-center icon-color font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg> Admin
+            </a>
+        
+<button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
+  <!-- default moon; script will swap if dark -->
+  <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+</button>
+<button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors ml-4" title="Sign out" onclick="handleLogout()">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out">
+<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+<polyline points="16 17 21 12 16 7"/>
+<line x1="21" x2="9" y1="12" y2="12"/>
+</svg>
+<span class="hidden sm:inline">Sign out</span>
+</button>
+</nav>
+    </header>
+
+    <main class="container mx-auto mt-24">
+        <section id="admin-heading" class="p-6 rounded-xl shadow-lg mb-6 card">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users mr-4 icon-color">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <div>
+                    <h1 class="text-2xl font-bold title-text">Admin Panel</h1>
+                    <p class="subtitle-text">Manage your Alumil inventory system</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+                <h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">
+                    <span id="stat-total-items">0</span>
+                </h3>
+                <p class="mt-2 stat-label">Total Items</p>
+            </div>
+            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+                <h3 id="labels-printed" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
+                <p class="mt-2 stat-label">Labels Printed</p>
+            </div>
+            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+                <h3 id="accessories-count" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
+                <p class="mt-2 stat-label">Accessories Loaded</p>
+            </div>
+            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+                <h3 id="profiles-count" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
+                <p class="mt-2 stat-label">Profiles Loaded</p>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
+            <a href="#" id="settings-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
+                <div class="mr-4 mt-1 icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.26.42a2 2 0 0 0 .73 2.73l.09.09a2 2 0 0 1 0 2.83l-.08.08a2 2 0 0 0-.73 2.73l.42.26a2 2 0 0 0 2.73.73l.09-.08a2 2 0 0 1 2-2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.26-.42a2 2 0 0 0-.73-2.73l-.09-.09a2 2 0 0 1 0-2.83l.08-.08a2 2 0 0 0 .73-2.73l-.42-.26a2 2 0 0 0-2.73-.73l-.09.08a2 2 0 0 1-2 2v.18a2 2 0 0 0-2-2Z"/>
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold title-text">System Settings</h3>
+                    <p class="text-sm subtitle-text">Configure system preferences and defaults.</p>
+                </div>
+            </a>
+
+            <a href="#" id="database-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
+                <div class="mr-4 mt-1 icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold title-text">Database Management</h3>
+                    <p class="text-sm subtitle-text">Manage inventory data and Excel imports</p>
+                </div>
+            </a>
+
+            <a href="#" id="activity-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
+                <div class="mr-4 mt-1 icon-color">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold title-text">User Activity</h3>
+                    <p class="text-sm subtitle-text">Track user actions and system usage</p>
+                </div>
+            </a>
+
+        </section>
+
+        <section id="sys-info" class="p-6 rounded-xl shadow-lg card">
+            <h2 class="text-xl font-bold mb-4 border-b border-color pb-2 title-text">System Information</h2>
+            <!-- System Information (values wired via JS) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-3 text-sm">
+  <div>Version:</div><div id="sys-version" class="text-blue-300">—</div>
+  <div>Active Users:</div><div id="sys-users" class="text-blue-300">—</div>
+
+  <div>Last Updated:</div><div id="sys-last-updated" class="text-blue-300">—</div>
+  <div>Storage Used:</div><div id="sys-storage" class="text-blue-300">—</div>
+
+  <div>Database:</div><div id="sys-db" class="text-blue-300">—</div>
+  <div>Last Backup:</div><div id="sys-last-backup" class="text-blue-300">—</div>
+</div>
+
+
+        </section>
+    </main>
+</div>
+
+<div id="data-modal-overlay"
+     class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain"
+     aria-hidden="true">
+    <div id="data-management-modal"
+         class="w-full max-w-2xl max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card
+                 transform scale-95 opacity-0 transition-all duration-300"
+         role="dialog" aria-modal="true" aria-labelledby="data-modal-title">
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="data-modal-title" class="text-2xl font-bold title-text">Database Management</h2>
+            <button id="close-data-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="Close data modal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+
+        <div id="data-status" class="hidden p-3 mb-4 rounded-lg border border-gray-600 flex items-center justify-between">
+            <span id="file-name-display" class="text-sm text-gray-300">File name:</span>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 connected-status"></span>
+                <span class="text-xs font-semibold uppercase text-yellow-500">Connected</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 mb-4">
+            <div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
+                <span class="chip-dot" id="dot-profiles"></span>
+                <span class="text-sm text-gray-300">Profiles</span>
+                <span class="ml-auto text-xs text-gray-400" id="count-profiles">0 items</span>
+            </div>
+            <div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
+                <span class="chip-dot" id="dot-accessories"></span>
+                <span class="text-sm text-gray-300">Accessories</span>
+                <span class="ml-auto text-xs text-gray-400" id="count-accessories">0 items</span>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <label for="excel-input" class="sr-only">Select Excel or CSV file</label>
+            <input id="excel-input" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+            <button id="upload-btn" class="w-full bg-yellow-500 text-black font-semibold py-2 px-4 rounded-lg hover:bg-yellow-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload mr-2 inline-block">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15" />
+                </svg>
+                Select Excel File
+            <
+<!-- BEGIN OneDrive/Azure Buttons (auto-inserted) -->
+<button id="connect-onedrive-btn"
+  class="w-full bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors mt-2">
+  Connect OneDrive / SharePoint Excel
+</button>
+
+<button id="connect-azure-btn"
+  class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 transition-colors mt-2 flex items-center justify-center gap-2">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud">
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9Z"/>
+  </svg>
+  Connect Azure Blob Storage
+</button>
+<!-- END OneDrive/Azure Buttons -->
+            <div id="file-name" class="text-xs text-gray-400" aria-live="polite"></div>
+            <button id="clear-btn" class="w-full text-sm text-gray-400 hover:text-red-400 transition-colors">Clear Stored Data</button>
+        </div>
+
+        <div class="mt-2 text-xs text-gray-400 leading-2">
+            <p><strong>Data Source Options:</strong></p>
+            <ul class="mb-4 space-y-1 text-xs">
+                <li>• <strong>Local Excel/CSV:</strong> Upload files directly from your computer</li>
+                <li>• <strong>OneDrive/SharePoint:</strong> Connect to shared Excel files with anyone-with-link access</li>
+                <li>• <strong>Azure Blob Storage:</strong> Use SAS URLs for direct file access (supports .xlsx, .csv, .json)</li>
+            </ul>
+            
+            <div class="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg mb-4">
+                <h4 class="text-blue-300 font-semibold text-sm mb-2">Azure Blob Storage Setup</h4>
+                <ol class="text-xs space-y-1">
+                    <li>1. Upload your Excel/CSV/JSON file to Azure Blob Storage</li>
+                    <li>2. Generate a SAS URL with <strong>Read</strong> permissions</li>
+                    <li>3. Ensure CORS is configured to allow your domain</li>
+                    <li>4. Use the SAS URL in the "Connect Azure Blob Storage" button</li>
+                </ol>
+                <p class="text-xs mt-2 text-blue-200">
+                    <strong>Supported formats:</strong> .xlsx, .xls, .csv, .json
+                </p>
+            </div>
+            
+            <p><strong>Expected sheets (flexible):</strong> "Profiles", "Accessories" (or first two sheets). Column names are matched loosely (e.g., <em>Code, Item Code, Profile Code</em>).</p>
+            <h2 class="text-xl font-semibold text-yellow-400 mb-1">Live Usage</h2>
+            <p class="text-sm text-gray-400 mb-2">Once uploaded, the data becomes instantly available in <span class="text-yellow-400 font-medium">profile-label-printing.html</span> and <span class="text-yellow-400 font-medium">acc-label-printing.html</span> for search and print preview.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="profile-label-printing.html" class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler icon-color">
+                            <path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"/><path d="M2.25 10.5h19.5"/>
+                        </svg>
+                        <div>
+                            <div class="text-yellow-400 font-semibold">Profile Label Printing</div>
+                            <div class="text-xs text-gray-400">Uses uploaded Profiles data</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="acc-label-printing.html" class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-nuts icon-color">
+                            <path d="M12 2v20"/><path d="M17 5v14"/><path d="M7 5v14"/><path d="M19 8v8"/><path d="M5 8v8"/><path d="M21 12v.01"/><path d="M3 12v.01"/>
+                        </svg>
+                        <div>
+                            <div class="text-yellow-400 font-semibold">Accessories Label Printing</div>
+                            <div class="text-xs text-gray-400">Uses uploaded Accessories data</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="mt-6 p-4 rounded-lg bg-gray-200/50 border border-gray-800">
+                <div class="text-sm text-gray-500 mb-2">Quick Stats</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-yellow-400" id="stat-profiles">0</div>
+                        <div class="text-xs text-gray-400">Profiles</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-yellow-400" id="stat-accessories">0</div>
+                        <div class="text-xs text-gray-400">Accessories</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-yellow-400" id="stat-cols-profiles">0</div>
+                        <div class="text-xs text-gray-400">Profile Columns</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-yellow-400" id="stat-cols-accessories">0</div>
+                        <div class="text-xs text-gray-400">Accessory Columns</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="settings-modal-overlay"
+     class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain"
+     aria-hidden="true">
+    <div id="system-settings-modal"
+         class="w-full max-w-md max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card
+                 transform scale-95 opacity-0 transition-all duration-300"
+         role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="settings-modal-title" class="text-2xl font-bold title-text">System Settings</h2>
+            <button id="close-settings-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="Close settings modal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-6 subtitle-text">Theme</h3>
+                <div class="flex space-x-5 mt-5">
+                    <button id="dark-mode-btn" class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon text-gray-400"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <span class="text-sm text-gray-400">Dark</span>
+                    </button>
+                    <button id="light-mode-btn" class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2"></button>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun text-gray-400">
+                            <circle cx="12" cy="12" r="4" /><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        <span class="text-sm text-gray-400">Light</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800"></div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-2 subtitle-text">Change Font</h3>
+                <div class="flex space-x-4 mt-4">
+                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Inter">
+                        <span class="text-sm text-gray-400">Inter</span>
+                    </button>
+                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Roboto">
+                        <span class="text-sm text-gray-500 font-roboto">Roboto</span>
+                    </button>
+                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Open Sans">
+                        <span class="text-sm text-gray-400 font-open-sans">Open Sans</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800"></div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-2 subtitle-text">System Options</h3>
+                <div class="flex flex-col space-y-4 mt-4">
+                    <button id="clear-cache-btn" class="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg border border-red-700 hover:bg-red-700">
+                        Clear Cache Memory
+                    </button>
+                    <button id="logo-change-btn" class="w-full bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded-lg border border-gray-700 hover:bg-gray-700">
+                        Change Logo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const body = document.body,
+        header = document.getElementById("header"),
+        adminHeading = document.getElementById("admin-heading"),
+        sysInfo = document.getElementById("sys-info"),
+        statCards = document.querySelectorAll(".grid.grid-cols-1 > div, .grid.grid-cols-1 > a"),
+        databaseTile = document.getElementById("database-tile"),
+        dataModalOverlay = document.getElementById("data-modal-overlay"),
+        dataManagementModal = document.getElementById("data-management-modal"),
+        closeDataModalBtn = document.getElementById("close-data-modal-btn"),
+        settingsTile = document.getElementById("settings-tile"),
+        settingsModalOverlay = document.getElementById("settings-modal-overlay"),
+        systemSettingsModal = document.getElementById("system-settings-modal"),
+        closeSettingsModalBtn = document.getElementById("close-settings-modal-btn"),
+        backButton = document.getElementById("back-button");
+
+    function adjustMainOffset() {
+        const m = document.querySelector("main");
+        if (m && header) {
+            const h = header.offsetHeight;
+            document.documentElement.style.setProperty("--header-h", h + "px");
+            m.style.marginTop = (h + 16) + "px";
+        }
+    }
+
+    // Theme applier: only flips the root attribute (no per-element class churn)
+    function updateThemeClasses(isDark) {
+        const theme = isDark ? "dark" : "light";
+        document.documentElement.setAttribute('data-theme', theme);
+        body.classList.toggle('dark', isDark);
+        body.classList.toggle('light', !isDark);
+        // Save theme
+        localStorage.setItem("theme", theme);
+    }
+
+    function showModal(overlay, panel) {
+        if (!overlay || !panel) return;
+        document.body.classList.add("modal-open");
+        overlay.classList.remove("hidden");
+        overlay.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(() => {
+            panel.classList.remove("scale-95", "opacity-0");
+            panel.classList.add("scale-100", "opacity-100");
+        });
+    }
+
+    function hideModal(overlay, panel) {
+        if (!overlay || !panel) return;
+        panel.classList.remove("scale-100", "opacity-100");
+        panel.classList.add("scale-95", "opacity-0");
+        setTimeout(() => {
+            overlay.classList.add("hidden");
+            overlay.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("modal-open");
+        }, 300);
+    }
+
+    window.addEventListener("resize", () => requestAnimationFrame(adjustMainOffset));
+
+    databaseTile?.addEventListener("click", (e) => {
+        e.preventDefault();
+        showModal(dataModalOverlay, dataManagementModal);
+    });
+    closeDataModalBtn?.addEventListener("click", () => hideModal(dataModalOverlay, dataManagementModal));
+    dataModalOverlay?.addEventListener("click", (e) => {
+        if (e.target === dataModalOverlay) hideModal(dataModalOverlay, dataManagementModal);
+    });
+
+    settingsTile?.addEventListener("click", (e) => {
+        e.preventDefault();
+        showModal(settingsModalOverlay, systemSettingsModal);
+    });
+    closeSettingsModalBtn?.addEventListener("click", () => hideModal(settingsModalOverlay, systemSettingsModal));
+    settingsModalOverlay?.addEventListener("click", (e) => {
+        if (e.target === settingsModalOverlay) hideModal(settingsModalOverlay, systemSettingsModal);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (!settingsModalOverlay?.classList.contains("hidden")) hideModal(settingsModalOverlay, systemSettingsModal);
+            if (!dataModalOverlay?.classList.contains("hidden")) hideModal(dataModalOverlay, dataManagementModal);
+        }
+    });
+    backButton?.addEventListener("click", (e) => {
+        e.preventDefault();
+        history.back();
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Load cached counts
+        try {
+            const ec = JSON.parse(localStorage.getItem("excelCache") || "{}");
+            if (ec && (ec.profiles?.length || ec.accessories?.length)) {
+                const pLen = ec.profiles.length || 0;
+                const aLen = ec.accessories.length || 0;
+                const accEl = document.getElementById("accessories-count");
+                const proEl = document.getElementById("profiles-count");
+                if (accEl) accEl.textContent = aLen;
+                if (proEl) proEl.textContent = pLen;
+            }
+        } catch (err) {
+            console.warn("Failed to load cached dashboard data:", err);
+        }
+
+        // Theme bootstrap (migrate legacy key if present)
+        const legacy = localStorage.getItem("alumil:theme");
+        if (legacy && !localStorage.getItem("theme")) {
+            localStorage.setItem("theme", legacy);
+        }
+        const savedTheme = localStorage.getItem("theme") || "light";
+        updateThemeClasses(savedTheme === "dark"); // also syncs html[data-theme]
+
+        // Preferred font
+        const pf = localStorage.getItem("preferredFont") || "Inter";
+        body.classList.remove("font-roboto", "font-open-sans");
+        if (pf === "Roboto") body.classList.add("font-roboto");
+        if (pf === "Open Sans") body.classList.add("font-open-sans");
+
+        adjustMainOffset();
+    });
+
+    document.getElementById("dark-mode-btn")?.addEventListener("click", () => updateThemeClasses(true));
+    document.getElementById("light-mode-btn")?.addEventListener("click", () => updateThemeClasses(false));
+
+    document.querySelectorAll(".font-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            const font = button.getAttribute("data-font");
+            localStorage.setItem("preferredFont", font);
+            body.classList.remove("font-roboto", "font-open-sans");
+            if (font === "Roboto") body.classList.add("font-roboto");
+            if (font === "Open Sans") body.classList.add("font-open-sans");
+        });
+    });
+
+    document.getElementById("clear-cache-btn")?.addEventListener("click", () => {
+        localStorage.removeItem("excelCache");
+        alert("Cache cleared!");
+        window.location.reload();
+    });
+
+</script>
+<script>
+    !function () {
+        const KEY = "alumil:sysinfo";
+
+        /* ---------- NEW: modal chip + quick stats helpers ---------- */
+        const countProfilesEl = () => document.getElementById("count-profiles");
+        const countAccessoriesEl = () => document.getElementById("count-accessories");
+        const dotProfilesEl = () => document.getElementById("dot-profiles");
+        const dotAccessoriesEl = () => document.getElementById("dot-accessories");
+        const statProfilesEl = () => document.getElementById("stat-profiles");
+        const statAccessoriesEl = () => document.getElementById("stat-accessories");
+        const statColsProfilesEl = () => document.getElementById("stat-cols-profiles");
+        const statColsAccessoriesEl = () => document.getElementById("stat-cols-accessories");
+
+        function distinctColumnCount(rows) {
+            if (!Array.isArray(rows) || rows.length === 0) return 0;
+            const seen = {};
+            for (const r of rows) {
+                if (r && typeof r === "object") {
+                    for (const k of Object.keys(r)) seen[k] = 1;
+                }
+            }
+            return Object.keys(seen).length;
+        }
+
+        function updateModalIndicators(profiles, accessories) {
+            const p = Array.isArray(profiles) ? profiles : [];
+            const a = Array.isArray(accessories) ? accessories : [];
+
+            const pc = p.length;
+            const ac = a.length;
+
+            if (countProfilesEl()) countProfilesEl().textContent = `${pc} item${pc === 1 ? "" : "s"}`;
+            if (countAccessoriesEl()) countAccessoriesEl().textContent = `${ac} item${ac === 1 ? "" : "s"}`;
+
+            if (dotProfilesEl()) {
+                dotProfilesEl().style.backgroundColor = pc > 0 ? "#22c55e" : "#6b7280";
+                dotProfilesEl().title = pc > 0 ? "Loaded" : "Empty";
+            }
+            if (dotAccessoriesEl()) {
+                dotAccessoriesEl().style.backgroundColor = ac > 0 ? "#22c55e" : "#6b7280";
+                dotAccessoriesEl().title = ac > 0 ? "Loaded" : "Empty";
+            }
+
+            if (statProfilesEl()) statProfilesEl().textContent = String(pc);
+            if (statAccessoriesEl()) statAccessoriesEl().textContent = String(ac);
+            if (statColsProfilesEl()) statColsProfilesEl().textContent = String(distinctColumnCount(p));
+            if (statColsAccessoriesEl()) statColsAccessoriesEl().textContent = String(distinctColumnCount(a));
+        }
+        /* ---------- /NEW ---------- */
+
+        function $parts() {
+            const list = Array.from(document.querySelectorAll("#sys-info .grid > div"));
+            if (list.length < 6) return {};
+            return {
+                versionEl: list[0].querySelector("span:last-child"),
+                activeUsersEl: list[1].querySelector("span:last-child"),
+                lastUpdatedEl: list[2].querySelector("span:last-child"),
+                storageUsedEl: list[3].querySelector("span:last-child"),
+                databaseEl: list[4].querySelector("span:last-child"),
+                lastBackupEl: list[5].querySelector("span:last-child"),
+            };
+        }
+        function getInfo() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } }
+        function pad2(x) { return String(x).padStart(2, "0"); }
+        function friendly(ts) {
+            if (!ts) return "";
+            const d = new Date(ts), now = new Date();
+            const hh = d.getHours(), mm = pad2(d.getMinutes());
+            const ampm = hh >= 12 ? "PM" : "AM";
+            const h12 = (hh + 11) % 12 + 1;
+            const isToday = d.toDateString() === now.toDateString();
+            const yday = new Date(now); yday.setDate(now.getDate() - 1);
+            if (isToday) return `Today, ${h12}:${mm} ${ampm}`;
+            if (d.toDateString() === yday.toDateString()) return `Yesterday, ${h12}:${mm} ${ampm}`;
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+        }
+        function toMb(bytes) { if (bytes == null) return ""; const mb = bytes / 1048576; return `${Math.round(mb)} MB`; }
+        function render() {
+            const info = getInfo(), el = $parts();
+            if (el.versionEl && info.version) el.versionEl.textContent = info.version;
+            if (el.activeUsersEl && Number.isFinite(info.activeUsers)) el.activeUsersEl.textContent = String(info.activeUsers);
+            if (el.lastUpdatedEl && info.lastUpdatedISO) el.lastUpdatedEl.textContent = info.lastUpdatedISO.split("T")[0];
+            if (el.storageUsedEl && Number.isFinite(info.storageBytes)) el.storageUsedEl.textContent = toMb(info.storageBytes);
+            if (el.databaseEl && info.dbName) el.databaseEl.textContent = info.dbName;
+            if (el.lastBackupEl && info.lastBackupISO) el.lastBackupEl.textContent = friendly(info.lastBackupISO);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            render();
+            setInterval(function () {
+                const p = $parts(), info = getInfo();
+                if (p.lastBackupEl && info.lastBackupISO) p.lastBackupEl.textContent = friendly(info.lastBackupISO);
+            }, 60000);
+
+            const uploadBtn = document.getElementById("upload-btn");
+            let excelInput = document.getElementById("excel-input");
+            const clearBtn = document.getElementById("clear-btn");
+            const totalItemsEl = document.getElementById("stat-total-items");
+            const labelsPrintedEl = document.getElementById("labels-printed");
+
+            const updateCounts = (profiles, accessories) => {
+                const total = (profiles ? profiles.length : 0) + (accessories ? accessories.length : 0);
+                if (totalItemsEl) totalItemsEl.textContent = total;
+                const profilesCountEl = document.getElementById("profiles-count");
+                if (profilesCountEl) profilesCountEl.textContent = `${profiles ? profiles.length : 0}`;
+                const accessoriesCountEl = document.getElementById("accessories-count");
+                if (accessoriesCountEl) accessoriesCountEl.textContent = `${accessories ? accessories.length : 0}`;
+
+                // keep modal chips + quick stats in sync
+                updateModalIndicators(profiles, accessories);
+            };
+
+            const processFile = (file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const profilesSheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("profile")) || workbook.SheetNames[0];
+                    const accessoriesSheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("accessor")) || workbook.SheetNames[1];
+
+                    let profiles = [];
+                    if (profilesSheetName) {
+                        profiles = XLSX.utils.sheet_to_json(workbook.Sheets[profilesSheetName]);
+                    }
+
+                    let accessories = [];
+                    if (accessoriesSheetName) {
+                        accessories = XLSX.utils.sheet_to_json(workbook.Sheets[accessoriesSheetName]);
+                    }
+
+                    const excelCache = {
+                        profiles,
+                        accessories,
+                        fileName: file.name,
+                        loadedAt: new Date().toISOString()
+                    };
+
+                    localStorage.setItem("excelCache", JSON.stringify(excelCache));
+                    document.getElementById("file-name-display").textContent = `File name: ${file.name}`;
+                    const fileNameLive = document.getElementById("file-name");
+                    if (fileNameLive) fileNameLive.textContent = file.name;
+                    document.getElementById("data-status").classList.remove("hidden");
+
+                    updateCounts(profiles, accessories);        // updates dashboard + modal chips
+                    // labelsPrintedEl left as-is on upload
+                    alert("Data uploaded successfully!");
+                };
+                reader.readAsArrayBuffer(file);
+            };
+
+            if (uploadBtn) {
+                uploadBtn.addEventListener("click", () => {
+                    excelInput.click();
+                });
+            }
+
+            if (excelInput) {
+                excelInput.addEventListener("change", (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        processFile(file);
+                    }
+                });
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener("click", () => {
+                    localStorage.removeItem("excelCache");
+                    document.getElementById("data-status").classList.add("hidden");
+                    document.getElementById("file-name-display").textContent = "No file connected";
+                    updateCounts([], []);                       // resets dashboard + modal
+                    alert("Stored data cleared!");
+                });
+            }
+
+            const loadInitialData = () => {
+                const excelCache = JSON.parse(localStorage.getItem("excelCache") || "{}");
+                if (excelCache && excelCache.profiles && excelCache.accessories) {
+                    document.getElementById("file-name-display").textContent = `File name: ${excelCache.fileName}`;
+                    document.getElementById("data-status").classList.remove("hidden");
+                    updateCounts(excelCache.profiles, excelCache.accessories); // also updates modal chips
+                } else {
+                    // ensure modal chips show “0 items” + gray dots on first load
+                    updateModalIndicators([], []);
+                }
+            };
+            loadInitialData();
+
+        });
+    }();
+</script>
+
+<!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+<div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
+  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
+      <path d="M20 7h-9"/>
+      <path d="M14 17h-5"/>
+      <circle cx="17" cy="17" r="3"/>
+      <circle cx="7" cy="7" r="3"/>
+    </svg>
+    <span>Admin</span>
+  </button>
+  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+    </svg>
+  </button>
+  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
+      <path d="m7.5 4.27 9 5.15"/>
+      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"/>
+      <path d="m3.29 7.39 8.31 3.23"/>
+      <path d="m12 22.95 8.71-3.26"/>
+    </svg>
+    <span>Rack Label</span>
+  </button>
+  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.3-4.3"/>
+    </svg>
+    <span>Search</span>
+  </button>
+</nav>
+<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
+  <small>Alumil Inventory App @2025</small>
+</footer>
+<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<style>
+  .alumil-bottom-nav {
+    position: fixed; left: 0; right: 0;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    margin: 0 auto; z-index: 60;
+    display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    align-items: center; max-width: 720px;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, .92); color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,.08); border-radius: 16px;
+    backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
+  .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
+  .alumil-bottom-nav .nav-btn i { width: 22px; height: 22px; display:inline-block; }
+  .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
+  html[data-theme="light"] .alumil-bottom-nav .nav-btn:hover { background: rgba(0,0,0,.04); }
+  .scan-btn { position: relative; width: 56px; height: 56px; display: inline-grid; place-items: center; border-radius: 14px; border: 0; background: #facc15; color: #111827; box-shadow: 0 0 0 0 rgba(250,204,21,0); transition: transform .15s, box-shadow .2s; }
+  .scan-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 8px rgba(250,204,21,.2); }
+  .scan-btn:active { transform: translateY(0); }
+  .scan-btn i { width: 28px; height: 28px; }
+  .alumil-footer { position: fixed; left:0; right:0; bottom: 0; z-index: 50; display:flex; align-items:center; justify-content:center; min-height: 24px; background: #0b1220; color:#cbd5e1; border-top: 1px solid rgba(255,255,255,.08); padding-bottom: env(safe-area-inset-bottom, 0px); font-size: 12px; letter-spacing: .02em; }
+  html[data-theme="light"] .alumil-footer { background:#f8fafc; color:#334155; border-top-color: rgba(0,0,0,.06); }
+  @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
+  .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+</style>
+<script>
+(function(){
+  function routeByCode(raw){
+    if(!raw) return;
+    const code = String(raw).trim();
+    if(!code) return;
+    const isAcc = /(\bACC\b|^ACC-|ACC\d|ACCESS|ACCS)/i.test(code);
+    const target = isAcc ? 'acc-label-printing.html' : 'profile-label-printing.html';
+    const url = target + '?code=' + encodeURIComponent(code);
+    window.location.href = url;
+  }
+
+function routeByCode(code) {
+    if (!code) return;
+const trimmedCode = code.trim().toLowerCase();
+if (trimmedCode.startsWith('acc')) {
+      location.href = 'acc-label-printing.html';
+    } else {
+      location.href = 'profile-label-printing.html';
+    }
+  }
+  // Keyboard wedge capture
+  (function(){
+    let buf = '', last = 0;
+    window.addEventListener('keydown', (e) => {
+      const now = Date.now();
+      if(now - last > 250) buf = '';
+      last = now;
+      if(e.key === 'Enter'){
+        if(buf.length >= 4){ routeByCode(buf); }
+        buf = ''; return;
+      }
+      if(e.ctrlKey || e.metaKey || e.altKey) return;
+      if(e.key && e.key.length === 1){ buf += e.key; }
+    }, true);
+  })();
+  // Hidden input focus via big button (mobile bottom nav)
+  const scanBtn = document.getElementById('alumil-scan-btn');
+  const scanInput = document.getElementById('alumil-scan-input');
+  if (scanInput && scanBtn) {
+    // Show a toast when the button is clicked to indicate readiness
+    scanBtn.addEventListener('click', () => {
+      scanInput.value = '';
+      scanInput.focus();
+      try {
+        if (!document.getElementById('alumil-scan-toast')) {
+          const t = document.createElement('div');
+          t.id = 'alumil-scan-toast';
+          t.textContent = 'Ready to scan… (press Enter when done)';
+          t.style.position = 'fixed';
+          t.style.left = '50%';
+          t.style.bottom = '90px';
+          t.style.transform = 'translateX(-50%)';
+          t.style.background = 'rgba(0,0,0,.72)';
+          t.style.color = '#fff';
+          t.style.font = '600 12px/1.1 Inter,system-ui';
+          t.style.padding = '8px 12px';
+          t.style.borderRadius = '10px';
+          t.style.zIndex = 80;
+          document.body.appendChild(t);
+          setTimeout(() => {
+            t.remove();
+          }, 2000);
+        }
+      } catch (e) {}
+    });
+
+   // Handle the Enter key press in the scanner input field
+    scanInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        routeByCode(scanInput.value);
+        scanInput.blur();
+      }
+    });
+  }
+  // Active tab highlight
+  try{
+    const here = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('#alumil-bottom-nav .nav-btn').forEach(btn => {
+      const k = btn.getAttribute('data-nav'); if(!k) return;
+      const map = { home:'home.html', admin:'admin.html', rack:'rack-label-printing.html', search:'search-inventory.html' };
+      if(map[k] && here === map[k].toLowerCase()){ btn.style.fontWeight='800'; btn.style.opacity='1'; }
+      else { btn.style.opacity='.85'; }
+    });
+  }catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+  var MOON = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  var SUN = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+
+  function getSaved(){ return localStorage.getItem('theme') || 'light'; }
+  function isDark(){ return getSaved() === 'dark'; }
+
+  function setIcon() {
+    var btn = document.getElementById('theme-toggle');
+    if(!btn) return;
+    btn.innerHTML = isDark() ? SUN : MOON;
+  }
+
+  function applySaved() {
+    if (typeof updateThemeClasses === 'function') {
+      updateThemeClasses(isDark());
+    } else {
+      // Fallback: toggle body classes directly if helper missing
+      var add = isDark() ? 'dark' : 'light';
+      var remove = isDark() ? 'light' : 'dark';
+      document.body.classList.remove(remove);
+      document.body.classList.add(add);
+    }
+    setIcon();
+  }
+
+  function toggleTheme() {
+    var next = isDark() ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    if (typeof updateThemeClasses === 'function') {
+      updateThemeClasses(next === 'dark');
+    } else {
+      var add = next === 'dark' ? 'dark' : 'light';
+      var remove = next === 'dark' ? 'light' : 'dark';
+      document.body.classList.remove(remove);
+      document.body.classList.add(add);
+    }
+    setIcon();
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    applySaved();
+    var btn = document.getElementById('theme-toggle');
+    if (btn) btn.addEventListener('click', toggleTheme);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  try{
+    var path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var home = document.querySelector('[data-nav="home"]');
+    var admin = document.querySelector('[data-nav="admin"]');
+    function addActive(el){ if(!el) return; el.classList.add('text-yellow-400'); el.classList.add('font-semibold'); }
+    if(path === 'admin.html'){ addActive(admin); }
+    else if(path === 'home.html' || path === 'index.html' || path === ''){ addActive(home); }
+  }catch(e){}
+  try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
+})();
+</script>
+
+
+<script>
+// Versioned global bootstrap (SharePoint + Config)
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3";
+  async function j(u){
+  // If we're pointing at a SharePoint Excel link, emulate the old JSON API:
+  if ((typeof BASE === "string") && BASE.includes("sharepoint.com")) {
+    // Ensure loader + workbook
+    if (typeof loadWorkbook !== "function") {
+      throw new Error("XLSX loader not found. Ensure xlsx.full.min.js and js/sharepoint_loader.js are loaded.");
+    }
+    if (!window.__SP_WB_LOADED__) {
+      await loadWorkbook(BASE);
+      window.__SP_WB_LOADED__ = true;
+    }
+    // Extract sheet=Name from the URL and return rows from that sheet
+    try {
+      const qs = (u.split("?")[1] || "");
+      const params = new URLSearchParams(qs);
+      const sheet = params.get("sheet") || "Config";
+      const rows = getSheetJSON(sheet);
+      return rows || [];
+    } catch (e) {
+      console.error("SharePoint sheet load failed:", e);
+      return [];
+    }
+  }
+
+  // Fallback: original JSON fetch behavior
+  const r = await fetch(u, {mode:'cors'});
+  if(!r.ok) throw 0;
+  return r.json();
+}
+
+  // 1) Local cache + version
+  let local = {}, localVersion = null;
+  try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
+
+  // 2) Remote config (version, sheet names)
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows || []).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch (_){
+    // no Config found -> force refresh
+  }
+
+  const remoteVersion = cfg.version || null;
+  const hasData = (Array.isArray(local?.profiles) && local.profiles.length) || (Array.isArray(local?.accessories) && local.accessories.length);
+
+  // 3) If same version and have data -> keep cache
+  if (remoteVersion && localVersion && remoteVersion === localVersion && hasData) return;
+
+  // 4) Fetch fresh data from configured sheets
+  try {
+    const urlP = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetProfiles || 'Profile');
+    const urlA = BASE + (BASE.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(cfg.sheetAccessories || 'Accessories');
+    const [p, a] = await Promise.all([ j(urlP), j(urlA) ]);
+    const profiles = Array.isArray(p) ? p : (p?.data || []);
+    const accessories = Array.isArray(a) ? a : (a?.data || []);
+
+    localStorage.setItem('excelCache', JSON.stringify({
+      profiles, accessories,
+      version: remoteVersion,
+      fileName: `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`,
+      loadedAt: new Date().toISOString()
+    }));
+    console.log('[bootstrap] excelCache updated to version', remoteVersion);
+  } catch (e) {
+    console.warn('Versioned bootstrap failed:', e);
+  }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  function updateFromCache(){
+    try{
+      const cache = JSON.parse(localStorage.getItem('excelCache') || '{}');
+      const p = Array.isArray(cache.profiles) ? cache.profiles : [];
+      const a = Array.isArray(cache.accessories) ? cache.accessories : [];
+      const total = p.length + a.length;
+      const proEl = document.getElementById('profiles-count');
+      const accEl = document.getElementById('accessories-count');
+      const totalEl = document.getElementById('stat-total-items');
+      if (proEl) proEl.textContent = String(p.length);
+      if (accEl) accEl.textContent = String(a.length);
+      if (totalEl) totalEl.textContent = String(total);
+      const status = document.getElementById('data-status');
+      const label = document.getElementById('file-name-display');
+      if (status) status.classList.remove('hidden');
+      if (label) label.textContent = cache.fileName ? ('File name: ' + cache.fileName) : 'Shared source';
+      const verLocal = document.getElementById('ver-local');
+      if (verLocal) verLocal.textContent = cache.version || '(none)';
+    }catch(e){ console.warn('admin updateFromCache', e); }
+  }
+  updateFromCache();
+  setTimeout(updateFromCache, 400);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const BASE = "https://alumildxb-my.sharepoint.com/:x:/g/personal/a_olivero_alumil_ae/EVlOY6zQ8SRJmM9696IevO8BpoiOXwkzFe88_yRNe2kC2A?e=tfIbS3"; // your SharePoint endpoint
+  async function j(u){ const r = await fetch(u, {mode:'cors'}); if(!r.ok) throw 0; return r.json(); }
+  const el = id => document.getElementById(id);
+
+  // Read local cache
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem('excelCache') || '{}'); } catch {}
+  const profiles = Array.isArray(cache.profiles) ? cache.profiles : [];
+  const accessories = Array.isArray(cache.accessories) ? cache.accessories : [];
+
+  // Read remote version + sheet names
+  let cfg = { version: null, sheetProfiles: "Profile", sheetAccessories: "Accessories" };
+  try {
+    const rows = await j(BASE + (BASE.includes('?')?'&':'?') + 'sheet=Config');
+    const map = Object.fromEntries((rows||[]).filter(r => r && r.key).map(r => [r.key, r.value]));
+    cfg = Object.assign(cfg, map);
+  } catch {}
+
+  // Helpers
+  const fmt = iso => {
+    try { return new Date(iso).toLocaleString(); } catch { return "—"; }
+  };
+  const sizeOf = obj => {
+    try { return (new Blob([JSON.stringify(obj)]).size / (1024*1024)).toFixed(2) + " MB"; }
+    catch { return "0 MB"; }
+  };
+
+  // Fill values
+  el('sys-version')      && (el('sys-version').textContent      = cfg.version || '(none)');
+  el('sys-last-updated') && (el('sys-last-updated').textContent = cache.loadedAt ? fmt(cache.loadedAt) : '(not loaded)');
+  el('sys-db')           && (el('sys-db').textContent           = cache.fileName || `SharePoint: ${cfg.sheetProfiles} + ${cfg.sheetAccessories}`);
+  el('sys-storage')      && (el('sys-storage').textContent      = sizeOf(cache));
+  el('sys-users')        && (el('sys-users').textContent        = '—'); // unless you track sessions somewhere
+  el('sys-last-backup')  && (el('sys-last-backup').textContent  = '—');
+
+  // If bootstrap finishes a moment later, re-run once
+  setTimeout(() => {
+    try {
+      const c = JSON.parse(localStorage.getItem('excelCache') || '{}');
+      if (!c.loadedAt) return;
+      el('sys-last-updated') && (el('sys-last-updated').textContent = fmt(c.loadedAt));
+      el('sys-db') && (el('sys-db').textContent = c.fileName || el('sys-db').textContent);
+      el('sys-storage') && (el('sys-storage').textContent = sizeOf(c));
+    } catch {}
+  }, 500);
+});
+</script>
+
+
+
+  <script src="js/sharepoint_loader.js"></script>
+
+<!-- BEGIN OneDrive/Azure Loaders -->
+<script>
+(() => {
+  function sheetToJson(workbook, name) {
+    const ws = workbook.Sheets[name];
+    return ws ? XLSX.utils.sheet_to_json(ws) : [];
+  }
+
+  function detectSheetNames(wb, hintProfiles = null, hintAccessories = null) {
+    const names = wb.SheetNames || [];
+    const findLike = (s) => names.find(n => n.toLowerCase().includes(s));
+    const profiles = hintProfiles || findLike('profile') || names[0];
+    const accessories = hintAccessories || findLike('accessor') || names[1];
+    return { profiles, accessories };
+  }
+
+  function processWorkbook(wb, sourceLabel = 'Remote Excel', version = null, hints = {}) {
+    const { profiles: pName, accessories: aName } = detectSheetNames(wb, hints.sheetProfiles, hints.sheetAccessories);
+    const profiles = pName ? sheetToJson(wb, pName) : [];
+    const accessories = aName ? sheetToJson(wb, aName) : [];
+
+    const payload = {
+      profiles,
+      accessories,
+      version: version || null,
+      fileName: sourceLabel,
+      loadedAt: new Date().toISOString(),
+    };
+    try { localStorage.setItem('excelCache', JSON.stringify(payload)); } catch (_) { /* storage might be blocked */ }
+
+    const nameEl = document.getElementById("file-name-display");
+    const fileNameLive = document.getElementById("file-name");
+    if (nameEl) nameEl.textContent = `File name: ${sourceLabel}`;
+    if (fileNameLive) fileNameLive.textContent = sourceLabel;
+    const status = document.getElementById("data-status");
+    if (status) status.classList.remove("hidden");
+
+    try {
+      const totalEl = document.getElementById("stat-total-items");
+      const profilesEl = document.getElementById("profiles-count");
+      const accessoriesEl = document.getElementById("accessories-count");
+      const total = profiles.length + accessories.length;
+      if (totalEl) totalEl.textContent = total;
+      if (profilesEl) profilesEl.textContent = String(profiles.length);
+      if (accessoriesEl) accessoriesEl.textContent = String(accessories.length);
+      if (typeof updateModalIndicators === 'function') {
+        updateModalIndicators(profiles, accessories);
+      }
+    } catch (e) { console.warn('Counts update fallback:', e); }
+
+    alert("Data loaded successfully!");
+  }
+
+  
+  async function loadFromOneDrive() {
+    const link = prompt("Paste your OneDrive/SharePoint Excel link:");
+    if (!link) return;
+
+    // Try to build a direct-download URL for SharePoint/OneDrive
+    const buildCandidates = (href) => {
+      try {
+        const u = new URL(href);
+        const withDownloadParam = href + (href.includes("?") ? "&" : "?") + "download=1";
+        const dlLayout = `${u.origin}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(href)}`;
+        // Some links look like .../:x:/g/... — use sourceurl fallback as well
+        const dlLayoutSource = `${u.origin}/_layouts/15/download.aspx?sourceurl=${encodeURIComponent(href)}`;
+        return [withDownloadParam, dlLayout, dlLayoutSource, href];
+      } catch {
+        return [href];
+      }
+    };
+
+    const candidates = buildCandidates(link);
+
+    let arrayBuf = null, usedUrl = null, lastErr = null;
+    for (const url of candidates) {
+      try {
+        const resp = await fetch(url, { mode: "cors", redirect: "follow" });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        // Some SharePoint "download.aspx" pages return the file directly;
+        // others redirect. With redirect: "follow", we should still land on the file.
+        arrayBuf = await resp.arrayBuffer();
+        usedUrl = url;
+        break;
+      } catch (e) {
+        lastErr = e;
+        continue;
+      }
+    }
+
+    if (!arrayBuf) {
+      console.error("SharePoint/OneDrive fetch failed", lastErr);
+      alert("Couldn't fetch the Excel from SharePoint/OneDrive. Make sure the link allows anyone-with-link to download, or download it locally and use the file picker.");
+      return;
+    }
+
+    try {
+      // Heuristics: if it's CSV, parse as string; otherwise use array buffer for XLSX
+      const isCSV = /\.csv(\?|$)/i.test(usedUrl || link);
+      let wb;
+      if (isCSV) {
+        const csvText = new TextDecoder().decode(new Uint8Array(arrayBuf));
+        wb = XLSX.read(csvText, { type: "string" });
+        processWorkbook(wb, "OneDrive/SharePoint CSV");
+      } else {
+        wb = XLSX.read(arrayBuf, { type: "array" });
+        processWorkbook(wb, "OneDrive/SharePoint workbook");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Fetched the file but couldn't parse it. Is it a valid Excel/CSV?");
+    }
+  }
+
+
+  async function loadFromAzureBlob() {
+    const sasUrl = prompt("Paste your Azure Blob SAS URL (direct .xlsx/.xls/.csv):\n\nNote: The SAS URL should have read permissions and proper CORS configuration.");
+    if (!sasUrl) return;
+
+    // Validate SAS URL format
+    if (!sasUrl.includes('sig=')) {
+      alert('This does not look like a valid SAS URL (missing signature parameter).');
+      return;
+    }
+
+    try {
+      // Show loading state
+      const azureBtn = document.getElementById("connect-azure-btn");
+      if (azureBtn) {
+        azureBtn.textContent = "Loading from Azure...";
+        azureBtn.disabled = true;
+      }
+
+      const resp = await fetch(sasUrl, { 
+        mode: "cors",
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status} - ${resp.statusText}`);
+      }
+      
+      const contentType = resp.headers.get('content-type') || '';
+      const buf = await resp.arrayBuffer();
+
+      // Determine file type from URL or content type
+      const isCSV = /\.csv(\?|$)/i.test(sasUrl) || contentType.includes('text/csv');
+      const isJSON = /\.json(\?|$)/i.test(sasUrl) || contentType.includes('application/json');
+      
+      let wb, sourceLabel;
+      
+      if (isJSON) {
+        // Handle JSON format
+        const jsonText = new TextDecoder().decode(new Uint8Array(buf));
+        const jsonData = JSON.parse(jsonText);
+        
+        // Create a workbook from JSON data
+        if (jsonData.profiles || jsonData.accessories) {
+          // Direct format with profiles/accessories
+          const payload = {
+            profiles: Array.isArray(jsonData.profiles) ? jsonData.profiles : [],
+            accessories: Array.isArray(jsonData.accessories) ? jsonData.accessories : [],
+            version: jsonData.version || null,
+            fileName: "Azure Blob JSON",
+            loadedAt: new Date().toISOString()
+          };
+          
+          localStorage.setItem('excelCache', JSON.stringify(payload));
+          
+          // Update UI immediately
+          updateCacheDisplay(payload);
+          updateModalIndicators(payload.profiles, payload.accessories);
+          
+          alert("JSON data loaded from Azure Blob successfully!");
+          return;
+        } else if (Array.isArray(jsonData)) {
+          // Assume it's profile data
+          wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.json_to_sheet(jsonData);
+          XLSX.utils.book_append_sheet(wb, ws, "Profiles");
+          sourceLabel = "Azure Blob JSON (as Profiles)";
+        } else {
+          throw new Error("Unrecognized JSON format");
+        }
+      } else if (isCSV) {
+        const csvText = new TextDecoder().decode(new Uint8Array(buf));
+        wb = XLSX.read(csvText, { type: "string" });
+        sourceLabel = "Azure Blob CSV";
+      } else {
+        wb = XLSX.read(buf, { type: "array" });
+        sourceLabel = "Azure Blob Excel";
+      }
+      
+      processWorkbook(wb, sourceLabel);
+      
+      // Trigger data sync event
+      if (typeof DataSync !== 'undefined') {
+        const cache = JSON.parse(localStorage.getItem('excelCache') || '{}');
+        DataSync.setData(cache);
+      }
+      
+    } catch (e) {
+      console.error('Azure Blob load error:', e);
+      let errorMsg = "Failed to load from Azure Blob. ";
+      
+      if (e.message.includes('CORS')) {
+        errorMsg += "CORS error - ensure your Azure Blob has proper CORS configuration.";
+      } else if (e.message.includes('403')) {
+        errorMsg += "Access denied - check your SAS URL permissions.";
+      } else if (e.message.includes('404')) {
+        errorMsg += "File not found - verify the blob URL.";
+      } else {
+        errorMsg += `Error: ${e.message}`;
+      }
+      
+      alert(errorMsg);
+    } finally {
+      // Reset button state
+      const azureBtn = document.getElementById("connect-azure-btn");
+      if (azureBtn) {
+        azureBtn.textContent = "Connect Azure Blob (SAS)";
+        azureBtn.disabled = false;
+      }
+    }
+  }
+
+  // Helper function to update cache display
+  function updateCacheDisplay(cache) {
+    try {
+      const nameEl = document.getElementById("file-name-display");
+      const fileNameLive = document.getElementById("file-name");
+      const status = document.getElementById("data-status");
+      
+      if (nameEl) nameEl.textContent = `File name: ${cache.fileName || 'Azure Blob'}`;
+      if (fileNameLive) fileNameLive.textContent = cache.fileName || 'Azure Blob';
+      if (status) status.classList.remove("hidden");
+
+      const totalEl = document.getElementById("stat-total-items");
+      const profilesEl = document.getElementById("profiles-count");
+      const accessoriesEl = document.getElementById("accessories-count");
+      
+      const profilesCount = cache.profiles?.length || 0;
+      const accessoriesCount = cache.accessories?.length || 0;
+      const total = profilesCount + accessoriesCount;
+      
+      if (totalEl) totalEl.textContent = total;
+      if (profilesEl) profilesEl.textContent = String(profilesCount);
+      if (accessoriesEl) accessoriesEl.textContent = String(accessoriesCount);
+    } catch (e) {
+      console.warn('Cache display update failed:', e);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("connect-onedrive-btn")?.addEventListener("click", loadFromOneDrive);
+    document.getElementById("connect-azure-btn")?.addEventListener("click", loadFromAzureBlob);
+    
+    // Logout functionality
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Confirm logout
+        if (confirm('Are you sure you want to sign out?')) {
+          // Use AuthHelper if available, otherwise direct logout
+          if (typeof AuthHelper !== 'undefined') {
+            AuthHelper.logout();
+          } else {
+            window.location.href = '/.auth/logout?post_logout_redirect_uri=' + encodeURIComponent(window.location.origin + '/welcome.html');
+          }
+        }
+      });
+    }
+    
+    // Add event listener for activity tile
+    const activityTile = document.getElementById('activity-tile');
+    if (activityTile) {
+      activityTile.addEventListener('click', function(e) {
+        e.preventDefault();
+        openActivityModal();
+      });
+    }
+  });
+})();
+</script>
+<!-- END OneDrive/Azure Loaders -->
+
+<!-- Activity Modal -->
+<div id="activity-modal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+  <div class="relative w-[95vw] max-w-5xl max-h-[85vh] overflow-hidden card rounded-xl p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold title-text">User Activity Log</h2>
+      <button id="activity-close" class="icon-btn" aria-label="Close activity"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <div class="border-b border-color mb-3">
+      <div class="flex flex-wrap gap-2 pb-3">
+        <input id="activity-filter-user" placeholder="Filter by user" class="input-field px-3 py-2" />
+        <input id="activity-filter-page" placeholder="Filter by page" class="input-field px-3 py-2" />
+        <select id="activity-filter-action" class="input-field px-3 py-2">
+          <option value="">All actions</option>
+          <option value="print">Print labels</option>
+          <option value="pageview">Page views</option>
+          <option value="search">Searches</option>
+          <option value="login">Logins</option>
+          <option value="logout">Logouts</option>
+          <option value="export">Exports</option>
+        </select>
+        <input id="activity-filter-item" placeholder="Filter by item code" class="input-field px-3 py-2" />
+        <input id="activity-filter-warehouse" placeholder="Warehouse/Rack #" class="input-field px-3 py-2" />
+        <div class="flex flex-wrap gap-2 w-full">
+          <input id="activity-filter-from" type="datetime-local" class="input-field px-3 py-2" />
+          <input id="activity-filter-to" type="datetime-local" class="input-field px-3 py-2" />
+          <div class="ml-auto flex gap-2 items-center">
+            <select id="activity-sort-by" class="input-field px-2 py-2">
+              <option value="timestamp" selected>Sort by date</option>
+              <option value="user">Sort by user</option>
+              <option value="action">Sort by action</option>
+              <option value="page">Sort by page</option>
+            </select>
+            <select id="activity-sort-dir" class="input-field px-2 py-2">
+              <option value="desc" selected>Desc</option>
+              <option value="asc">Asc</option>
+            </select>
+            <button id="activity-export-csv" class="btn btn-amber">Export CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-auto" style="max-height: 60vh;">
+      <table class="w-full text-sm">
+        <thead class="subtitle-text">
+          <tr>
+            <th class="text-left p-2 border-b border-color">Date</th>
+            <th class="text-left p-2 border-b border-color">User</th>
+            <th class="text-left p-2 border-b border-color">Action</th>
+            <th class="text-left p-2 border-b border-color">Page</th>
+            <th class="text-left p-2 border-b border-color">Item Code</th>
+            <th class="text-left p-2 border-b border-color">Warehouse/Rack</th>
+            <th class="text-left p-2 border-b border-color">Additional Details</th>
+          </tr>
+        </thead>
+        <tbody id="activity-tbody" class="title-text"></tbody>
+      </table>
+    </div>
+  </div>
+  <style>
+    #activity-modal.hidden{ display:none; }
+    #activity-modal:not(.hidden){ display:flex; }
+  </style>
+</div>
+
+<script>
+// Activity Modal logic
+(function(){
+  const modal = document.getElementById('activity-modal');
+  const tbody = document.getElementById('activity-tbody');
+  const closeBtn = document.getElementById('activity-close');
+  const filterUser = document.getElementById('activity-filter-user');
+  const filterPage = document.getElementById('activity-filter-page');
+  const filterAction = document.getElementById('activity-filter-action');
+  const filterFrom = document.getElementById('activity-filter-from');
+  const filterTo = document.getElementById('activity-filter-to');
+  const sortBy = document.getElementById('activity-sort-by');
+  const sortDir = document.getElementById('activity-sort-dir');
+  const exportBtn = document.getElementById('activity-export-csv');
+
+  function fmt(iso){ try{ return new Date(iso).toLocaleString(); }catch{ return iso; } }
+
+  async function render(){
+    if (!window.ActivityLogger) return;
+    
+    const from = filterFrom.value ? new Date(filterFrom.value).toISOString() : null;
+    const to = filterTo.value ? new Date(filterTo.value).toISOString() : null;
+    const filterItemEl = document.getElementById('activity-filter-item');
+    const filterWarehouseEl = document.getElementById('activity-filter-warehouse');
+    const filterItem = filterItemEl ? filterItemEl.value : '';
+    const filterWarehouse = filterWarehouseEl ? filterWarehouseEl.value : '';
+    
+    const rows = await window.ActivityLogger.filterSort({
+      page: filterPage.value || null,
+      action: filterAction.value || null,
+      from, to,
+      user: filterUser.value || null,
+      sortBy: sortBy.value,
+      sortDir: sortDir.value === 'asc' ? 'asc' : 'desc'
+    });
+    
+    // Apply additional client-side filtering for item_code and warehouse/rack
+    const filteredRows = rows.filter(row => {
+      // Skip filtering if no values entered
+      if (!filterItem && !filterWarehouse) return true;
+      
+      const details = row.details || {};
+      
+      // For item code filtering
+      if (filterItem) {
+        const itemCode = (details.item_code || '').toLowerCase();
+        if (!itemCode.includes(filterItem.toLowerCase())) return false;
+      }
+      
+      // For warehouse/rack filtering
+      if (filterWarehouse) {
+        const warehouseStr = (details.warehouse_no || '').toLowerCase();
+        const rackStr = (details.rack_no || '').toLowerCase();
+        const combined = `${warehouseStr} ${rackStr}`.toLowerCase();
+        if (!combined.includes(filterWarehouse.toLowerCase())) return false;
+      }
+      
+      return true;
+    });
+    
+    tbody.innerHTML = filteredRows.map(r => {
+      const details = r.details || {};
+      
+      // Extract specific fields for label printing activities
+      const itemCode = r.action === 'print' ? (details.item_code || '') : '';
+      const warehouseRack = r.action === 'print' ? 
+        `${details.warehouse_no || ''} / ${details.rack_no || ''}` : '';
+      
+      // Format remaining details, but exclude already displayed fields
+      const filteredDetails = {...details};
+      delete filteredDetails.item_code;
+      delete filteredDetails.warehouse_no;
+      delete filteredDetails.rack_no;
+      
+      const detailsStr = Object.keys(filteredDetails).length > 0 ? 
+        JSON.stringify(filteredDetails) : '';
+      
+      return `
+      <tr>
+        <td class="p-2 border-b border-color">${fmt(r.timestamp)}</td>
+        <td class="p-2 border-b border-color">${r.user || ''}</td>
+        <td class="p-2 border-b border-color">${r.action || ''}</td>
+        <td class="p-2 border-b border-color">${r.page || ''}</td>
+        <td class="p-2 border-b border-color">${itemCode}</td>
+        <td class="p-2 border-b border-color">${warehouseRack}</td>
+        <td class="p-2 border-b border-color"><code class="text-xs">${detailsStr}</code></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function open(){ modal.classList.remove('hidden'); render(); }
+  function close(){ modal.classList.add('hidden'); }
+
+  closeBtn?.addEventListener('click', close);
+  const filterItemEl = document.getElementById('activity-filter-item');
+  const filterWarehouseEl = document.getElementById('activity-filter-warehouse');
+  
+  [filterUser, filterPage, filterAction, filterFrom, filterTo, sortBy, sortDir, 
+   filterItemEl, filterWarehouseEl].forEach(el=> el?.addEventListener('change', render));
+  
+  // Add input event listeners for real-time filtering on text fields
+  [filterUser, filterPage, filterItemEl, filterWarehouseEl].forEach(el => {
+    el?.addEventListener('input', () => {
+      if (el.value.length > 2 || el.value.length === 0) {
+        render();
+      }
+    });
+  });
+  
+  exportBtn?.addEventListener('click', async ()=>{
+    if (!window.ActivityLogger) return;
+    
+    const from = filterFrom.value ? new Date(filterFrom.value).toISOString() : null;
+    const to = filterTo.value ? new Date(filterTo.value).toISOString() : null;
+    const filterItemEl = document.getElementById('activity-filter-item');
+    const filterWarehouseEl = document.getElementById('activity-filter-warehouse');
+    const filterItem = filterItemEl ? filterItemEl.value : '';
+    const filterWarehouse = filterWarehouseEl ? filterWarehouseEl.value : '';
+    
+    const rows = await window.ActivityLogger.filterSort({
+      page: filterPage.value || null,
+      action: filterAction.value || null,
+      from, to,
+      user: filterUser.value || null,
+      sortBy: sortBy.value,
+      sortDir: sortDir.value === 'asc' ? 'asc' : 'desc'
+    });
+    
+    // Apply additional client-side filtering for item_code and warehouse/rack
+    const filteredRows = rows.filter(row => {
+      if (!filterItem && !filterWarehouse) return true;
+      
+      const details = row.details || {};
+      
+      if (filterItem) {
+        const itemCode = (details.item_code || '').toLowerCase();
+        if (!itemCode.includes(filterItem.toLowerCase())) return false;
+      }
+      
+      if (filterWarehouse) {
+        const warehouseStr = (details.warehouse_no || '').toLowerCase();
+        const rackStr = (details.rack_no || '').toLowerCase();
+        const combined = `${warehouseStr} ${rackStr}`.toLowerCase();
+        if (!combined.includes(filterWarehouse.toLowerCase())) return false;
+      }
+      
+      return true;
+    });
+    
+    // Generate CSV with enhanced fields for print activities
+    const header = ['Timestamp', 'User', 'Action', 'Page', 'Item Code', 'Description', 'Warehouse', 'Rack', 'System', 'Alloy', 'Length', 'Details'];
+    const esc = s => '"' + String(s || '').replaceAll('"','""') + '"';
+    
+    const lines = [header.join(',')];
+    for (const r of filteredRows) {
+      const details = r.details || {};
+      lines.push([
+        esc(r.timestamp), 
+        esc(r.user),
+        esc(r.action), 
+        esc(r.page || ''),
+        esc(details.item_code || ''),
+        esc(details.description || ''),
+        esc(details.warehouse_no || ''),
+        esc(details.rack_no || ''),
+        esc(details.system || ''),
+        esc(details.alloy || ''),
+        esc(details.length || ''),
+        esc(JSON.stringify(details))
+      ].join(','));
+    }
+    
+    const csv = lines.join('\n');
+    window.ActivityLogger.downloadCSV(`user-activity-log-${new Date().toISOString().split('T')[0]}.csv`, csv);
+  });
+
+  // Expose open function globally
+  window.openActivityModal = open;
+})();
+
+// Authentication and Admin Access Control
+async function checkAdminAccess() {
+  if (!window.SupabaseAPI) {
+    location.href = 'login.html';
+    return false;
+  }
+  
+  const user = await window.SupabaseAPI.getCurrentUser();
+  if (!user) {
+    location.href = 'login.html';
+    return false;
+  }
+  
+  const isAdminUser = await window.SupabaseAPI.isAdmin();
+  if (!isAdminUser) {
+    alert('Access denied. Admin privileges required.');
+    location.href = 'home.html';
+    return false;
+  }
+  
+  return true;
+}
+
+// Logout functionality
+async function handleLogout() {
+  if (window.SupabaseAPI) {
+    await window.SupabaseAPI.signOut();
+  }
+  location.href = 'login.html';
+}
+
+// Check admin access on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkAdminAccess();
+});
+</script>
