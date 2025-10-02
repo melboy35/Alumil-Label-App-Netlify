@@ -1,27 +1,24 @@
-# Alumil Inventory System - Supabase Edition
+# Alumil Inventory System - Netlify Edition
 
-## 🚀 Quick Deployment Guide
+## 🚀 Beautiful Login & Role-Based Authentication
 
-### Pre-configured Features:
+### ✨ New Features:
+✅ **Beautiful Login Page**: Professional glassmorphism design with Alumil branding  
+✅ **Role-Based Authentication**: Admins → admin.html, Users → home.html  
 ✅ **Supabase Integration**: Fully configured with your project credentials  
-✅ **Login System**: `login.html` ready to use  
 ✅ **Auto-Logout**: Logout buttons in navigation headers  
 ✅ **Smart Input Reading**: Automatically reads SKU/Qty/Size from page inputs  
-✅ **Database Ready**: Schema deployed and admin user configured  
+✅ **Fixed Favicons**: Working favicons across all browsers  
+✅ **Git + Netlify**: Continuous deployment via GitHub integration  
 
-### Deployment Steps:
-
-1. **Upload to your host** (Cloudflare Pages, Netlify, or your current hosting)
-2. **Set your team's entry point** to `login.html`
-3. **Users sign in first** before accessing other pages
+### Deployment:
+Connected to **GitHub** → **Netlify** for automatic deployments.
+Push to main branch triggers instant deployment to: `https://alumillabelprintingapp.netlify.app/`
 
 ### Usage Flow:
 
-1. **Team members visit** `login.html` to sign in
-2. **After login**, they can access:
-   - `profile-label-printing.html` - Print profile labels
-   - `acc-label-printing.html` - Print accessory labels
-   - `admin.html` - Admin panel (admin users only)
+1. **Team members visit** `login.html` to sign in (beautiful branded login)
+2. **Role-based routing**: Admins → Admin Panel, Users → Home Page
 3. **Print logging**: Click "Log Print" button on printing pages
 4. **Reports**: Admin users can access reports via Admin panel
 
@@ -58,4 +55,5 @@
 
 ---
 
-**Ready to use!** Your Supabase-powered inventory system is fully configured and ready for deployment.
+**Live Site**: https://alumillabelprintingapp.netlify.app/  
+**Repository**: https://github.com/melboy35/Alumil-Label-App-Netlify
