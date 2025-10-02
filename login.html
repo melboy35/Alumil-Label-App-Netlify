@@ -144,8 +144,8 @@
 
     input[type="email"]:focus, input[type="password"]:focus {
       outline: none;
-      border-color: var(--blue);
-      box-shadow: 0 0 0 2px rgba(42, 125, 225, 0.2);
+      border-color: #ffc107;
+      box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
     }
 
     input[type="email"]::placeholder, input[type="password"]::placeholder {
@@ -156,17 +156,17 @@
       display:flex; align-items:center; justify-content:center;
       gap:10px; width:100%;
       padding: 14px 16px; border-radius: var(--radius);
-      text-decoration:none; color:#fff; font-weight: 600;
-      background: var(--blue);
-      box-shadow: 0 6px 14px rgba(42,125,225,.35);
+      text-decoration:none; color:#000; font-weight: 600;
+      background: #ffc107;
+      box-shadow: 0 6px 14px rgba(255, 193, 7, .35);
       transition: transform .04s ease, background .15s ease, box-shadow .15s ease;
       border: 0;
       cursor: pointer;
       font-size: 15px;
       margin-top: 8px;
     }
-    .btn:active { transform: translateY(1px); background: var(--blue-press); box-shadow: 0 4px 10px rgba(42,125,225,.28); }
-    .btn:hover { box-shadow: 0 8px 18px rgba(42,125,225,.45); }
+    .btn:active { transform: translateY(1px); background: #e0a800; box-shadow: 0 4px 10px rgba(255, 193, 7, .28); }
+    .btn:hover { box-shadow: 0 8px 18px rgba(255, 193, 7, .45); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .login-icon {
