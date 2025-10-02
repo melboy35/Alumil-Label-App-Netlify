@@ -293,11 +293,34 @@ body {
               <option value="250x200">250 x 200 mm</option>
             </select>
           </div>
+          
+          <!-- Warehouse No - Required field -->
+          <div>
+            <label for="WarehouseNo" class="block text-sm font-medium subtitle-text">
+              Warehouse No <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input id="WarehouseNo" class="mt-1 block w-full input-field" placeholder="Enter warehouse number..." required>
+              <div id="warehouseSuggestions" class="suggestions-list hidden"></div>
+            </div>
+          </div>
+          
+          <!-- Rack No - Required field -->
+          <div>
+            <label for="RackNo" class="block text-sm font-medium subtitle-text">
+              Rack No <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input id="RackNo" class="mt-1 block w-full input-field" placeholder="Enter rack number..." required>
+              <div id="rackSuggestions" class="suggestions-list hidden"></div>
+            </div>
+          </div>
+          
           <div>
             <label for="Remarks" class="block text-sm font-medium subtitle-text">Remarks</label>
             <input id="Remarks" class="mt-1 block w-full input-field" placeholder="(optional) Notes for this label…)">
           </div>
-          <button type="button" id="printViewButton" class="btn-primary w-full sm:w-auto">Print View</button>
+          <button type="button" id="printViewButton" class="btn-primary w-full sm:w-auto" disabled>Print View</button>
         </form>
       </div>
 
@@ -443,10 +466,14 @@ body {
             const length = pick(r, ['Length','Len','ProfileLength']);
             const barcode = pick(r, ['Barcode','BARCODE','barcode','EAN','GTIN']) || code;
             const image = normalizeImageURL(findImageUrl(r));
-            /* Profile Title from column H */
             const profileTitle = pick(r, ['Profile Title','ProfileTitle']);
+            
+            // Extract warehouse and rack information
+            const warehouseNo = pick(r, ['Warehouse No','Warehouse Number','WarehouseNo','Warehouse','WH No']);
+            const rackNo = pick(r, ['Rack No','Rack Number','RackNo','Rack','Rack Code']);
+            
             if (code || description){
-              out.push({code, description, profileTitle, alloy, finish, length, barcode, image});
+              out.push({code, description, profileTitle, alloy, finish, length, barcode, image, warehouseNo, rackNo});
             }
           });
         }
@@ -455,6 +482,24 @@ body {
     }
 
     let PROFILE_DATA = loadProfiles();
+    
+    // Create location mapping for items with multiple warehouse/rack combinations
+    let LOCATION_MAP = {};
+    function buildLocationMap() {
+      LOCATION_MAP = {};
+      PROFILE_DATA.forEach(profile => {
+        if (profile.code && (profile.warehouseNo || profile.rackNo)) {
+          if (!LOCATION_MAP[profile.code]) {
+            LOCATION_MAP[profile.code] = [];
+          }
+          LOCATION_MAP[profile.code].push({
+            warehouse: profile.warehouseNo || '',
+            rack: profile.rackNo || ''
+          });
+        }
+      });
+    }
+    buildLocationMap();
 
     /* ============== DOM refs ============== */
     const searchInput = document.getElementById('searchInput');
@@ -467,7 +512,13 @@ body {
     const AlloyInput = document.getElementById('Alloy');
     const FinishInput = document.getElementById('Finish');
     const labelSizeInput = document.getElementById('labelSize');
+    const WarehouseNoInput = document.getElementById('WarehouseNo');
+    const RackNoInput = document.getElementById('RackNo');
     const RemarksInput = document.getElementById('Remarks');
+    
+    const warehouseSuggestions = document.getElementById('warehouseSuggestions');
+    const rackSuggestions = document.getElementById('rackSuggestions');
+    const printViewButton = document.getElementById('printViewButton');
 
     const profileImage = document.getElementById('profileImage');
     const previewDescription = document.getElementById('previewDescription');
@@ -511,19 +562,42 @@ body {
         DiscriptionInput.value = '';
         AlloyInput.value = '';
         FinishInput.value = '';
+        WarehouseNoInput.value = '';
+        RackNoInput.value = '';
         profileImage.referrerPolicy = 'no-referrer';
         profileImage.src = placeholder;
         previewDescription.textContent = 'Description: —';
         previewProfileTitle.textContent = 'Profile Title: —';
         previewAlloy.textContent = 'Alloy: —';
         previewFinish.textContent = 'Finish: —';
+        validateForm();
         return;
       }
+      
       CodeInput.value = item.code || '';
       DiscriptionInput.value = item.description || '';
       AlloyInput.value = item.alloy || '';
       FinishInput.value = item.finish || '';
       if (item.length && !isNaN(item.length)) { LengthInput.value = Number(item.length); }
+
+      // Auto-fill warehouse and rack if available
+      const itemCode = item.code;
+      if (itemCode && LOCATION_MAP[itemCode] && LOCATION_MAP[itemCode].length > 0) {
+        const locations = LOCATION_MAP[itemCode];
+        
+        if (locations.length === 1) {
+          // Single location - auto-fill
+          WarehouseNoInput.value = locations[0].warehouse || '';
+          RackNoInput.value = locations[0].rack || '';
+        } else {
+          // Multiple locations - show suggestions
+          showLocationSuggestions(itemCode);
+        }
+      } else {
+        // No existing location data
+        WarehouseNoInput.value = '';
+        RackNoInput.value = '';
+      }
 
       profileImage.referrerPolicy = 'no-referrer';
       profileImage.onerror = () => { profileImage.src = placeholder; };
@@ -533,7 +607,146 @@ body {
       previewProfileTitle.textContent = 'Profile Title: ' + (item.profileTitle || '—');
       previewAlloy.textContent = 'Alloy: ' + (item.alloy || '—');
       previewFinish.textContent = 'Finish: ' + (item.finish || '—');
+      
+      validateForm();
     }
+
+    function validateForm() {
+      const code = CodeInput.value.trim();
+      const description = DiscriptionInput.value.trim();
+      const warehouse = WarehouseNoInput.value.trim();
+      const rack = RackNoInput.value.trim();
+      
+      const isValid = code && description && warehouse && rack;
+      
+      // Find the print view button and disable/enable it
+      const printViewButton = document.getElementById('printViewButton');
+      if (printViewButton) {
+        printViewButton.disabled = !isValid;
+        printViewButton.style.opacity = isValid ? '1' : '0.5';
+        printViewButton.style.cursor = isValid ? 'pointer' : 'not-allowed';
+      }
+      
+      return isValid;
+    }
+
+    function showLocationSuggestions(itemCode) {
+      const locations = LOCATION_MAP[itemCode];
+      if (!locations || locations.length === 0) return;
+
+      // Clear previous suggestions
+      warehouseSuggestions.innerHTML = '';
+      rackSuggestions.innerHTML = '';
+
+      // Create warehouse suggestions
+      const uniqueWarehouses = [...new Set(locations.map(loc => loc.warehouse).filter(w => w))];
+      uniqueWarehouses.forEach(warehouse => {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion-item';
+        suggestion.textContent = warehouse;
+        suggestion.onclick = () => {
+          WarehouseNoInput.value = warehouse;
+          warehouseSuggestions.innerHTML = '';
+          warehouseSuggestions.style.display = 'none';
+          
+          // Auto-fill rack if there's only one rack for this warehouse
+          const racksForWarehouse = locations
+            .filter(loc => loc.warehouse === warehouse)
+            .map(loc => loc.rack)
+            .filter(r => r);
+          
+          if (racksForWarehouse.length === 1) {
+            RackNoInput.value = racksForWarehouse[0];
+          } else if (racksForWarehouse.length > 1) {
+            showRackSuggestions(itemCode, warehouse);
+          }
+          
+          validateForm();
+        };
+        warehouseSuggestions.appendChild(suggestion);
+      });
+
+      // Show warehouse suggestions
+      warehouseSuggestions.style.display = 'block';
+    }
+
+    function showRackSuggestions(itemCode, selectedWarehouse) {
+      const locations = LOCATION_MAP[itemCode];
+      if (!locations || locations.length === 0) return;
+
+      const racksForWarehouse = locations
+        .filter(loc => loc.warehouse === selectedWarehouse)
+        .map(loc => loc.rack)
+        .filter(r => r);
+
+      if (racksForWarehouse.length === 0) return;
+
+      // Clear previous suggestions
+      rackSuggestions.innerHTML = '';
+
+      // Create rack suggestions
+      const uniqueRacks = [...new Set(racksForWarehouse)];
+      uniqueRacks.forEach(rack => {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion-item';
+        suggestion.textContent = rack;
+        suggestion.onclick = () => {
+          RackNoInput.value = rack;
+          rackSuggestions.innerHTML = '';
+          rackSuggestions.style.display = 'none';
+          validateForm();
+        };
+        rackSuggestions.appendChild(suggestion);
+      });
+
+      // Show rack suggestions
+      rackSuggestions.style.display = 'block';
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.warehouse-field') && !e.target.closest('.warehouse-suggestions')) {
+        warehouseSuggestions.style.display = 'none';
+      }
+      if (!e.target.closest('.rack-field') && !e.target.closest('.rack-suggestions')) {
+        rackSuggestions.style.display = 'none';
+      }
+    });
+
+    // Input event listeners for warehouse and rack fields
+    WarehouseNoInput.addEventListener('input', function() {
+      validateForm();
+      if (this.value.trim() === '') {
+        warehouseSuggestions.style.display = 'none';
+      }
+    });
+
+    RackNoInput.addEventListener('input', function() {
+      validateForm();
+      if (this.value.trim() === '') {
+        rackSuggestions.style.display = 'none';
+      }
+    });
+
+    // Show suggestions when fields are focused and have existing data
+    WarehouseNoInput.addEventListener('focus', function() {
+      const currentCode = CodeInput.value.trim();
+      if (currentCode && LOCATION_MAP[currentCode] && LOCATION_MAP[currentCode].length > 1) {
+        showLocationSuggestions(currentCode);
+      }
+    });
+
+    RackNoInput.addEventListener('focus', function() {
+      const currentCode = CodeInput.value.trim();
+      const currentWarehouse = WarehouseNoInput.value.trim();
+      if (currentCode && currentWarehouse && LOCATION_MAP[currentCode]) {
+        showRackSuggestions(currentCode, currentWarehouse);
+      }
+    });
+
+    // Add validation to all relevant input fields
+    CodeInput.addEventListener('input', validateForm);
+    DiscriptionInput.addEventListener('input', validateForm);
 
     searchInput.addEventListener('input', (e)=>{
       const query = e.target.value;
@@ -564,10 +777,24 @@ body {
     document.getElementById('printViewButton').addEventListener('click', ()=>{
       const Code = (CodeInput.value||'').trim();
       const Discription = (DiscriptionInput.value||'').trim();
+      const WarehouseNo = (WarehouseNoInput.value||'').trim();
+      const RackNo = (RackNoInput.value||'').trim();
+      
       if (!Discription){
         showMessage('Please select a Profile by Description first.');
         return;
       }
+      
+      if (!WarehouseNo){
+        showMessage('Please enter a Warehouse Number.');
+        return;
+      }
+      
+      if (!RackNo){
+        showMessage('Please enter a Rack Number.');
+        return;
+      }
+      
       const found = PROFILE_DATA.find(p => (p.description||'') === Discription) || PROFILE_DATA.find(p => (p.code||'') === Code);
       if (!found){
         showMessage('Selected profile was not found in loaded data.');
@@ -588,7 +815,9 @@ body {
         barcode: found.barcode || found.code || '',
         image: found.image || '',
         remarks: (RemarksInput.value||'').trim(),
-        labelSize: (labelSizeInput.value||'').trim() || '160x110'
+        labelSize: (labelSizeInput.value||'').trim() || '160x110',
+        warehouseNo: WarehouseNo,
+        rackNo: RackNo
       };
       localStorage.setItem('profilePrintData', JSON.stringify(payload));
       window.open('profile-print-preview.html', '_blank');
@@ -926,8 +1155,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(!r.ok) throw 0;
   return r.json();
 }
-
-); if(!r.ok) throw 0; return r.json(); }
 
   // 1) Local cache + version
   let local = {}, localVersion = null;

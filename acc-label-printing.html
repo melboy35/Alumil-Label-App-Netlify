@@ -98,6 +98,57 @@
     html[data-theme="light"] .suggestions-list li{border-bottom:1px solid #e5e7eb;color:inherit;}
     html[data-theme="light"] .suggestions-list li:hover,.suggestions-list li[aria-selected="true"],.suggestions-list li.is-active{background:#f3f4f6;color:#111827;}
 
+    /* Warehouse and Rack Suggestions */
+    .warehouse-suggestions, .rack-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1f2937;
+      border: 1px solid rgba(148,163,184,.25);
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      margin-top: 4px;
+    }
+    
+    .suggestion-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(148,163,184,.12);
+      font-size: 14px;
+      transition: background-color 0.15s ease;
+    }
+    
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    
+    .suggestion-item:hover {
+      background: #374151;
+    }
+    
+    html[data-theme="light"] .warehouse-suggestions,
+    html[data-theme="light"] .rack-suggestions {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 12px 24px rgba(0,0,0,.08);
+    }
+    
+    html[data-theme="light"] .suggestion-item {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    html[data-theme="light"] .suggestion-item:hover {
+      background: #f3f4f6;
+    }
+    
+    .warehouse-field, .rack-field {
+      position: relative;
+    }
+
     @keyframes header-glow{0%,100%{box-shadow:0 10px 15px -3px rgb(0 0 0 / .2),0 4px 6px -4px rgb(0 0 0 / .2)}50%{box-shadow:0 10px 20px -5px rgba(255,193,7,.2),0 6px 10px -5px rgba(255,193,7,.2)}}
     .animating{animation:header-glow 3s infinite ease-in-out}
 
@@ -240,6 +291,16 @@
               <option value="200x150">200 x 150 mm</option>
               <option value="250x200">250 x 200 mm</option>
             </select>
+          </div>
+          <div class="warehouse-field">
+            <label for="WarehouseNo" class="block text-sm font-medium subtitle-text">Warehouse No <span class="text-red-500">*</span></label>
+            <input id="WarehouseNo" type="text" class="mt-1 block w-full input-field" placeholder="Enter warehouse number" required>
+            <div id="warehouseSuggestions" class="warehouse-suggestions" style="display: none;"></div>
+          </div>
+          <div class="rack-field">
+            <label for="RackNo" class="block text-sm font-medium subtitle-text">Rack No <span class="text-red-500">*</span></label>
+            <input id="RackNo" type="text" class="mt-1 block w-full input-field" placeholder="Enter rack number" required>
+            <div id="rackSuggestions" class="rack-suggestions" style="display: none;"></div>
           </div>
           <div>
             <label for="Remarks" class="block text-sm font-medium subtitle-text">Remarks</label>
@@ -414,6 +475,27 @@
     }
     let accessoryData = loadAccessories();
 
+    // Create location mapping from Excel data for auto-fill
+    let LOCATION_MAP = {};
+    try {
+      const excelCache = JSON.parse(localStorage.getItem('excelCache') || '{}');
+      const accessories = excelCache.accessories || [];
+      
+      accessories.forEach(item => {
+        if (item.code && (item.warehouse || item.rack)) {
+          if (!LOCATION_MAP[item.code]) {
+            LOCATION_MAP[item.code] = [];
+          }
+          LOCATION_MAP[item.code].push({
+            warehouse: item.warehouse || '',
+            rack: item.rack || ''
+          });
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to create location map:', e);
+    }
+
     /* ===== DOM refs ===== */
     const searchInput = document.getElementById('searchInput');
     const suggestionsList = document.getElementById('suggestions');
@@ -423,7 +505,12 @@
     const AccessoryTypeInput = document.getElementById('AccessoryType');
     const QuantityInput = document.getElementById('Quantity');
     const labelSizeInput = document.getElementById('labelSize');
+    const WarehouseNoInput = document.getElementById('WarehouseNo');
+    const RackNoInput = document.getElementById('RackNo');
     const RemarksInput = document.getElementById('Remarks');
+
+    const warehouseSuggestions = document.getElementById('warehouseSuggestions');
+    const rackSuggestions = document.getElementById('rackSuggestions');
 
     const accessoryImage = document.getElementById('accessoryImage');
     const previewCode = document.getElementById('previewCode');
@@ -473,6 +560,8 @@
         CodeInput.value = '';
         DescriptionInput.value = '';
         AccessoryTypeInput.value = '';
+        WarehouseNoInput.value = '';
+        RackNoInput.value = '';
         accessoryImage.referrerPolicy = 'no-referrer';
         accessoryImage.src = placeholder;
 
@@ -485,11 +574,32 @@
         previewDescription.textContent = 'Description: -';
         previewType.textContent = 'Accessory type: -';
         previewQuantity.textContent = 'Qty: ' + (QuantityInput.value || '');
+        validateForm();
         return;
       }
       CodeInput.value = item.code || '';
       DescriptionInput.value = item.description || '';
       AccessoryTypeInput.value = item.type || '';
+
+      // Auto-fill warehouse and rack if available
+      const itemCode = item.code;
+      if (itemCode && LOCATION_MAP[itemCode] && LOCATION_MAP[itemCode].length > 0) {
+        const locations = LOCATION_MAP[itemCode];
+        
+        if (locations.length === 1) {
+          // Single location - auto-fill
+          WarehouseNoInput.value = locations[0].warehouse || '';
+          RackNoInput.value = locations[0].rack || '';
+        } else {
+          // Multiple locations - show suggestions
+          showLocationSuggestions(itemCode);
+        }
+      } else {
+        // No existing location data
+        WarehouseNoInput.value = '';
+        RackNoInput.value = '';
+      }
+
       accessoryImage.referrerPolicy = 'no-referrer';
       accessoryImage.onerror = () => {
         accessoryImage.src = placeholder;
@@ -518,7 +628,146 @@
       previewDescription.textContent = 'Description: ' + (item.description || '-');
       previewType.textContent = 'Accessory type: ' + (item.type || '-');
       previewQuantity.textContent = 'Qty: ' + (QuantityInput.value || '');
+      
+      validateForm();
     }
+
+    function validateForm() {
+      const code = CodeInput.value.trim();
+      const description = DescriptionInput.value.trim();
+      const warehouse = WarehouseNoInput.value.trim();
+      const rack = RackNoInput.value.trim();
+      
+      const isValid = code && description && warehouse && rack;
+      
+      // Find the print view button and disable/enable it
+      const printViewButton = document.getElementById('printViewButton');
+      if (printViewButton) {
+        printViewButton.disabled = !isValid;
+        printViewButton.style.opacity = isValid ? '1' : '0.5';
+        printViewButton.style.cursor = isValid ? 'pointer' : 'not-allowed';
+      }
+      
+      return isValid;
+    }
+
+    function showLocationSuggestions(itemCode) {
+      const locations = LOCATION_MAP[itemCode];
+      if (!locations || locations.length === 0) return;
+
+      // Clear previous suggestions
+      warehouseSuggestions.innerHTML = '';
+      rackSuggestions.innerHTML = '';
+
+      // Create warehouse suggestions
+      const uniqueWarehouses = [...new Set(locations.map(loc => loc.warehouse).filter(w => w))];
+      uniqueWarehouses.forEach(warehouse => {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion-item';
+        suggestion.textContent = warehouse;
+        suggestion.onclick = () => {
+          WarehouseNoInput.value = warehouse;
+          warehouseSuggestions.innerHTML = '';
+          warehouseSuggestions.style.display = 'none';
+          
+          // Auto-fill rack if there's only one rack for this warehouse
+          const racksForWarehouse = locations
+            .filter(loc => loc.warehouse === warehouse)
+            .map(loc => loc.rack)
+            .filter(r => r);
+          
+          if (racksForWarehouse.length === 1) {
+            RackNoInput.value = racksForWarehouse[0];
+          } else if (racksForWarehouse.length > 1) {
+            showRackSuggestions(itemCode, warehouse);
+          }
+          
+          validateForm();
+        };
+        warehouseSuggestions.appendChild(suggestion);
+      });
+
+      // Show warehouse suggestions
+      warehouseSuggestions.style.display = 'block';
+    }
+
+    function showRackSuggestions(itemCode, selectedWarehouse) {
+      const locations = LOCATION_MAP[itemCode];
+      if (!locations || locations.length === 0) return;
+
+      const racksForWarehouse = locations
+        .filter(loc => loc.warehouse === selectedWarehouse)
+        .map(loc => loc.rack)
+        .filter(r => r);
+
+      if (racksForWarehouse.length === 0) return;
+
+      // Clear previous suggestions
+      rackSuggestions.innerHTML = '';
+
+      // Create rack suggestions
+      const uniqueRacks = [...new Set(racksForWarehouse)];
+      uniqueRacks.forEach(rack => {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion-item';
+        suggestion.textContent = rack;
+        suggestion.onclick = () => {
+          RackNoInput.value = rack;
+          rackSuggestions.innerHTML = '';
+          rackSuggestions.style.display = 'none';
+          validateForm();
+        };
+        rackSuggestions.appendChild(suggestion);
+      });
+
+      // Show rack suggestions
+      rackSuggestions.style.display = 'block';
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.warehouse-field') && !e.target.closest('.warehouse-suggestions')) {
+        warehouseSuggestions.style.display = 'none';
+      }
+      if (!e.target.closest('.rack-field') && !e.target.closest('.rack-suggestions')) {
+        rackSuggestions.style.display = 'none';
+      }
+    });
+
+    // Input event listeners for warehouse and rack fields
+    WarehouseNoInput.addEventListener('input', function() {
+      validateForm();
+      if (this.value.trim() === '') {
+        warehouseSuggestions.style.display = 'none';
+      }
+    });
+
+    RackNoInput.addEventListener('input', function() {
+      validateForm();
+      if (this.value.trim() === '') {
+        rackSuggestions.style.display = 'none';
+      }
+    });
+
+    // Show suggestions when fields are focused and have existing data
+    WarehouseNoInput.addEventListener('focus', function() {
+      const currentCode = CodeInput.value.trim();
+      if (currentCode && LOCATION_MAP[currentCode] && LOCATION_MAP[currentCode].length > 1) {
+        showLocationSuggestions(currentCode);
+      }
+    });
+
+    RackNoInput.addEventListener('focus', function() {
+      const currentCode = CodeInput.value.trim();
+      const currentWarehouse = WarehouseNoInput.value.trim();
+      if (currentCode && currentWarehouse && LOCATION_MAP[currentCode]) {
+        showRackSuggestions(currentCode, currentWarehouse);
+      }
+    });
+
+    // Add validation to all relevant input fields
+    CodeInput.addEventListener('input', validateForm);
+    DescriptionInput.addEventListener('input', validateForm);
 
     searchInput.addEventListener('input', (e)=>{
       const query = e.target.value;
@@ -540,10 +789,30 @@
     document.getElementById('printViewButton').addEventListener('click', ()=>{
       const Code = (CodeInput.value || '').trim();
       const Description = (DescriptionInput.value || '').trim();
+      const WarehouseNo = (WarehouseNoInput.value || '').trim();
+      const RackNo = (RackNoInput.value || '').trim();
       const qtyRaw = (QuantityInput.value || '').trim();
-      if (!Code || !Description){ showMessage('Please search/select an accessory first.'); return; }
+      
+      if (!Code || !Description){ 
+        showMessage('Please search/select an accessory first.'); 
+        return; 
+      }
+      
+      if (!WarehouseNo){
+        showMessage('Please enter a Warehouse Number.');
+        return;
+      }
+      
+      if (!RackNo){
+        showMessage('Please enter a Rack Number.');
+        return;
+      }
+      
       const selected = accessoryData.find(a => (a.code || '') === Code);
-      if (!selected){ showMessage('Selected accessory not found in data.'); return; }
+      if (!selected){ 
+        showMessage('Selected accessory not found in data.'); 
+        return; 
+      }
 
       const payload = {
         code: Code,
@@ -555,6 +824,8 @@
         image: selected?.image || '',
         remarks: (RemarksInput.value || '').trim(),
         labelSize: (labelSizeInput.value || '').trim(),
+        warehouseNo: WarehouseNo,
+        rackNo: RackNo,
         // NEW: carry to preview page
         status: selected?.status || '',
         mrpComments: selected?.mrp || ''
@@ -889,8 +1160,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(!r.ok) throw 0;
   return r.json();
 }
-
-); if(!r.ok) throw 0; return r.json(); }
 
   // 1) Local cache + version
   let local = {}, localVersion = null;
