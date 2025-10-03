@@ -69,23 +69,6 @@
     <script>
         // Immediate redirect to login page
         window.location.href = '/login.html';
-        
-        // Logo image switching for dark theme
-        function updateLogo() {
-            const theme = document.documentElement.getAttribute('data-theme');
-            const logoImg = document.querySelector('.alumil-logo');
-            if (logoImg) {
-                if (theme === 'dark') {
-                    logoImg.src = '/assets/images/alumil-logo-white.svg';
-                } else {
-                    logoImg.src = '/assets/images/alumil-logo-light.jpg';
-                }
-                logoImg.style.filter = 'none';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', updateLogo);
-        setTimeout(updateLogo, 200);
     </script>
     
     <style>
@@ -118,11 +101,6 @@
     </style>
 </head>
 <body>
-    <!-- Alumil Logo for Dark Theme -->
-    <div class="alumil-logo-container">
-        <img src="/assets/images/alumil-logo-light.jpg" alt="Alumil Logo" class="alumil-logo">
-    </div>
-    
     <div class="loading">
         <div class="spinner"></div>
         <h2>Alumil Inventory System</h2>

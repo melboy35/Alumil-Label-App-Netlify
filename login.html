@@ -412,54 +412,6 @@
     loginBtn.addEventListener('mouseleave', function() {
       this.style.transform = '';
     });
-    
-    // Logo image switching for dark theme
-    function updateLogo() {
-      const theme = document.documentElement.getAttribute('data-theme');
-      const logoImg = document.querySelector('.alumil-logo');
-      console.log('Theme detected:', theme);
-      console.log('Logo element found:', logoImg);
-      
-      if (logoImg) {
-        if (theme === 'dark') {
-          logoImg.src = 'assets/images/alumil-logo-white.svg';
-          logoImg.style.filter = 'none';
-          console.log('Switched to white logo');
-        } else {
-          logoImg.src = 'assets/images/alumil-logo-light.jpg';
-          logoImg.style.filter = 'none';
-          console.log('Switched to light logo');
-        }
-      }
-    }
-    
-    // Update logo on page load and theme changes
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set theme from localStorage first
-      try {
-        var theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-      
-      // Update logo after theme is set
-      setTimeout(updateLogo, 100);
-      
-      // Also call updateLogo when DOM is ready
-      updateLogo();
-    });
-    
-    const themeObserver = new MutationObserver(updateLogo);
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    });
-    
-    // Multiple fallback calls to ensure logo updates
-    setTimeout(updateLogo, 200);
-    setTimeout(updateLogo, 500);
-    setTimeout(updateLogo, 1000);
   </script>
 
   <!-- Footer -->
