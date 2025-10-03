@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- SVG wrapper that references the final white PNG logo (for dark backgrounds) -->
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80" role="img" aria-label="Alumil logo - white">
-  <title>Alumil logo (white)</title>
-  <image href="alumil-logo-white.png" x="0" y="0" width="320" height="80" preserveAspectRatio="xMinYMid meet" />
-</svg>

@@ -378,17 +378,7 @@
       }
     });
     
-      (function setAlumilLogo(){
-        try{
-          const img = document.querySelector('.alumil-header-logo');
-          if(!img) return;
-          const theme = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme') || 'light';
-          img.src = theme === 'dark' ? (img.dataset.dark || img.getAttribute('data-dark')) : (img.dataset.light || img.getAttribute('data-light'));
-          // observe changes to html[data-theme]
-          const mo = new MutationObserver(()=>{ const next = document.documentElement.getAttribute('data-theme') || 'light'; img.src = next === 'dark' ? (img.dataset.dark || img.getAttribute('data-dark')) : (img.dataset.light || img.getAttribute('data-light')); });
-          mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        }catch(e){ console.warn('logo switch error', e); }
-      })();
+      /* CSS-only logo switching: nothing to run in JS here; markup uses .logo-light and .logo-dark images and CSS shows the correct one based on html[data-theme] */
 
     loginBtn.addEventListener('mouseup', function() {
       this.style.transform = '';
