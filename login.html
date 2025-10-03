@@ -281,7 +281,7 @@
 
     <!-- Alumil Logo for Dark Theme -->
     <div class="logo-container" id="alumil-logo">
-      <img src="assets/images/alumil-logo-dark.jpg" alt="Alumil - Building excellence every day" class="alumil-logo">
+      <img src="assets/images/alumil-logo-light.jpg" alt="Alumil - Building excellence every day" class="alumil-logo">
     </div>
 
     <h1 id="title">Sign In</h1>
@@ -413,15 +413,16 @@
       this.style.transform = '';
     });
     
-    // Logo color management for dark theme
+    // Logo image switching for dark theme
     function updateLogo() {
       const theme = document.documentElement.getAttribute('data-theme');
       const logoImg = document.querySelector('.alumil-logo');
       if (logoImg) {
         if (theme === 'dark') {
-          // Make logo white and crisp for dark theme
-          logoImg.style.filter = 'brightness(0) invert(1) saturate(0) brightness(2.5) contrast(1.2)';
+          logoImg.src = 'assets/images/alumil-logo-white.png';
+          logoImg.style.filter = 'none';
         } else {
+          logoImg.src = 'assets/images/alumil-logo-light.jpg';
           logoImg.style.filter = 'none';
         }
       }

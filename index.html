@@ -70,16 +70,17 @@
         // Immediate redirect to login page
         window.location.href = '/login.html';
         
-        // Logo color management for dark theme
+        // Logo image switching for dark theme
         function updateLogo() {
             const theme = document.documentElement.getAttribute('data-theme');
             const logoImg = document.querySelector('.alumil-logo');
             if (logoImg) {
                 if (theme === 'dark') {
-                    logoImg.style.filter = 'brightness(0) invert(1) saturate(0) brightness(2.5) contrast(1.2)';
+                    logoImg.src = '/assets/images/alumil-logo-white.png';
                 } else {
-                    logoImg.style.filter = 'none';
+                    logoImg.src = '/assets/images/alumil-logo-light.jpg';
                 }
+                logoImg.style.filter = 'none';
             }
         }
         
@@ -119,7 +120,7 @@
 <body>
     <!-- Alumil Logo for Dark Theme -->
     <div class="alumil-logo-container">
-        <img src="/assets/images/alumil-logo-dark.jpg" alt="Alumil Logo" class="alumil-logo">
+        <img src="/assets/images/alumil-logo-light.jpg" alt="Alumil Logo" class="alumil-logo">
     </div>
     
     <div class="loading">
