@@ -107,6 +107,44 @@
     .flag-al { background: #e41e20; }
     .flag-mk { background: linear-gradient(to bottom, #d20000 0%, #d20000 50%, #ffce00 50%); }
 
+    /* Alumil Logo Styles */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    [data-theme="dark"] .logo-container {
+      opacity: 1;
+    }
+    
+    .alumil-logo {
+      max-width: 200px;
+      height: auto;
+    }
+    
+    /* Footer Styles */
+    .alumil-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      padding: 12px 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      z-index: 1000;
+    }
+    
+    .alumil-footer p {
+      margin: 0;
+      font-weight: 500;
+    }
+
     h1 {
       text-align:center; margin: 6px 0 8px; font-size: 24px; font-weight: 600; letter-spacing:.2px;
     }
@@ -240,6 +278,11 @@
       <div class="flag flag-mk" title="North Macedonia"></div>
     </div>
 
+    <!-- Alumil Logo for Dark Theme -->
+    <div class="logo-container" id="alumil-logo">
+      <img src="assets/images/alumil-logo-dark.jpg" alt="Alumil - Building excellence every day" class="alumil-logo">
+    </div>
+
     <h1 id="title">Sign In</h1>
     <p class="subtitle">Access your Inventory Management System</p>
 
@@ -369,5 +412,11 @@
       this.style.transform = '';
     });
   </script>
+
+  <!-- Footer -->
+  <footer class="alumil-footer">
+    <p>Alumil Labeling App @2025</p>
+  </footer>
+
 </body>
 </html>
