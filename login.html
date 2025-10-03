@@ -107,24 +107,6 @@
     .flag-al { background: #e41e20; }
     .flag-mk { background: linear-gradient(to bottom, #d20000 0%, #d20000 50%, #ffce00 50%); }
 
-    /* Alumil Logo Styles */
-    .logo-container {
-      text-align: center;
-      margin-bottom: 20px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    [data-theme="dark"] .logo-container {
-      opacity: 1;
-    }
-    
-    .alumil-logo {
-      max-width: 200px;
-      height: auto;
-      display: block;
-    }
-    
     /* Footer Styles */
     .alumil-footer {
       position: fixed;
@@ -265,10 +247,6 @@
   <div class="bg" aria-hidden="true"></div>
 
   <main class="panel" role="main" aria-labelledby="title">
-    <div class="brand">
-      <img src="alumil-logo.svg" alt="Alumil" onerror="this.style.display='none'" />
-    </div>
-
     <div class="flags" aria-label="Available regions">
       <div class="flag flag-gr" title="Greece"></div>
       <div class="flag flag-ro" title="Romania"></div>
@@ -277,11 +255,6 @@
       <div class="flag flag-rs" title="Serbia"></div>
       <div class="flag flag-al" title="Albania"></div>
       <div class="flag flag-mk" title="North Macedonia"></div>
-    </div>
-
-    <!-- Alumil Logo for Dark Theme -->
-    <div class="logo-container" id="alumil-logo">
-      <img src="assets/images/alumil-logo-light.jpg" alt="Alumil - Building excellence every day" class="alumil-logo">
     </div>
 
     <h1 id="title">Sign In</h1>
