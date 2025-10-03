@@ -1,57 +1,29 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Item Search – Alumil</title>
-    <!-- Favicons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-    <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-    <link rel="shortcut icon" href="/favicon/favicon.ico?v=6">
-    <meta name="msapplication-TileColor" content="#ffc107">
-    <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-    <meta name="theme-color" content="#ffffff">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="https://unpkg.com/lucide@latest" defer></script>
-    <link rel="stylesheet" href="assets/css/logo-theme.css">
-    <!-- Footer Styles -->
-    <style>
-        .alumil-footer {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: #e2e8f0;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: 4rem;
-            border-top: 2px solid #ffc107;
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .alumil-footer p {
-            margin: 0;
-            font-size: 0.875rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-    </style>
-    <style>
-        /* Theme and responsive styles */
-        .dark { background-color: #1e293b; color: #e2e8f0; }
-        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; }
-        .card.dark { background-color: #334155; border-color: #475569; }
-        .title-text { color: #1e293b; }
-        .title-text.dark { color: #f1f5f9; }
-        .subtitle-text { color: #64748b; }
-        .subtitle-text.dark { color: #cbd5e1; }
-        .icon-color { color: #64748b; }
-        .brand-title { color: #1e293b; }
-        .brand-title.dark { color: #f1f5f9; }
-    </style>
-</head>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>Search Inventory – Alumil</title>
+<!-- Favicons -->
+<link href="favicon/apple-touch-icon.png?v=6" rel="apple-touch-icon" sizes="180x180"/>
+<link href="favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<link href="favicon/favicon.ico?v=6" rel="shortcut icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<meta content="#ffffff" name="theme-color"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" referrerpolicy="no-referrer" rel="stylesheet"/>
+<script defer="" src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Footer Styles -->
+<style>
     .alumil-footer {
       position: fixed;
       bottom: 0;
@@ -84,10 +56,20 @@
       padding-bottom: 60px;
     }
     
-    /* Logo switching handled centrally in assets/css/alumil-brand.css */
+    /* Logo Theme Switching */
+    .alumil-header-logo {
+      transition: opacity 0.2s ease;
+    }
+    
+    [data-theme="light"] .alumil-header-logo {
+      content: url('assets/images/alumil-logo-dark.svg');
+    }
+    
+    [data-theme="dark"] .alumil-header-logo {
+      content: url('assets/images/alumil-logo-white.svg');
+    }
   </style>
-
-  <style>
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root { --header-h: 80px; }
@@ -148,8 +130,7 @@ html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
 #alumil-fixed-footer { position: fixed !important; bottom: 0 !important; width: 100% !important; z-index: 999 !important; }
 body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch; }
   </style>
-
-  <script>
+<script>
     (function(){
       try{
         var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
@@ -157,9 +138,8 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
       }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
     })();
   </script>
-
-  <!-- Dynamic header height + subtle extra gap (prevents mobile overlap) -->
-  <script>
+<!-- Dynamic header height + subtle extra gap (prevents mobile overlap) -->
+<script>
     (function(){
       function setHeaderVar(){
         var header = document.getElementById('header');
@@ -182,337 +162,238 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
       }
     })();
   </script>
-</head>
-
-<body class="light">
-  <!-- NOTE: remove horizontal padding on mobile so header can touch edges; keep for >=sm -->
-  <div class="min-h-screen font-sans antialiased px-0 sm:px-8 py-4">
-    <!-- Header -->
-    <header id="header" class="app-header fixed top-0 inset-x-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-none sm:rounded-xl shadow-lg card dark animating">
-      <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-        <div class="logo-container">
-          <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-        </div>
-        <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
-        <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
-      </div>
-      <nav class="flex items-center space-x-4 text-sm sm:text-base">
-        <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Home
-        </a>
-        <a href="admin.html" id="admin-link" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg>
-          Admin
-        </a>
-        <button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" onclick="handleLogout()" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </button>
-        <button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
-          <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </nav>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
-      <!-- Page title row -->
-      <div class="flex items-center justify-between mb-6 gap-4">
-        <h1 class="text-4xl font-bold title-text dark greeting-animation">Inventory Item Search</h1>
-        <div class="flex items-center gap-3 text-xs sm:text-sm">
-          <span id="last-updated" class="hidden sm:inline subtitle-text dark"></span>
-          <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border" id="data-pill">
-            <span id="data-indicator" class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-            <span id="data-source-text">Sample Data</span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Search form -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="lg:col-span-2 card p-6">
-          <h2 class="text-lg font-semibold mb-4 title-text dark">Search Profile or Accessory</h2>
-          <div class="relative">
-            <input type="text" id="search-input" placeholder="Type code, description, or system..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white">
-            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          </div>
-        </div>
-        
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold mb-4 title-text dark">Item Type</h2>
-          <select id="item-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white">
-            <option value="Profile">Profile</option>
-            <option value="Accessory">Accessory</option>
-          </select>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-black font-medium py-2 px-4 rounded-lg transition-colors">
-              <i class="fa-solid fa-file-csv mr-2"></i>CSV
-            </button>
-            <button class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              <i class="fa-solid fa-file-pdf mr-2"></i>PDF
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Results area -->
-      <div id="results-container" class="hidden">
-        <!-- Results will be populated here -->
-      </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="alumil-footer">
-      <p>Alumil Labeling App @2025</p>
-    </footer>
-
-  </div> <!-- End wrapper div -->
-
-<script>
-// Theme toggle functionality
-document.addEventListener('DOMContentLoaded', () => {
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  const body = document.body;
-  
-  // Initialize theme
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  html.setAttribute('data-theme', savedTheme);
-  body.className = savedTheme;
-  
-  themeToggle?.addEventListener('click', () => {
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    html.setAttribute('data-theme', newTheme);
-    body.className = newTheme;
-    localStorage.setItem('theme', newTheme);
-  });
-  
-  // Authentication check
-  if (window.SupabaseAPI) {
-    window.SupabaseAPI.getCurrentUser().then(user => {
-      if (user) {
-        const logoutBtn = document.getElementById('logout-btn');
-        const adminLink = document.getElementById('admin-link');
-        
-        if (logoutBtn) logoutBtn.style.display = 'flex';
-        
-        window.SupabaseAPI.isAdmin().then(isAdmin => {
-          if (isAdmin && adminLink) {
-            adminLink.style.display = 'flex';
-          }
-        });
-      } else {
-        location.href = 'login.html';
-      }
-    });
-  }
-});
-
-// Logout functionality
-async function handleLogout() {
-  if (window.SupabaseAPI) {
-    await window.SupabaseAPI.signOut();
-    location.href = 'login.html';
-  }
+<style>
+    /* Logo theme swap (auto) */
+    .logo-swap { display:inline-flex; align-items:center; gap:.5rem; }
+    .logo-swap .logo-light { display:inline; }
+    .logo-swap .logo-dark  { display:none; }
+    .dark  .logo-swap .logo-light, [data-theme="dark"]  .logo-swap .logo-light { display:none; }
+    .dark  .logo-swap .logo-dark,  [data-theme="dark"]  .logo-swap .logo-dark  { display:inline; }
+    [data-theme="light"] .logo-swap .logo-light { display:inline; }
+    [data-theme="light"] .logo-swap .logo-dark  { display:none; }
+    </style><link as_="image" href="assets/images/alumil-logo-black.png" rel="preload"/><link as_="image" href="assets/images/alumil-logo-white.png" rel="preload"/><style>
+/* Logo theme swap (SVG) */
+.logo-swap { display:inline-flex; align-items:center; gap:.75rem; }
+.logo-swap .logo-light { display:inline; }
+.logo-swap .logo-dark  { display:none; }
+.dark .logo-swap .logo-light, [data-theme="dark"] .logo-swap .logo-light { display:none; }
+.dark .logo-swap .logo-dark,  [data-theme="dark"] .logo-swap .logo-dark  { display:inline; }
+[data-theme="light"] .logo-swap .logo-light { display:inline; }
+[data-theme="light"] .logo-swap .logo-dark  { display:none; }
+.brand-title { white-space:nowrap; }
+</style><link as_="image" href="assets/images/alumil-logo-black.svg" rel="preload"/><link as_="image" href="assets/images/alumil-logo-white.svg" rel="preload"/><style>
+/* Inline SVG logo swap */
+.logo-swap { display:inline-flex; align-items:center; gap:.75rem; }
+.logo-light, .logo-dark { line-height:0; display:inline; }
+.dark .logo-light, [data-theme="dark"] .logo-light { display:none; }
+.dark .logo-dark,  [data-theme="dark"] .logo-dark  { display:inline; }
+[data-theme="light"] .logo-light { display:inline; }
+[data-theme="light"] .logo-dark  { display:none; }
+.logo-swap svg { width:156px; height:auto; display:block; }
+</style><style>
+/* Single-logo dark invert */
+/* Always reference the same black SVG; invert on dark theme only */
+.brand-logo { display:inline-block; width:156px; height:auto; filter:none; vertical-align:middle; }
+.dark .brand-logo, [data-theme="dark"] .brand-logo { filter: invert(1); }
+/* Optional: follow system dark mode if no class/attr is used */
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark):not([data-theme="light"]) .brand-logo { filter: invert(1); }
 }
-</script>
-</body>
-</html>
-  <!-- Page title row -->
-  <div class="flex items-center justify-between mb-6 gap-4">
-    <h1 class="text-3xl font-bold title-text">Inventory Item Search</h1>
-    <div class="flex items-center gap-3 text-xs sm:text-sm">
-      <span id="last-updated" class="hidden sm:inline subtitle-text"></span>
-      <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border" id="data-pill">
-        <span id="data-indicator" class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-        <span id="data-source-text">Sample Data</span>
-      </span>
-    </div>
-  </div>
-
-  <!-- Utility bar -->
-  <div class="sticky-utility card px-3 py-2 mb-3">
-    <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-      <div class="seg inline-flex">
-        <button id="seg-search" class="px-4 py-2" data-active="true"><i class="fa-solid fa-magnifying-glass mr-2"></i> Search</button>
-        <button id="seg-all" class="px-4 py-2">
-          <i class="fa-regular fa-rectangle-list mr-2"></i> View All
-          <span id="seg-count" class="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-black/20">—</span>
-        </button>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button id="filtersBtn" class="btn btn-ghost">
-          <i class="fa-solid fa-sliders"></i>
-          <span id="filtersBtnLabel" class="hidden sm:inline">Filters</span>
-          <kbd class="ml-1 text-[10px] px-1.5 py-0.5 rounded border border-current">F</kbd>
-        </button>
-        <div class="text-xs subtitle-text">
-          <span id="totalLabel">Total profiles:</span>
-          <span id="allCountMirror" class="chip filter ml-1">—</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Active filter chips -->
-  <div id="activeChips" class="flex flex-wrap gap-2 mb-6"></div>
-
-  <!-- Search section -->
-  <section id="search-section" class="card p-6">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto] gap-4 items-end">
-      <div>
-        <label class="block text-sm font-medium subtitle-text mb-1">Search Profile or Accessory</label>
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-          <input id="q" type="search" placeholder="Type code, description, or system…" class="input-field w-full pl-12"/>
-          <div id="sugWrap" class="absolute left-0 right-0 top-full mt-2 z-50 hidden">
-            <ul id="sugList" class="card p-2 max-h-72 overflow-y-auto divide-y divide-slate-700"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="min-w-[220px]">
-        <label class="block text-sm font-medium subtitle-text mb-1">Item Type</label>
-        <select id="kindSel" class="input-field w-full">
-          <option value="profile" selected>Profile</option>
-          <option value="accessory">Accessory</option>
-        </select>
-      </div>
-
-      <div class="flex gap-2">
-        <button id="exportCsvBtn" class="btn btn-amber"><i class="fa-solid fa-file-csv"></i> CSV</button>
-        <button id="exportPdfBtn" class="btn btn-amber"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- View-all section -->
-  <section id="viewall-section" class="card p-6 mt-6 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <div id="browseLabel" class="font-medium">Browsing all profiles</div>
-      <button id="toSearchBtn" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Search</button>
-    </div>
-    <div class="text-sm subtitle-text mb-4">Tip: Press <kbd class="px-1.5 py-0.5 border border-current rounded text-[10px]">F</kbd> to open filters.</div>
-    <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-  </section>
-
-  <!-- Details panel -->
-  <section id="detailsPanel" class="card p-6 mt-6 hidden">
-    <div class="flex flex-col lg:flex-row gap-6">
-      <div class="flex-shrink-0 flex flex-col items-center">
-        <img id="d-img" src="" class="w-48 h-48 object-contain rounded-lg border border-slate-700 bg-white hidden mx-auto" alt="">
-        <div id="d-img-ph" class="img-ph img-ph-lg mx-auto">No image</div>
-
-        <div class="flex flex-col items-center mt-4">
-          <h3 id="d-code" class="text-lg font-semibold"></h3>
-          <span id="d-status-chip" class="chip mt-3"></span>
-        </div>
-      </div>
-
-      <div class="flex-1">
-        <div class="flex gap-4 border-b border-slate-700 mb-4">
-          <button class="tab-btn py-2 font-semibold border-b-2 border-transparent active" data-tab="general">General</button>
-          <button class="tab-btn py-2 font-semibold border-b-2 border-transparent" data-tab="profile-specific" id="profile-accessory-tab-btn">Profile Data</button>
-          <button class="tab-btn py-2 font-semibold border-b-2 border-transparent" data-tab="misc">Misc</button>
-        </div>
-
-        <div id="general-tab" class="tab-content">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><div class="text-xs subtitle-text mb-1">Description</div><div id="d-desc" class="font-medium"></div></div>
-            <div id="d-pdesc-container"><div class="text-xs subtitle-text mb-1">Profile Description</div><div id="d-pdesc">N/A</div></div>
-            <div id="d-alloy-container"><div class="text-xs subtitle-text mb-1">Alloy</div><div id="d-alloy">N/A</div></div>
-            <div id="d-system-container"><div class="text-xs subtitle-text mb-1">System</div><div id="d-system">N/A</div></div>
-            <div id="d-supported-profile-container"><div class="text-xs subtitle-text mb-1">Supported Profile</div><div id="d-supported-profile">N/A</div></div>
-            <div id="d-finish-container"><div class="text-xs subtitle-text mb-1">Finish</div><div id="d-finish">N/A</div></div>
-            <div id="d-length-container"><div class="text-xs subtitle-text mb-1">Length</div><div id="d-length">N/A</div></div>
-            <div id="d-atype-container"><div class="text-xs subtitle-text mb-1">Accessories Type</div><div id="d-atype">N/A</div></div>
-            <div id="d-mrp-container"><div class="text-xs subtitle-text mb-1">MRP Comments</div><div id="d-mrp">N/A</div></div>
-            <div id="d-supplier-container"><div class="text-xs subtitle-text mb-1">Supplier</div><div id="d-supplier">N/A</div></div>
-            <div id="d-uom-container"><div class="text-xs subtitle-text mb-1">UOM</div><div id="d-uom">N/A</div></div>
-            <div id="d-scode-container"><div class="text-xs subtitle-text mb-1">Supplier Code</div><div id="d-scode">N/A</div></div>
-            <div><div class="text-xs subtitle-text mb-1">Warehouse / Rack</div><div id="d-ware-rack">N/A</div></div>
-          </div>
-        </div>
-
-        <div id="profile-specific-tab" class="tab-content hidden">
-          <div id="d-supplier-grid-container" class="mb-4">
-            <div class="text-xs subtitle-text mb-2" id="supplier-title" data-profile-title="Supplier Codes" data-accessory-title="Other colour codes">Supplier Codes</div>
-            <div id="d-supplier-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
-          </div>
-          <div id="d-sides-grid-container" class="mb-4">
-            <div class="text-xs subtitle-text mb-2" id="sides-title" data-profile-title="Sides" data-accessory-title="">Sides</div>
-            <div id="d-sides-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
-          </div>
-          <div id="d-poly-grid-container">
-            <div class="text-xs subtitle-text mb-2" id="poly-title" data-profile-title="Polyamide" data-accessory-title="Other colour codes">Polyamide</div>
-            <div id="d-poly-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
-          </div>
-        </div>
-
-        <div id="misc-tab" class="tab-content hidden">
-          <p class="subtitle-text text-sm">Additional information would go here.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- Filters Sheet -->
-<div id="filtersSheet" class="fixed inset-x-0 top-[calc(var(--header-h)+8px)] z-[60] max-w-7xl mx-auto px-4 sm:px-6 hidden">
-  <div class="card p-4">
-    <div class="flex items-center justify-between mb-3">
-      <div class="font-semibold" id="filtersTitle">Filters</div>
-      <div class="flex gap-2">
-        <button id="resetFilters" class="btn btn-ghost"><i class="fa-solid fa-rotate"></i> Reset</button>
-        <button id="applyFilters" class="btn btn-amber"><i class="fa-solid fa-check"></i> Apply</button>
-        <button id="closeFilters" class="icon-btn" aria-label="Close filters"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-    </div>
-
-    <!-- PROFILE FILTERS -->
-    <div id="profileFilters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-      <div>
-        <label class="block text-xs subtitle-text mb-1">System</label>
-        <select id="f-system" class="input-field w-full"><option value="">Any</option></select>
-      </div>
-      <div>
-        <label class="block text-xs subtitle-text mb-1">Finish</label>
-        <select id="f-finish" class="input-field w-full"><option value="">Any</option></select>
-      </div>
-      <div>
-        <label class="block text-xs subtitle-text mb-1">Alloy</label>
-        <select id="f-alloy" class="input-field w-full"><option value="">Any</option></select>
-      </div>
-      <div>
-        <label class="block text-xs subtitle-text mb-1">Supplier</label>
-        <select id="f-supplier" class="input-field w-full"><option value="">Any</option></select>
-      </div>
-      <div>
-        <label class="block text-xs subtitle-text mb-1">Supported</label>
-        <select id="f-supported" class="input-field w-full">
-          <option value="">Any</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- ACCESSORY FILTERS (Supplier only) -->
-    <div id="accessoryFilters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 hidden">
-      <div>
-        <label class="block text-xs subtitle-text mb-1">Supplier</label>
-        <select id="fa-supplier" class="input-field w-full"><option value="">Any</option></select>
-      </div>
-    </div>
-  </div>
+</style></head>
+<body class="light">
+<header class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card dark animating" id="header"><span><img alt="Alumil logo" class="brand-logo" decoding="async" loading="eager" src="assets/images/alumil-logo-black.svg"/></span>
+<div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
 </div>
-
+<nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      Home
+    </a>
+<a class="flex items-center icon-color font-medium" href="admin.html">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
+    </a>
+<!-- FIXED: IDs now match JS below -->
+<button aria-label="Toggle theme" class="flex items-center icon-color" id="themeToggle" style="margin-left: 0.5rem;" title="Toggle theme">
+<i class="fa-regular fa-moon" id="themeIcon"></i>
+</button>
+</nav>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
+<!-- Page title row -->
+<div class="flex items-center justify-between mb-6 gap-4">
+<h1 class="text-3xl font-bold title-text">Inventory Item Search</h1>
+<div class="flex items-center gap-3 text-xs sm:text-sm">
+<span class="hidden sm:inline subtitle-text" id="last-updated"></span>
+<span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border" id="data-pill">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500" id="data-indicator"></span>
+<span id="data-source-text">Sample Data</span>
+</span>
+</div>
+</div>
+<!-- Utility bar -->
+<div class="sticky-utility card px-3 py-2 mb-3">
+<div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+<div class="seg inline-flex">
+<button class="px-4 py-2" data-active="true" id="seg-search"><i class="fa-solid fa-magnifying-glass mr-2"></i> Search</button>
+<button class="px-4 py-2" id="seg-all">
+<i class="fa-regular fa-rectangle-list mr-2"></i> View All
+          <span class="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-black/20" id="seg-count">—</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="btn btn-ghost" id="filtersBtn">
+<i class="fa-solid fa-sliders"></i>
+<span class="hidden sm:inline" id="filtersBtnLabel">Filters</span>
+<kbd class="ml-1 text-[10px] px-1.5 py-0.5 rounded border border-current">F</kbd>
+</button>
+<div class="text-xs subtitle-text">
+<span id="totalLabel">Total profiles:</span>
+<span class="chip filter ml-1" id="allCountMirror">—</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Active filter chips -->
+<div class="flex flex-wrap gap-2 mb-6" id="activeChips"></div>
+<!-- Search section -->
+<section class="card p-6" id="search-section">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto] gap-4 items-end">
+<div>
+<label class="block text-sm font-medium subtitle-text mb-1">Search Profile or Accessory</label>
+<div class="relative">
+<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+<input class="input-field w-full pl-12" id="q" placeholder="Type code, description, or system…" type="search"/>
+<div class="absolute left-0 right-0 top-full mt-2 z-50 hidden" id="sugWrap">
+<ul class="card p-2 max-h-72 overflow-y-auto divide-y divide-slate-700" id="sugList"></ul>
+</div>
+</div>
+</div>
+<div class="min-w-[220px]">
+<label class="block text-sm font-medium subtitle-text mb-1">Item Type</label>
+<select class="input-field w-full" id="kindSel">
+<option selected="" value="profile">Profile</option>
+<option value="accessory">Accessory</option>
+</select>
+</div>
+<div class="flex gap-2">
+<button class="btn btn-amber" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> CSV</button>
+<button class="btn btn-amber" id="exportPdfBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+</div>
+</div>
+</section>
+<!-- View-all section -->
+<section class="card p-6 mt-6 hidden" id="viewall-section">
+<div class="flex items-center justify-between mb-4">
+<div class="font-medium" id="browseLabel">Browsing all profiles</div>
+<button class="btn btn-ghost" id="toSearchBtn"><i class="fa-solid fa-arrow-left"></i> Back to Search</button>
+</div>
+<div class="text-sm subtitle-text mb-4">Tip: Press <kbd class="px-1.5 py-0.5 border border-current rounded text-[10px]">F</kbd> to open filters.</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="results-grid"></div>
+</section>
+<!-- Details panel -->
+<section class="card p-6 mt-6 hidden" id="detailsPanel">
+<div class="flex flex-col lg:flex-row gap-6">
+<div class="flex-shrink-0 flex flex-col items-center">
+<img alt="" class="w-48 h-48 object-contain rounded-lg border border-slate-700 bg-white hidden mx-auto" id="d-img" src=""/>
+<div class="img-ph img-ph-lg mx-auto" id="d-img-ph">No image</div>
+<div class="flex flex-col items-center mt-4">
+<h3 class="text-lg font-semibold" id="d-code"></h3>
+<span class="chip mt-3" id="d-status-chip"></span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex gap-4 border-b border-slate-700 mb-4">
+<button class="tab-btn py-2 font-semibold border-b-2 border-transparent active" data-tab="general">General</button>
+<button class="tab-btn py-2 font-semibold border-b-2 border-transparent" data-tab="profile-specific" id="profile-accessory-tab-btn">Profile Data</button>
+<button class="tab-btn py-2 font-semibold border-b-2 border-transparent" data-tab="misc">Misc</button>
+</div>
+<div class="tab-content" id="general-tab">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div><div class="text-xs subtitle-text mb-1">Description</div><div class="font-medium" id="d-desc"></div></div>
+<div id="d-pdesc-container"><div class="text-xs subtitle-text mb-1">Profile Description</div><div id="d-pdesc">N/A</div></div>
+<div id="d-alloy-container"><div class="text-xs subtitle-text mb-1">Alloy</div><div id="d-alloy">N/A</div></div>
+<div id="d-system-container"><div class="text-xs subtitle-text mb-1">System</div><div id="d-system">N/A</div></div>
+<div id="d-supported-profile-container"><div class="text-xs subtitle-text mb-1">Supported Profile</div><div id="d-supported-profile">N/A</div></div>
+<div id="d-finish-container"><div class="text-xs subtitle-text mb-1">Finish</div><div id="d-finish">N/A</div></div>
+<div id="d-length-container"><div class="text-xs subtitle-text mb-1">Length</div><div id="d-length">N/A</div></div>
+<div id="d-atype-container"><div class="text-xs subtitle-text mb-1">Accessories Type</div><div id="d-atype">N/A</div></div>
+<div id="d-mrp-container"><div class="text-xs subtitle-text mb-1">MRP Comments</div><div id="d-mrp">N/A</div></div>
+<div id="d-supplier-container"><div class="text-xs subtitle-text mb-1">Supplier</div><div id="d-supplier">N/A</div></div>
+<div id="d-uom-container"><div class="text-xs subtitle-text mb-1">UOM</div><div id="d-uom">N/A</div></div>
+<div id="d-scode-container"><div class="text-xs subtitle-text mb-1">Supplier Code</div><div id="d-scode">N/A</div></div>
+<div><div class="text-xs subtitle-text mb-1">Warehouse / Rack</div><div id="d-ware-rack">N/A</div></div>
+</div>
+</div>
+<div class="tab-content hidden" id="profile-specific-tab">
+<div class="mb-4" id="d-supplier-grid-container">
+<div class="text-xs subtitle-text mb-2" data-accessory-title="Other colour codes" data-profile-title="Supplier Codes" id="supplier-title">Supplier Codes</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" id="d-supplier-grid"></div>
+</div>
+<div class="mb-4" id="d-sides-grid-container">
+<div class="text-xs subtitle-text mb-2" data-accessory-title="" data-profile-title="Sides" id="sides-title">Sides</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="d-sides-grid"></div>
+</div>
+<div id="d-poly-grid-container">
+<div class="text-xs subtitle-text mb-2" data-accessory-title="Other colour codes" data-profile-title="Polyamide" id="poly-title">Polyamide</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="d-poly-grid"></div>
+</div>
+</div>
+<div class="tab-content hidden" id="misc-tab">
+<p class="subtitle-text text-sm">Additional information would go here.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Filters Sheet -->
+<div class="fixed inset-x-0 top-[calc(var(--header-h)+8px)] z-[60] max-w-7xl mx-auto px-4 sm:px-6 hidden" id="filtersSheet">
+<div class="card p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="font-semibold" id="filtersTitle">Filters</div>
+<div class="flex gap-2">
+<button class="btn btn-ghost" id="resetFilters"><i class="fa-solid fa-rotate"></i> Reset</button>
+<button class="btn btn-amber" id="applyFilters"><i class="fa-solid fa-check"></i> Apply</button>
+<button aria-label="Close filters" class="icon-btn" id="closeFilters"><i class="fa-solid fa-xmark"></i></button>
+</div>
+</div>
+<!-- PROFILE FILTERS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="profileFilters">
+<div>
+<label class="block text-xs subtitle-text mb-1">System</label>
+<select class="input-field w-full" id="f-system"><option value="">Any</option></select>
+</div>
+<div>
+<label class="block text-xs subtitle-text mb-1">Finish</label>
+<select class="input-field w-full" id="f-finish"><option value="">Any</option></select>
+</div>
+<div>
+<label class="block text-xs subtitle-text mb-1">Alloy</label>
+<select class="input-field w-full" id="f-alloy"><option value="">Any</option></select>
+</div>
+<div>
+<label class="block text-xs subtitle-text mb-1">Supplier</label>
+<select class="input-field w-full" id="f-supplier"><option value="">Any</option></select>
+</div>
+<div>
+<label class="block text-xs subtitle-text mb-1">Supported</label>
+<select class="input-field w-full" id="f-supported">
+<option value="">Any</option>
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
+</div>
+</div>
+<!-- ACCESSORY FILTERS (Supplier only) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 hidden" id="accessoryFilters">
+<div>
+<label class="block text-xs subtitle-text mb-1">Supplier</label>
+<select class="input-field w-full" id="fa-supplier"><option value="">Any</option></select>
+</div>
+</div>
+</div>
+</div>
 <!-- Toast -->
-<div id="statusMessage" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white bg-emerald-600/90 opacity-0 transition-opacity"></div>
-
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm text-white bg-emerald-600/90 opacity-0 transition-opacity" id="statusMessage"></div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
@@ -525,9 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getTheme(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
   function setTheme(next){
     document.documentElement.setAttribute('data-theme', next);
-        try { localStorage.setItem('alumil:theme', next); localStorage.setItem('theme', next); } catch(e){}
-
-        // logo switching handled by CSS (assets/css/alumil-brand.css)
+    try { localStorage.setItem('alumil:theme', next); localStorage.setItem('theme', next); } catch(e){}
     applyThemeIcon(next);
   }
   applyThemeIcon(getTheme());
@@ -1224,55 +1103,54 @@ document.addEventListener('DOMContentLoaded', () => {
   initialRender();
 });
 </script>
-
 <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
 <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
-<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
-  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-    <span>Home</span>
-  </button>
-  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
-      <path d="M20 7h-9"/>
-      <path d="M14 17h-5"/>
-      <circle cx="17" cy="17" r="3"/>
-      <circle cx="7" cy="7" r="3"/>
-    </svg>
-    <span>Admin</span>
-  </button>
-  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
-      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-    </svg>
-  </button>
-  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
-      <path d="m7.5 4.27 9 5.15"/>
-      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51Z"/>
-      <path d="m3.29 7.39 8.31 3.23"/>
-      <path d="m12 22.95 8.71-3.26"/>
-    </svg>
-    <span>Rack Label</span>
-  </button>
-  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
-      <circle cx="11" cy="11" r="8"/>
-      <path d="m21 21-4.3-4.3"/>
-    </svg>
-    <span>Search</span>
-  </button>
+<nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
+<button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
+</button>
+<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 7h-9"></path>
+<path d="M14 17h-5"></path>
+<circle cx="17" cy="17" r="3"></circle>
+<circle cx="7" cy="7" r="3"></circle>
+</svg>
+<span>Admin</span>
+</button>
+<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+<path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+<path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+<path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+</svg>
+</button>
+<button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m7.5 4.27 9 5.15"></path>
+<path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51Z"></path>
+<path d="m3.29 7.39 8.31 3.23"></path>
+<path d="m12 22.95 8.71-3.26"></path>
+</svg>
+<span>Rack Label</span>
+</button>
+<button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="11" cy="11" r="8"></circle>
+<path d="m21 21-4.3-4.3"></path>
+</svg>
+<span>Search</span>
+</button>
 </nav>
-<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
-  <small>Alumil Inventory App @2025</small>
+<footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">
+<small>Alumil Inventory App @2025</small>
 </footer>
-<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text"/>
 <style>
   .alumil-bottom-nav {
     position: fixed; left: 0; right: 0;
@@ -1363,7 +1241,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }catch(e){}
 })();
 </script>
-
 <script>
 (function(){
   try{
@@ -1377,8 +1254,6 @@ document.addEventListener('DOMContentLoaded', () => {
   try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
 })();
 </script>
-
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1455,14 +1330,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
-
-  <script src="js/sharepoint_loader.js"></script>
-
-  <!-- Footer -->
-  <footer class="alumil-footer">
-    <p>Alumil Labeling App @2025</p>
-  </footer>
-
-  </div> <!-- End wrapper div -->
+<script src="js/sharepoint_loader.js"></script>
+<!-- Footer -->
+<footer class="alumil-footer">
+<p>Alumil Labeling App @2025</p>
+</footer>
 </body>
 </html>
