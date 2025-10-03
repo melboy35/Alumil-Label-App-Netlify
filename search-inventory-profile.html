@@ -16,7 +16,7 @@
 <meta content="#ffc107" name="msapplication-TileColor"/>
 <meta content="favicon/browserconfig.xml?v=6" name="msapplication-config"/>
 <meta content="#ffffff" name="theme-color"/>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script><link href="assets/css/logo-theme.css" rel="stylesheet"/>
 <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" referrerpolicy="no-referrer" rel="stylesheet"/>
 <script defer="" src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -198,33 +198,99 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 @media (prefers-color-scheme: dark) {
   :root:not(.dark):not([data-theme="light"]) .brand-logo { color:#EDEDED; }
 }
+</style><style>    .btn-primary{background:#ffc107;color:#1a1a1a;font-weight:600;padding:.75rem 1.5rem;border-radius:.5rem;transition:background-color .3s,transform .2s}
+    .btn-primary:hover{background:#f59e0b;transform:translateY(-2px)}
+
+    .btn-scan{
+      width:44px;height:44px;border-radius:12px;display:inline-grid;place-items:center;
+      background:#facc15; color:#111827; border:none;
+      box-shadow:0 0 0 0 rgba(250,204,21,0);
+      transition:transform .15s, box-shadow .2s, background .2s;
+    }
+    .btn-scan:hover{
+      background:#f59e0b;
+      box-shadow:0 0 0 6px rgba(250,204,21,.18);
+    }
+    .btn-scan:active{ transform:translateY(1px) scale(.98); }
+    html[data-theme="light"] .btn-scan{ color:#111827; }
+
+    .no-scroll{overflow:hidden;touch-action:none}
+
+    /* Scanner modal */
+    .modal{
+      display:none; position:fixed; inset:0; z-index:100;
+      place-items:center; padding:16px;
+      background:rgba(0,0,0,.6);
+      -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+      opacity:0; transition:opacity .2s; overscroll-behavior:contain;
+    }
+    .modal.open{display:grid;opacity:1}
+    .modal-panel{
+      width:92vw; max-width:720px; background:#111827; border:1px solid #374151; border-radius:1rem; padding:1rem;
+      max-height:min(90svh,720px); max-height:calc(100dvh - 2rem); overflow:auto;
+      padding-bottom:calc(1rem + env(safe-area-inset-bottom));
+    }
+    .video-wrap{position:relative;overflow:hidden;border-radius:.75rem;background:#000}
+    #scanVideo{width:100%;height:auto;display:block}
+    .scan-line{position:absolute;left:0;right:0;top:50%;height:2px;background:#22c55e;box-shadow:0 0 12px #22c55e;animation:scan 2s linear infinite}
+    @keyframes scan{0%{top:15%}50%{top:85%}100%{top:15%}}
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+    }
+  
+/* --- Fixed bottom navigation always visible --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+#alumil-bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+#alumil-fixed-footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  z-index: 999 !important;
+}
+body {
+  position: relative;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+}
 </style></head>
 <body class="light">
-<header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card dark animating">
-        <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-            <div class="logo-container">
-              <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-            </div>
-            <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
-            <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
-        </div>
-        <nav class="flex items-center space-x-4 text-sm sm:text-base">
-<a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+<header class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card dark animating" id="header">
+<div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+<span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
+<span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
+</div>
+<nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </a>
-            <a href="admin.html" class="flex items-center icon-color font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg> Admin
+<a class="flex items-center icon-color font-medium" href="admin.html">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
             </a>
-        
 <div class="flex items-center gap-2">
-      <!-- Theme toggle -->
-      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
-        <i class="fa-regular fa-moon" id="themeIcon"></i>
-      </button>
-
-</nav>
-    </header>
+<!-- Theme toggle -->
+<button aria-label="Toggle theme" class="icon-btn" id="themeToggle">
+<i class="fa-regular fa-moon" id="themeIcon"></i>
+</button>
+</div></nav>
+</header>
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
 <!-- Page title row -->
 <div class="flex items-center justify-between mb-6 gap-4">
@@ -283,8 +349,8 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 </select>
 </div>
 <div class="flex gap-2">
-<button class="btn btn-amber" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> CSV</button>
-<button class="btn btn-amber" id="exportPdfBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+<button class="btn btn-primary" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> CSV</button>
+<button class="btn btn-primary" id="exportPdfBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button>
 </div>
 </div>
 </section>
@@ -301,13 +367,13 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <section class="card p-6 mt-6 hidden" id="detailsPanel">
 <div class="flex flex-col lg:flex-row gap-6">
 <div class="flex-shrink-0 flex flex-col items-center">
-<img alt="" class="w-48 h-48 object-contain rounded-lg border border-slate-700 bg-white hidden mx-auto" id="d-img" src="">
+<img alt="" class="w-48 h-48 object-contain rounded-lg border border-slate-700 bg-white hidden mx-auto" id="d-img" src=""/>
 <div class="img-ph img-ph-lg mx-auto" id="d-img-ph">No image</div>
 <div class="flex flex-col items-center mt-4">
 <h3 class="text-lg font-semibold" id="d-code"></h3>
 <span class="chip mt-3" id="d-status-chip"></span>
 </div>
-</img></div>
+</div>
 <div class="flex-1">
 <div class="flex gap-4 border-b border-slate-700 mb-4">
 <button class="tab-btn py-2 font-semibold border-b-2 border-transparent active" data-tab="general">General</button>
@@ -359,7 +425,7 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <div class="font-semibold" id="filtersTitle">Filters</div>
 <div class="flex gap-2">
 <button class="btn btn-ghost" id="resetFilters"><i class="fa-solid fa-rotate"></i> Reset</button>
-<button class="btn btn-amber" id="applyFilters"><i class="fa-solid fa-check"></i> Apply</button>
+<button class="btn btn-primary" id="applyFilters"><i class="fa-solid fa-check"></i> Apply</button>
 <button aria-label="Close filters" class="icon-btn" id="closeFilters"><i class="fa-solid fa-xmark"></i></button>
 </div>
 </div>
@@ -1129,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </svg>
 <span>Admin</span>
 </button>
-<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<button aria-label="Barcode scan (open)" class="btn-scan" id="alumil-scan-btn">
 <svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
 <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
 <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
