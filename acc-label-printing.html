@@ -46,13 +46,24 @@
       font-weight: 500;
     }
     
-    /* Add bottom padding to main content to account for fixed footer */
-    main, body {
-      padding-bottom: 60px;
-    }
-  </style>
-
-  <!-- Tailwind -->
+  /* Add bottom padding to main content to account for fixed footer */
+  main, body {
+    padding-bottom: 60px;
+  }
+  
+  /* Logo Theme Switching */
+  .alumil-header-logo {
+    transition: opacity 0.2s ease;
+  }
+  
+  [data-theme="light"] .alumil-header-logo {
+    content: url('assets/images/alumil-logo-dark.svg');
+  }
+  
+  [data-theme="dark"] .alumil-header-logo {
+    content: url('assets/images/alumil-logo-white.svg');
+  }
+</style>  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Icons & libs -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -242,8 +253,10 @@
 
 <body>
 <header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card dark animating">
-  <div class="flex items-center space-x-3 mb-4 sm:mb-0">
-    <span class="brand-title font-semibold text-2xl tracking-tight">Alumil Inventory System</span>
+  <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
+    <img src="alumil-logo.svg" alt="Alumil logo" class="h-8 sm:h-9 w-auto select-none alumil-header-logo" loading="eager" decoding="async">
+    <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
+    <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
   </div>
   <nav class="flex items-center space-x-4 text-sm sm:text-base">
     <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
