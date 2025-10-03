@@ -122,10 +122,7 @@
     .alumil-logo {
       max-width: 200px;
       height: auto;
-    }
-    
-    [data-theme="dark"] .alumil-logo {
-      filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+      display: block;
     }
     
     /* Footer Styles */
@@ -415,6 +412,31 @@
     loginBtn.addEventListener('mouseleave', function() {
       this.style.transform = '';
     });
+    
+    // Logo color management for dark theme
+    function updateLogo() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const logoImg = document.querySelector('.alumil-logo');
+      if (logoImg) {
+        if (theme === 'dark') {
+          // Make logo white and crisp for dark theme
+          logoImg.style.filter = 'brightness(0) invert(1) saturate(0) brightness(2.5) contrast(1.2)';
+        } else {
+          logoImg.style.filter = 'none';
+        }
+      }
+    }
+    
+    // Update logo on page load and theme changes
+    document.addEventListener('DOMContentLoaded', updateLogo);
+    const themeObserver = new MutationObserver(updateLogo);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+    
+    // Call updateLogo after theme is set
+    setTimeout(updateLogo, 200);
   </script>
 
   <!-- Footer -->

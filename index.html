@@ -36,11 +36,6 @@
         .alumil-logo {
             width: 120px;
             height: auto;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        
-        [data-theme="dark"] .alumil-logo {
-            filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
         }
         
         .alumil-footer {
@@ -74,6 +69,22 @@
     <script>
         // Immediate redirect to login page
         window.location.href = '/login.html';
+        
+        // Logo color management for dark theme
+        function updateLogo() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const logoImg = document.querySelector('.alumil-logo');
+            if (logoImg) {
+                if (theme === 'dark') {
+                    logoImg.style.filter = 'brightness(0) invert(1) saturate(0) brightness(2.5) contrast(1.2)';
+                } else {
+                    logoImg.style.filter = 'none';
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateLogo);
+        setTimeout(updateLogo, 200);
     </script>
     
     <style>
