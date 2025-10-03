@@ -342,9 +342,27 @@
   <!-- Greeting -->
   <script>
     function getGreeting(){ const hour = new Date().getHours(); if (hour < 12) return 'Good morning'; if (hour < 18) return 'Good afternoon'; return 'Good evening'; }
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const greetingElement = document.getElementById('greeting').querySelector('h1');
-      const userName = 'John Doe';
+      let userName = 'User';
+      
+      // Get user's name from Supabase authentication
+      if (window.SupabaseAPI) {
+        try {
+          const user = await window.SupabaseAPI.getCurrentUser();
+          if (user && user.user_metadata) {
+            // Try to get full name first, then fall back to email or display name
+            userName = user.user_metadata.full_name || 
+                      user.user_metadata.name || 
+                      user.user_metadata.display_name ||
+                      user.email?.split('@')[0] || 
+                      'User';
+          }
+        } catch (error) {
+          console.log('Could not fetch user data:', error);
+        }
+      }
+      
       greetingElement.textContent = `${getGreeting()}, ${userName}!`;
     });
   </script>
