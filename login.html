@@ -23,6 +23,16 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
+  <!-- Theme initialization -->
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+  
   <style>
     :root {
       --panel-bg: rgba(60, 60, 60, 0.55);
@@ -81,10 +91,17 @@
 
     .brand {
       display:flex; align-items:center; justify-content:center;
-      margin-bottom: 14px;
+      margin-bottom: 20px;
       user-select:none;
     }
-    .brand img { height: 40px; opacity: .95; }
+    .brand img { 
+      height: 40px; 
+      opacity: .95;
+      filter: brightness(0) invert(1); /* Make logo white for dark theme */
+    }
+    html[data-theme="light"] .brand img {
+      filter: none; /* Show normal logo for light theme */
+    }
 
     .flags {
       display:flex; gap: 10px; justify-content:center; margin: 8px 0 18px;
@@ -247,6 +264,11 @@
   <div class="bg" aria-hidden="true"></div>
 
   <main class="panel" role="main" aria-labelledby="title">
+    <!-- Adding the brand logo section -->
+    <div class="brand">
+      <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager" style="height:40px;">
+    </div>
+    
     <div class="flags" aria-label="Available regions">
       <div class="flag flag-gr" title="Greece"></div>
       <div class="flag flag-ro" title="Romania"></div>
