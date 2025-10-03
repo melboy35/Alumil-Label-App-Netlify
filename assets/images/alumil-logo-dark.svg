@@ -1,36 +1,7 @@
-<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dark Alumil Logo for Light Theme -->
-  <defs>
-    <style>
-      .logo-text { 
-        fill: #2c3e50; 
-        font-family: 'Arial', 'Helvetica', sans-serif; 
-        font-weight: bold; 
-      }
-      .logo-accent { 
-        fill: #ffc107; 
-      }
-      .tagline { 
-        fill: #666; 
-        font-family: 'Arial', 'Helvetica', sans-serif; 
-        font-weight: 300; 
-        opacity: 0.8;
-      }
-    </style>
-  </defs>
-  
-  <!-- Building block logo element -->
-  <g transform="translate(10, 15)">
-    <!-- Main geometric shape -->
-    <rect x="0" y="0" width="30" height="30" fill="#2c3e50" opacity="0.9" rx="3"/>
-    <rect x="3" y="3" width="24" height="24" fill="#ffc107" rx="2"/>
-    <!-- Accent triangle -->
-    <polygon points="21,3 30,3 30,12" fill="#2c3e50" opacity="0.7"/>
-  </g>
-  
-  <!-- "Alumil" text -->
-  <text x="55" y="40" class="logo-text" font-size="28">Alumil</text>
-  
-  <!-- Building excellence tagline -->
-  <text x="55" y="58" class="tagline" font-size="10">Building excellence every day</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG wrapper that references the final dark PNG logo (for light backgrounds) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80" role="img" aria-label="Alumil logo - dark">
+  <title>Alumil logo (dark)</title>
+  <!-- Use the PNG asset so designers can supply raster artwork. The path is relative to this SVG. -->
+  <image href="alumil-logo-dark.png" x="0" y="0" width="320" height="80" preserveAspectRatio="xMinYMid meet" />
 </svg>
