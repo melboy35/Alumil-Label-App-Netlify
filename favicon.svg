@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512">
-  <!-- Yellow chevron/arrow favicon based on Alumil branding -->
+  <!-- Yellow Alumil arrow favicon -->
   <rect width="512" height="512" fill="transparent"/>
-  <path d="M93 94 L419 256 L93 418" fill="#FFD700" stroke="#FF9900" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Main arrow shape inspired by Alumil yellow design -->
+  <path d="M256 50 L450 256 L350 256 L350 400 L162 400 L162 256 L62 256 Z" fill="#ffc107"/>
+  <!-- Shadow/depth effect -->
+  <path d="M350 256 L450 256 L350 356 L350 400 L256 306 Z" fill="#f59e0b"/>
+  <!-- Highlight -->
+  <path d="M162 256 L256 162 L350 256 L350 300 L256 206 L162 300 Z" fill="#ffd54f"/>
 </svg>
