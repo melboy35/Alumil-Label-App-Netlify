@@ -19,9 +19,9 @@
   filter: none;
 }
 
-/* Dark theme: invert colors to make logo white */
+/* Dark theme: invert colors and adjust to off-white */
 html[data-theme="dark"] .logo-container img {
-  filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1) brightness(0.9);
 }
 
 /* Responsive sizing */

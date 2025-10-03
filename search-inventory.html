@@ -1,30 +1,56 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Search Inventory – Alumil</title>
-
-  <!-- Favicons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=6">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png?v=6">
-  <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg?v=6">
-  <link rel="manifest" href="favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <link rel="shortcut icon" href="favicon/favicon.ico?v=6">
-  <meta name="msapplication-TileColor" content="#ffc107">
-  <meta name="msapplication-config" content="favicon/browserconfig.xml?v=6">
-  <meta name="theme-color" content="#ffffff">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-  <script src="https://unpkg.com/lucide@latest" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-  <!-- Footer Styles -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Item Search – Alumil</title>
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
+    <link rel="manifest" href="/favicon/site.webmanifest?v=6">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
+    <link rel="shortcut icon" href="/favicon/favicon.ico?v=6">
+    <meta name="msapplication-TileColor" content="#ffc107">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link rel="stylesheet" href="assets/css/logo-theme.css">
+    <!-- Footer Styles -->
+    <style>
+        .alumil-footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 4rem;
+            border-top: 2px solid #ffc107;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .alumil-footer p {
+            margin: 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+    </style>
+    <style>
+        /* Theme and responsive styles */
+        .dark { background-color: #1e293b; color: #e2e8f0; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; }
+        .card.dark { background-color: #334155; border-color: #475569; }
+        .title-text { color: #1e293b; }
+        .title-text.dark { color: #f1f5f9; }
+        .subtitle-text { color: #64748b; }
+        .subtitle-text.dark { color: #cbd5e1; }
+        .icon-color { color: #64748b; }
+        .brand-title { color: #1e293b; }
+        .brand-title.dark { color: #f1f5f9; }
+    </style>
+</head>
   <style>
     .alumil-footer {
       position: fixed;
@@ -179,6 +205,10 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg>
           Admin
         </a>
+        <button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" onclick="handleLogout()" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
         <button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
           <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
@@ -186,6 +216,110 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
     </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
+      <!-- Page title row -->
+      <div class="flex items-center justify-between mb-6 gap-4">
+        <h1 class="text-4xl font-bold title-text dark greeting-animation">Inventory Item Search</h1>
+        <div class="flex items-center gap-3 text-xs sm:text-sm">
+          <span id="last-updated" class="hidden sm:inline subtitle-text dark"></span>
+          <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border" id="data-pill">
+            <span id="data-indicator" class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+            <span id="data-source-text">Sample Data</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Search form -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="lg:col-span-2 card p-6">
+          <h2 class="text-lg font-semibold mb-4 title-text dark">Search Profile or Accessory</h2>
+          <div class="relative">
+            <input type="text" id="search-input" placeholder="Type code, description, or system..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold mb-4 title-text dark">Item Type</h2>
+          <select id="item-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+            <option value="Profile">Profile</option>
+            <option value="Accessory">Accessory</option>
+          </select>
+          <div class="flex gap-2 mt-4">
+            <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-black font-medium py-2 px-4 rounded-lg transition-colors">
+              <i class="fa-solid fa-file-csv mr-2"></i>CSV
+            </button>
+            <button class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+              <i class="fa-solid fa-file-pdf mr-2"></i>PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results area -->
+      <div id="results-container" class="hidden">
+        <!-- Results will be populated here -->
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="alumil-footer">
+      <p>Alumil Labeling App @2025</p>
+    </footer>
+
+  </div> <!-- End wrapper div -->
+
+<script>
+// Theme toggle functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  const body = document.body;
+  
+  // Initialize theme
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  html.setAttribute('data-theme', savedTheme);
+  body.className = savedTheme;
+  
+  themeToggle?.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.setAttribute('data-theme', newTheme);
+    body.className = newTheme;
+    localStorage.setItem('theme', newTheme);
+  });
+  
+  // Authentication check
+  if (window.SupabaseAPI) {
+    window.SupabaseAPI.getCurrentUser().then(user => {
+      if (user) {
+        const logoutBtn = document.getElementById('logout-btn');
+        const adminLink = document.getElementById('admin-link');
+        
+        if (logoutBtn) logoutBtn.style.display = 'flex';
+        
+        window.SupabaseAPI.isAdmin().then(isAdmin => {
+          if (isAdmin && adminLink) {
+            adminLink.style.display = 'flex';
+          }
+        });
+      } else {
+        location.href = 'login.html';
+      }
+    });
+  }
+});
+
+// Logout functionality
+async function handleLogout() {
+  if (window.SupabaseAPI) {
+    await window.SupabaseAPI.signOut();
+    location.href = 'login.html';
+  }
+}
+</script>
+</body>
+</html>
   <!-- Page title row -->
   <div class="flex items-center justify-between mb-6 gap-4">
     <h1 class="text-3xl font-bold title-text">Inventory Item Search</h1>
