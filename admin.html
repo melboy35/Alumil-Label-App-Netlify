@@ -183,7 +183,7 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <div class="min-h-screen font-sans antialiased p-4 sm:p-8">
     <header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 rounded-xl shadow-lg card animating">
         <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-            <img src="alumil-logo.svg" alt="Alumil logo" class="h-8 sm:h-9 w-auto select-none alumil-header-logo" loading="eager" decoding="async">
+            <img src="assets/images/alumil-logo-dark.svg" alt="Alumil logo" class="h-8 sm:h-9 w-auto select-none alumil-header-logo" loading="eager" decoding="async" data-light="assets/images/alumil-logo-dark.svg" data-dark="assets/images/alumil-logo-white.svg">
             <span class="brand-title font-semibold text-lg sm:text-xl lg:text-2xl tracking-tight leading-tight hidden sm:inline">Alumil Inventory System</span>
             <span class="brand-title font-semibold text-sm tracking-tight leading-tight sm:hidden">Alumil</span>
         </div>
@@ -654,6 +654,16 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <script>
     !function () {
         const KEY = "alumil:sysinfo";
+        (function setAlumilLogo(){
+          try{
+            const img = document.querySelector('.alumil-header-logo');
+            if(!img) return;
+            const theme = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme') || 'light';
+            img.src = theme === 'dark' ? (img.dataset.dark || img.getAttribute('data-dark')) : (img.dataset.light || img.getAttribute('data-light'));
+            const mo = new MutationObserver(()=>{ const next = document.documentElement.getAttribute('data-theme') || 'light'; img.src = next === 'dark' ? (img.dataset.dark || img.getAttribute('data-dark')) : (img.dataset.light || img.getAttribute('data-light')); });
+            mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+          }catch(e){ console.warn('logo switch error', e); }
+        })();
 
         /* ---------- NEW: modal chip + quick stats helpers ---------- */
         const countProfilesEl = () => document.getElementById("count-profiles");
