@@ -1,0 +1,46 @@
+/* Logo theme switching CSS */
+.logo-container {
+  display: inline-block;
+  width: 180px;
+  height: auto;
+  line-height: 0;
+}
+
+.logo-container img {
+  width: 100%;
+  height: auto;
+  max-height: 50px;
+  object-fit: contain;
+  transition: filter 0.3s ease;
+}
+
+/* Default: black logo for light theme */
+.logo-container img {
+  filter: none;
+}
+
+/* Dark theme: invert colors to make logo white */
+html[data-theme="dark"] .logo-container img {
+  filter: brightness(0) invert(1);
+}
+
+/* Responsive sizing */
+@media (max-width: 640px) {
+  .logo-container {
+    width: 140px;
+  }
+  
+  .logo-container img {
+    max-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-container {
+    width: 120px;
+  }
+  
+  .logo-container img {
+    max-height: 35px;
+  }
+}
