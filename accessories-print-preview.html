@@ -1,29 +1,27 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Accessories Label – Print Preview (100×50)</title>
-
-  <!-- Favicons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-  <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <link rel="shortcut icon" href="/favicon/favicon.ico?v=6">
-  <meta name="msapplication-TileColor" content="#ffc107">
-  <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="assets/css/logo-theme.css">
-  <!-- Brand CSS removed -->
-  
-  <!-- Tailwind only for the (admin) control bar -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>Accessories Label – Print Preview (100×50)</title>
+<!-- Favicons -->
+<link href="/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<link href="/favicon/favicon.ico?v=6" rel="shortcut icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="/favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="assets/css/logo-theme.css" rel="stylesheet"/>
+<!-- Brand CSS removed -->
+<!-- Tailwind only for the (admin) control bar -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
     :root{
       /* Fixed label size */
       --label-w-mm: 100;
@@ -149,105 +147,92 @@
 
     body.no-admin .controls { display:none; }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="page">
-    <div class="label" aria-label="Printable label 100×50 mm">
-      <!-- HEADER -->
-      <div class="head">
-  <div class="brand">
-    <div class="logo-container">
-      <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-    </div>
-  </div>
-        <div class="barcode-wrap">
-          <svg id="barcode"></svg>
-          <div id="code-under" class="code-under">—</div>
-        </div>
-      </div>
-
-      <!-- BODY -->
-      <div class="body">
-        <!-- IMAGE -->
-        <div class="photo-wrap">
-          <div id="photoBox" class="photo-box" data-zoom="off">
-            <img id="item-photo" src="https://placehold.co/480x320/ffffff/111111?text=No+Image" alt="Accessory image">
-          </div>
-        </div>
-
-        <!-- DETAILS (Description uses hanging-label layout) -->
-        <div id="kv" class="kv">
-          <!-- NEW: hanging row so wrapped lines start under the "Description" label -->
-          <div class="row row--hang" data-k="Description"><div id="v-desc" class="v">—</div></div>
-
-          <div class="row"><div class="k">Type</div><div id="v-type" class="v">—</div></div>
-          <div class="row"><div class="k">Quantity</div><div id="v-qty" class="v">—</div></div>
-          <div class="row"><div class="k">Remarks</div><div id="v-remarks" class="v">—</div></div>
-          <div class="row"><div class="k">Generated</div><div id="v-generated" class="v">—</div></div>
-        </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="foot">
-        <div>Alumil Inventory</div>
-        <div id="foot-right">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ADMIN-ONLY CONTROLS (override when needed) -->
-  <div class="controls">
-    <div class="inner">
-      <div class="grp">
-        <label>Image width</label>
-        <input id="imgW" type="range" min="30" max="60" step="1" value="38">
-        <span id="imgWVal" class="text-xs text-gray-300">38%</span>
-      </div>
-      <div class="grp">
-        <label>Image height</label>
-        <input id="imgH" type="range" min="40" max="95" step="1" value="68">
-        <span id="imgHVal" class="text-xs text-gray-300">68%</span>
-      </div>
-      <div class="grp">
-        <label class="inline-flex items-center gap-2">
-          <input id="zoomToggle" type="checkbox">
-          Keep box size & zoom image
+<div class="page">
+<div aria-label="Printable label 100×50 mm" class="label">
+<!-- HEADER -->
+<div class="head">
+<div class="brand">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+</div>
+<div class="barcode-wrap">
+<svg id="barcode"></svg>
+<div class="code-under" id="code-under">—</div>
+</div>
+</div>
+<!-- BODY -->
+<div class="body">
+<!-- IMAGE -->
+<div class="photo-wrap">
+<div class="photo-box" data-zoom="off" id="photoBox">
+<img alt="Accessory image" id="item-photo" src="https://placehold.co/480x320/ffffff/111111?text=No+Image"/>
+</div>
+</div>
+<!-- DETAILS (Description uses hanging-label layout) -->
+<div class="kv" id="kv">
+<!-- NEW: hanging row so wrapped lines start under the "Description" label -->
+<div class="row row--hang" data-k="Description"><div class="v" id="v-desc">—</div></div>
+<div class="row"><div class="k">Type</div><div class="v" id="v-type">—</div></div>
+<div class="row"><div class="k">Quantity</div><div class="v" id="v-qty">—</div></div>
+<div class="row"><div class="k">Remarks</div><div class="v" id="v-remarks">—</div></div>
+<div class="row"><div class="k">Generated</div><div class="v" id="v-generated">—</div></div>
+</div>
+</div>
+<!-- FOOTER -->
+<div class="foot">
+<div>Alumil Inventory</div>
+<div id="foot-right">—</div>
+</div>
+</div>
+</div>
+<!-- ADMIN-ONLY CONTROLS (override when needed) -->
+<div class="controls">
+<div class="inner">
+<div class="grp">
+<label>Image width</label>
+<input id="imgW" max="60" min="30" step="1" type="range" value="38"/>
+<span class="text-xs text-gray-300" id="imgWVal">38%</span>
+</div>
+<div class="grp">
+<label>Image height</label>
+<input id="imgH" max="95" min="40" step="1" type="range" value="68"/>
+<span class="text-xs text-gray-300" id="imgHVal">68%</span>
+</div>
+<div class="grp">
+<label class="inline-flex items-center gap-2">
+<input id="zoomToggle" type="checkbox"/>
+          Keep box size &amp; zoom image
         </label>
-        <label>Zoom</label>
-        <input id="imgZoom" type="range" min="100" max="220" step="5" value="100" disabled>
-        <span id="imgZoomVal" class="text-xs text-gray-300">100%</span>
-      </div>
-
-      <div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
-
-      <div class="grp">
-        <label>Barcode height</label>
-        <input id="bcH" type="range" min="28" max="70" step="2" value="42">
-        <label>Thickness</label>
-        <input id="bcW" type="range" min="1" max="4" step="0.2" value="2">
-      </div>
-
-      <div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
-
-      <div class="grp">
-        <label>Details size</label>
-        <input id="kvSize" type="range" min="6.5" max="9.5" step="0.1" value="8.0">
-        <span id="kvSizeVal" class="text-xs text-gray-300">8.0pt</span>
-      </div>
-
-      <div class="spacer"></div>
-
-      <div class="grp">
-        <button id="btnResetLayout" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reset image layout</button>
-        <button id="btnReload" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reload</button>
-        <button id="btnPrint" class="px-3 py-1.5 rounded bg-amber-500 text-black font-semibold text-sm">Print</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
+<label>Zoom</label>
+<input disabled="" id="imgZoom" max="220" min="100" step="5" type="range" value="100"/>
+<span class="text-xs text-gray-300" id="imgZoomVal">100%</span>
+</div>
+<div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
+<div class="grp">
+<label>Barcode height</label>
+<input id="bcH" max="70" min="28" step="2" type="range" value="42"/>
+<label>Thickness</label>
+<input id="bcW" max="4" min="1" step="0.2" type="range" value="2"/>
+</div>
+<div class="grp"><span class="w-px h-6 bg-white/20"></span></div>
+<div class="grp">
+<label>Details size</label>
+<input id="kvSize" max="9.5" min="6.5" step="0.1" type="range" value="8.0"/>
+<span class="text-xs text-gray-300" id="kvSizeVal">8.0pt</span>
+</div>
+<div class="spacer"></div>
+<div class="grp">
+<button class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm" id="btnResetLayout">Reset image layout</button>
+<button class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm" id="btnReload">Reload</button>
+<button class="px-3 py-1.5 rounded bg-amber-500 text-black font-semibold text-sm" id="btnPrint">Print</button>
+</div>
+</div>
+</div>
+<script>
     /* ---------- Admin gate ---------- */
     function isAdmin() {
       try {
@@ -475,7 +460,6 @@
     document.getElementById('btnReload')?.addEventListener('click', ()=> fillFromPayload(getPayload()));
     document.getElementById('btnPrint')?.addEventListener('click', ()=> window.print());
   </script>
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -552,7 +536,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+<script src="js/sharepoint_loader.js"></script>
 
-  <script src="js/sharepoint_loader.js"></script>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
+
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>

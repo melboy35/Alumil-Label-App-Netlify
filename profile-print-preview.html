@@ -1,29 +1,27 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Profile Label – Print Preview (Free Layout)</title>
-
-  <!-- Favicons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-  <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <link rel="shortcut icon" href="/favicon/favicon.ico?v=6">
-  <meta name="msapplication-TileColor" content="#ffc107">
-  <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-  <meta name="theme-color" content="#ffc107">
-  
-  <!-- Tailwind for control bar only -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- JsBarcode -->
-  <script src="https://unpkg.com/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-
-  <!-- Admin via URL (enable: ?admin=1, disable: ?admin=0 or ?admin=clear) -->
-  <script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>Profile Label – Print Preview (Free Layout)</title>
+<!-- Favicons -->
+<link href="favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<link href="/favicon/favicon.ico?v=6" rel="shortcut icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="/favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<meta content="#ffc107" name="theme-color"/>
+<!-- Tailwind for control bar only -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- JsBarcode -->
+<script src="https://unpkg.com/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<!-- Admin via URL (enable: ?admin=1, disable: ?admin=0 or ?admin=clear) -->
+<script>
     (function () {
       try {
         const q = new URLSearchParams(location.search);
@@ -45,8 +43,7 @@
       } catch(e){}
     })();
   </script>
-
-  <style>
+<style>
     :root{
       /* Physical label defaults (Portrait 160x110) */
       --label-w-mm: 160;
@@ -280,122 +277,111 @@
     .grp input[type="range"]{ width:140px; }
     .sep { width:1px; height:26px; background:rgba(255,255,255,.12); margin:0 6px; }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body data-orient="portrait">
-  <div class="page">
-    <div class="label" aria-label="Printable label">
-      <!-- HEADER -->
-      <div class="head">
-  <div class="brand">
-    <div class="logo-container">
-      <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-    </div>
-  </div>
-        <div class="barcode-wrap">
-          <svg id="barcode"></svg>
-          <div id="code-under" class="code-under">—</div>
-        </div>
-      </div>
-
-      <!-- BODY CANVAS (draggable/resize blocks) -->
-      <div id="canvas" class="body">
-        <!-- Photo block (left) -->
-        <div id="blk-photo" class="blk blk-photo" data-key="photo">
-          <div class="titlebar"><span>Image</span></div>
-          <div class="content">
-            <img id="item-photo" src="https://placehold.co/600x400/ffffff/111111?text=No+Image" alt="Item image">
-          </div>
-          <div class="handle" title="Resize"></div>
-        </div>
-
-        <!-- Details block (right) -->
-        <div id="blk-details" class="blk blk-details" data-key="details">
-          <div class="titlebar"><span>Details</span></div>
-          <div class="content">
-            <div class="kv">
-              <!-- 🔹 Description uses hanging-label layout -->
-              <div class="row row--hang" data-k="Description"><div id="v-desc" class="v">—</div></div>
-
-              <div class="row"><div class="k">Profile Title</div><div id="v-ptitle" class="v">—</div></div>
-              <div class="row"><div class="k">Alloy</div><div id="v-alloy" class="v">—</div></div>
-              <div class="row"><div class="k">Finish</div><div id="v-finish" class="v">—</div></div>
-              <div class="row"><div class="k">Quantity</div><div id="v-qty" class="v">—</div></div>
-              <div class="row"><div class="k">Length</div><div id="v-length" class="v">—</div></div>
-              <div class="row"><div class="k">Remarks</div><div id="v-remarks" class="v">—</div></div>
-              <div class="row"><div class="k">Label Size</div><div id="v-size" class="v">—</div></div>
-              <div class="row"><div class="k">Generated</div><div id="v-generated" class="v">—</div></div>
-            </div>
-          </div>
-          <div class="handle" title="Resize"></div>
-        </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="foot">
-        <div id="foot-left">Alumil Inventory</div>
-        <div id="foot-right">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONTROL BAR (admin-only; visibility set in JS) -->
-  <div class="controls hidden" id="controlsBar">
-    <div class="inner">
-      <div class="grp">
-        <label>Size (mm)</label>
-        <select id="sizeSel" class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm">
-          <option value="160x110">160×110</option>
-          <option value="150x100">150×100</option>
-          <option value="200x150">200×150</option>
-          <option value="250x200">250×200</option>
-        </select>
-        <div class="sep"></div>
-        <label>Orientation</label>
-        <label class="inline-flex items-center gap-1 text-sm"><input type="radio" name="orient" value="portrait" checked> Portrait</label>
-        <label class="inline-flex items-center gap-1 text-sm"><input type="radio" name="orient" value="landscape"> Landscape</label>
-        <div class="sep"></div>
-        <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" id="editToggle"> Free layout (drag/resize)</label>
-        <div class="sep"></div>
-        <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" id="scaleToggle"> Show scale border</label>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="grp">
-        <label>Barcode height</label>
-        <input id="bcH" type="range" min="36" max="90" step="2" value="52" title="px">
-        <label>Barcode thickness</label>
-        <input id="bcW" type="range" min="1" max="4" step="0.2" value="2" title="px">
-        <label>Logo height</label>
-        <input id="logoH" type="range" min="8" max="18" step="0.5" value="12" title="mm">
-        <label>Details font</label>
-        <input id="kvFont" type="range" min="8" max="12" step="0.5" value="9" title="pt">
-        <label>Key width</label>
-        <input id="keyW" type="range" min="20" max="50" step="1" value="28" title="mm">
-        <label>Padding</label>
-        <input id="pad" type="range" min="5" max="14" step="0.5" value="8" title="mm">
-        <label>Gaps</label>
-        <input id="gap" type="range" min="2" max="6" step="0.5" value="3" title="mm">
-        <div class="sep"></div>
-        <!-- NEW: Image Zoom inside preview frame -->
-        <label>Image zoom</label>
-        <input id="imgZoom" type="range" min="0.5" max="3" step="0.05" value="1" title="×">
-      </div>
-
-      <div class="flex-1"></div>
-
-      <div class="grp">
-        <button id="btnReload" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reload Data</button>
-        <button id="btnResetBlocks" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reset Blocks</button>
-        <button id="btnResetAll" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm">Reset All</button>
-        <button id="btnPrint" class="px-3 py-1.5 rounded bg-amber-500 text-black font-semibold text-sm">Print</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
+<div class="page">
+<div aria-label="Printable label" class="label">
+<!-- HEADER -->
+<div class="head">
+<div class="brand">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+</div>
+<div class="barcode-wrap">
+<svg id="barcode"></svg>
+<div class="code-under" id="code-under">—</div>
+</div>
+</div>
+<!-- BODY CANVAS (draggable/resize blocks) -->
+<div class="body" id="canvas">
+<!-- Photo block (left) -->
+<div class="blk blk-photo" data-key="photo" id="blk-photo">
+<div class="titlebar"><span>Image</span></div>
+<div class="content">
+<img alt="Item image" id="item-photo" src="https://placehold.co/600x400/ffffff/111111?text=No+Image"/>
+</div>
+<div class="handle" title="Resize"></div>
+</div>
+<!-- Details block (right) -->
+<div class="blk blk-details" data-key="details" id="blk-details">
+<div class="titlebar"><span>Details</span></div>
+<div class="content">
+<div class="kv">
+<!-- 🔹 Description uses hanging-label layout -->
+<div class="row row--hang" data-k="Description"><div class="v" id="v-desc">—</div></div>
+<div class="row"><div class="k">Profile Title</div><div class="v" id="v-ptitle">—</div></div>
+<div class="row"><div class="k">Alloy</div><div class="v" id="v-alloy">—</div></div>
+<div class="row"><div class="k">Finish</div><div class="v" id="v-finish">—</div></div>
+<div class="row"><div class="k">Quantity</div><div class="v" id="v-qty">—</div></div>
+<div class="row"><div class="k">Length</div><div class="v" id="v-length">—</div></div>
+<div class="row"><div class="k">Remarks</div><div class="v" id="v-remarks">—</div></div>
+<div class="row"><div class="k">Label Size</div><div class="v" id="v-size">—</div></div>
+<div class="row"><div class="k">Generated</div><div class="v" id="v-generated">—</div></div>
+</div>
+</div>
+<div class="handle" title="Resize"></div>
+</div>
+</div>
+<!-- FOOTER -->
+<div class="foot">
+<div id="foot-left">Alumil Inventory</div>
+<div id="foot-right">—</div>
+</div>
+</div>
+</div>
+<!-- CONTROL BAR (admin-only; visibility set in JS) -->
+<div class="controls hidden" id="controlsBar">
+<div class="inner">
+<div class="grp">
+<label>Size (mm)</label>
+<select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm" id="sizeSel">
+<option value="160x110">160×110</option>
+<option value="150x100">150×100</option>
+<option value="200x150">200×150</option>
+<option value="250x200">250×200</option>
+</select>
+<div class="sep"></div>
+<label>Orientation</label>
+<label class="inline-flex items-center gap-1 text-sm"><input checked="" name="orient" type="radio" value="portrait"/> Portrait</label>
+<label class="inline-flex items-center gap-1 text-sm"><input name="orient" type="radio" value="landscape"/> Landscape</label>
+<div class="sep"></div>
+<label class="inline-flex items-center gap-2 text-sm"><input id="editToggle" type="checkbox"/> Free layout (drag/resize)</label>
+<div class="sep"></div>
+<label class="inline-flex items-center gap-2 text-sm"><input id="scaleToggle" type="checkbox"/> Show scale border</label>
+</div>
+<div class="sep"></div>
+<div class="grp">
+<label>Barcode height</label>
+<input id="bcH" max="90" min="36" step="2" title="px" type="range" value="52"/>
+<label>Barcode thickness</label>
+<input id="bcW" max="4" min="1" step="0.2" title="px" type="range" value="2"/>
+<label>Logo height</label>
+<input id="logoH" max="18" min="8" step="0.5" title="mm" type="range" value="12"/>
+<label>Details font</label>
+<input id="kvFont" max="12" min="8" step="0.5" title="pt" type="range" value="9"/>
+<label>Key width</label>
+<input id="keyW" max="50" min="20" step="1" title="mm" type="range" value="28"/>
+<label>Padding</label>
+<input id="pad" max="14" min="5" step="0.5" title="mm" type="range" value="8"/>
+<label>Gaps</label>
+<input id="gap" max="6" min="2" step="0.5" title="mm" type="range" value="3"/>
+<div class="sep"></div>
+<!-- NEW: Image Zoom inside preview frame -->
+<label>Image zoom</label>
+<input id="imgZoom" max="3" min="0.5" step="0.05" title="×" type="range" value="1"/>
+</div>
+<div class="flex-1"></div>
+<div class="grp">
+<button class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm" id="btnReload">Reload Data</button>
+<button class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm" id="btnResetBlocks">Reset Blocks</button>
+<button class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm" id="btnResetAll">Reset All</button>
+<button class="px-3 py-1.5 rounded bg-amber-500 text-black font-semibold text-sm" id="btnPrint">Print</button>
+</div>
+</div>
+</div>
+<script>
     /* ================== Admin gate ================== */
     function isAdmin(){
       try {
@@ -765,7 +751,6 @@
       updateControlsHeight();
     });
   </script>
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -842,7 +827,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+<script src="js/sharepoint_loader.js"></script>
 
-  <script src="js/sharepoint_loader.js"></script>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
+
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>

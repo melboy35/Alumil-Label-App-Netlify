@@ -1,38 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-    <meta name="description" content="Alumil Admin Panel for inventory management, Excel import, and label printing.">
-    <title>Alumil Admin Panel</title>
-    <link rel="stylesheet" href="assets/css/logo-theme.css">
-    <!-- Brand CSS removed -->
-    <!-- Comprehensive Favicon Setup -->
-    <link rel="icon" href="/favicon.ico?v=6" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico?v=6" type="image/x-icon">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=6">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-    <link rel="manifest" href="/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
-    <meta name="msapplication-TileColor" content="#ffc107">
-    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
-    <meta name="theme-color" content="#ffffff">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest" defer></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" defer></script>
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Supabase Overlay -->
-    <script src="assets/js/supabase-overlay.js"></script>
-    <script src="/js/auth-helper.js"></script>
-    <script src="/js/data-sync.js"></script>
-  <script src="/js/user-display.js"></script>
-  <script src="/js/activity-logger.js"></script>
-
-    <!-- Ensure the CSS selectors that depend on html[data-theme] have the attribute ASAP -->
-    <script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="Alumil Admin Panel for inventory management, Excel import, and label printing." name="description"/>
+<title>Alumil Admin Panel</title>
+<link href="assets/css/logo-theme.css" rel="stylesheet"/>
+<!-- Brand CSS removed -->
+<!-- Comprehensive Favicon Setup -->
+<link href="/favicon.ico?v=6" rel="icon" type="image/x-icon"/>
+<link href="/favicon.ico?v=6" rel="shortcut icon" type="image/x-icon"/>
+<link href="/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/site.webmanifest" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg" rel="mask-icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="/favicon/browserconfig.xml" name="msapplication-config"/>
+<meta content="#ffffff" name="theme-color"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer="" src="https://unpkg.com/lucide@latest"></script>
+<script defer="" src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase Overlay -->
+<script src="assets/js/supabase-overlay.js"></script>
+<script src="/js/auth-helper.js"></script>
+<script src="/js/data-sync.js"></script>
+<script src="/js/user-display.js"></script>
+<script src="/js/activity-logger.js"></script>
+<!-- Ensure the CSS selectors that depend on html[data-theme] have the attribute ASAP -->
+<script>
       (function(){
         try {
           var t = localStorage.getItem('theme') || 'light';
@@ -42,8 +42,7 @@
         }
       })();
     </script>
-
-    <style>
+<style>
         /* --- Fonts & Theme surface (no per-element theme classes to avoid FOUC) --- */
         .font-roboto { font-family: Roboto, sans-serif; }
         .font-open-sans { font-family: 'Open Sans', sans-serif; }
@@ -169,337 +168,294 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 
 </style>
 </head>
-
 <body class="light">
 <div class="min-h-screen font-sans antialiased p-4 sm:p-8">
-    <header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card animating">
-        <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-              <div class="logo-container">
-                <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-              </div>
-            <span class="brand-title font-semibold text-lg sm:text-xl lg:text-2xl tracking-tight leading-tight hidden sm:inline">Alumil Inventory System</span>
-            <span class="brand-title font-semibold text-sm tracking-tight leading-tight sm:hidden">Alumil</span>
-        </div>
-        <nav class="flex items-center space-x-4 text-sm sm:text-base">
-            <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+<header class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card animating" id="header">
+<div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+<span class="brand-title font-semibold text-lg sm:text-xl lg:text-2xl tracking-tight leading-tight hidden sm:inline">Alumil Inventory System</span>
+<span class="brand-title font-semibold text-sm tracking-tight leading-tight sm:hidden">Alumil</span>
+</div>
+<nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </a>
-            <a href="admin.html" class="flex items-center icon-color font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg> Admin
+<a class="flex items-center icon-color font-medium" href="admin.html">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
             </a>
-        <button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" onclick="handleLogout()" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span class="hidden sm:inline">Logout</span>
-          <span class="sm:hidden">Logout</span>
-        </button>
-        
-<button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
-  <!-- default moon; script will swap if dark -->
-  <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </svg>
+<button class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" id="logout-btn" onclick="handleLogout()" style="display: none;">
+<svg class="lucide lucide-log-out mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+<span class="hidden sm:inline">Logout</span>
+<span class="sm:hidden">Logout</span>
+</button>
+<button aria-label="Toggle theme" class="flex items-center icon-color" id="theme-toggle" style="margin-left: 0.5rem;" title="Toggle theme">
+<!-- default moon; script will swap if dark -->
+<svg fill="none" height="20" id="theme-toggle-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+</svg>
 </button>
 </nav>
-    </header>
-
-    <main class="container mx-auto mt-24">
-        <section id="admin-heading" class="p-6 rounded-xl shadow-lg mb-6 card">
-            <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users mr-4 icon-color">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                <div>
-                    <h1 class="text-2xl font-bold title-text">Admin Panel</h1>
-                    <p class="subtitle-text">Manage your Alumil inventory system</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
-                <h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">
-                    <span id="stat-total-items">0</span>
-                </h3>
-                <p class="mt-2 stat-label">Total Items</p>
-            </div>
-            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
-                <h3 id="labels-printed" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
-                <p class="mt-2 stat-label">Labels Printed</p>
-            </div>
-            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
-                <h3 id="accessories-count" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
-                <p class="mt-2 stat-label">Accessories Loaded</p>
-            </div>
-            <div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
-                <h3 id="profiles-count" class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">0</h3>
-                <p class="mt-2 stat-label">Profiles Loaded</p>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
-            <a href="#" id="settings-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
-                <div class="mr-4 mt-1 icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings">
-                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.26.42a2 2 0 0 0 .73 2.73l.09.09a2 2 0 0 1 0 2.83l-.08.08a2 2 0 0 0-.73 2.73l.42.26a2 2 0 0 0 2.73.73l.09-.08a2 2 0 0 1 2-2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.26-.42a2 2 0 0 0-.73-2.73l-.09-.09a2 2 0 0 1 0-2.83l.08-.08a2 2 0 0 0 .73-2.73l-.42-.26a2 2 0 0 0-2.73-.73l-.09.08a2 2 0 0 1-2 2v.18a2 2 0 0 0-2-2Z"/>
-                        <circle cx="12" cy="12" r="3" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold title-text">System Settings</h3>
-                    <p class="text-sm subtitle-text">Configure system preferences and defaults.</p>
-                </div>
-            </a>
-
-            <a href="#" id="database-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
-                <div class="mr-4 mt-1 icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database">
-                        <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold title-text">Database Management</h3>
-                    <p class="text-sm subtitle-text">Manage inventory data and Excel imports</p>
-                </div>
-            </a>
-
-            <a href="#" id="activity-tile" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover">
-                <div class="mr-4 mt-1 icon-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold title-text">User Activity</h3>
-                    <p class="text-sm subtitle-text">Track user actions and system usage</p>
-                </div>
-            </a>
-
-        </section>
-
-        <section id="sys-info" class="p-6 rounded-xl shadow-lg card">
-            <h2 class="text-xl font-bold mb-4 border-b border-color pb-2 title-text">System Information</h2>
-            <!-- System Information (values wired via JS) -->
+</header>
+<main class="container mx-auto mt-24">
+<section class="p-6 rounded-xl shadow-lg mb-6 card" id="admin-heading">
+<div class="flex items-center">
+<svg class="lucide lucide-users mr-4 icon-color" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="32" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle>
+<path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+<div>
+<h1 class="text-2xl font-bold title-text">Admin Panel</h1>
+<p class="subtitle-text">Manage your Alumil inventory system</p>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+<h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400">
+<span id="stat-total-items">0</span>
+</h3>
+<p class="mt-2 stat-label">Total Items</p>
+</div>
+<div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+<h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400" id="labels-printed">0</h3>
+<p class="mt-2 stat-label">Labels Printed</p>
+</div>
+<div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+<h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400" id="accessories-count">0</h3>
+<p class="mt-2 stat-label">Accessories Loaded</p>
+</div>
+<div class="p-6 rounded-xl text-center transform hover:scale-105 transition-all duration-300 summary-card glow-hover">
+<h3 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#ffc107] to-amber-400" id="profiles-count">0</h3>
+<p class="mt-2 stat-label">Profiles Loaded</p>
+</div>
+</section>
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
+<a class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover" href="#" id="settings-tile">
+<div class="mr-4 mt-1 icon-color">
+<svg class="lucide lucide-settings" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.26.42a2 2 0 0 0 .73 2.73l.09.09a2 2 0 0 1 0 2.83l-.08.08a2 2 0 0 0-.73 2.73l.42.26a2 2 0 0 0 2.73.73l.09-.08a2 2 0 0 1 2-2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.26-.42a2 2 0 0 0-.73-2.73l-.09-.09a2 2 0 0 1 0-2.83l.08-.08a2 2 0 0 0 .73-2.73l-.42-.26a2 2 0 0 0-2.73-.73l-.09.08a2 2 0 0 1-2 2v.18a2 2 0 0 0-2-2Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text">System Settings</h3>
+<p class="text-sm subtitle-text">Configure system preferences and defaults.</p>
+</div>
+</a>
+<a class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover" href="#" id="database-tile">
+<div class="mr-4 mt-1 icon-color">
+<svg class="lucide lucide-database" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text">Database Management</h3>
+<p class="text-sm subtitle-text">Manage inventory data and Excel imports</p>
+</div>
+</a>
+<a class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card glow-hover" href="#" id="activity-tile">
+<div class="mr-4 mt-1 icon-color">
+<svg class="lucide lucide-activity" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text">User Activity</h3>
+<p class="text-sm subtitle-text">Track user actions and system usage</p>
+</div>
+</a>
+</section>
+<section class="p-6 rounded-xl shadow-lg card" id="sys-info">
+<h2 class="text-xl font-bold mb-4 border-b border-color pb-2 title-text">System Information</h2>
+<!-- System Information (values wired via JS) -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-3 text-sm">
-  <div>Version:</div><div id="sys-version" class="text-blue-300">—</div>
-  <div>Active Users:</div><div id="sys-users" class="text-blue-300">—</div>
-
-  <div>Last Updated:</div><div id="sys-last-updated" class="text-blue-300">—</div>
-  <div>Storage Used:</div><div id="sys-storage" class="text-blue-300">—</div>
-
-  <div>Database:</div><div id="sys-db" class="text-blue-300">—</div>
-  <div>Last Backup:</div><div id="sys-last-backup" class="text-blue-300">—</div>
+<div>Version:</div><div class="text-blue-300" id="sys-version">—</div>
+<div>Active Users:</div><div class="text-blue-300" id="sys-users">—</div>
+<div>Last Updated:</div><div class="text-blue-300" id="sys-last-updated">—</div>
+<div>Storage Used:</div><div class="text-blue-300" id="sys-storage">—</div>
+<div>Database:</div><div class="text-blue-300" id="sys-db">—</div>
+<div>Last Backup:</div><div class="text-blue-300" id="sys-last-backup">—</div>
 </div>
-
-
-        </section>
-    </main>
+</section>
+</main>
 </div>
-
-<div id="data-modal-overlay"
-     class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain"
-     aria-hidden="true">
-    <div id="data-management-modal"
-         class="w-full max-w-2xl max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card
-                 transform scale-95 opacity-0 transition-all duration-300"
-         role="dialog" aria-modal="true" aria-labelledby="data-modal-title">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="data-modal-title" class="text-2xl font-bold title-text">Database Management</h2>
-            <button id="close-data-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="Close data modal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-        </div>
-
-        <div id="data-status" class="hidden p-3 mb-4 rounded-lg border border-gray-600 flex items-center justify-between">
-            <span id="file-name-display" class="text-sm text-gray-300">File name:</span>
-            <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 connected-status"></span>
-                <span class="text-xs font-semibold uppercase text-yellow-500">Connected</span>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-3 mb-4">
-            <div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
-                <span class="chip-dot" id="dot-profiles"></span>
-                <span class="text-sm text-gray-300">Profiles</span>
-                <span class="ml-auto text-xs text-gray-400" id="count-profiles">0 items</span>
-            </div>
-            <div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
-                <span class="chip-dot" id="dot-accessories"></span>
-                <span class="text-sm text-gray-300">Accessories</span>
-                <span class="ml-auto text-xs text-gray-400" id="count-accessories">0 items</span>
-            </div>
-        </div>
-
-        <div class="space-y-3">
-            <label for="excel-input" class="sr-only">Select Excel or CSV file</label>
-            <input id="excel-input" type="file" accept=".xlsx,.xls,.csv" class="hidden">
-            <button id="upload-btn" class="w-full bg-yellow-500 text-black font-semibold py-2 px-4 rounded-lg hover:bg-yellow-400 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload mr-2 inline-block">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15" />
-                </svg>
+<div aria-hidden="true" class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain" id="data-modal-overlay">
+<div aria-labelledby="data-modal-title" aria-modal="true" class="w-full max-w-2xl max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card transform scale-95 opacity-0 transition-all duration-300" id="data-management-modal" role="dialog">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-2xl font-bold title-text" id="data-modal-title">Database Management</h2>
+<button aria-label="Close data modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" id="close-data-modal-btn">
+<svg class="lucide lucide-x" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+</button>
+</div>
+<div class="hidden p-3 mb-4 rounded-lg border border-gray-600 flex items-center justify-between" id="data-status">
+<span class="text-sm text-gray-300" id="file-name-display">File name:</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-yellow-500 connected-status"></span>
+<span class="text-xs font-semibold uppercase text-yellow-500">Connected</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 mb-4">
+<div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
+<span class="chip-dot" id="dot-profiles"></span>
+<span class="text-sm text-gray-300">Profiles</span>
+<span class="ml-auto text-xs text-gray-400" id="count-profiles">0 items</span>
+</div>
+<div class="chip border-gray-700 flex items-center gap-2 rounded-lg px-3 py-2 border">
+<span class="chip-dot" id="dot-accessories"></span>
+<span class="text-sm text-gray-300">Accessories</span>
+<span class="ml-auto text-xs text-gray-400" id="count-accessories">0 items</span>
+</div>
+</div>
+<div class="space-y-3">
+<label class="sr-only" for="excel-input">Select Excel or CSV file</label>
+<input accept=".xlsx,.xls,.csv" class="hidden" id="excel-input" type="file"/>
+<button class="w-full bg-yellow-500 text-black font-semibold py-2 px-4 rounded-lg hover:bg-yellow-400 transition-colors" id="upload-btn">
+<svg class="lucide lucide-upload mr-2 inline-block" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line>
+</svg>
                 Select Excel File
-            <
+            &lt;
 <!-- BEGIN OneDrive/Azure Buttons (auto-inserted) -->
-<button id="connect-onedrive-btn"
-  class="w-full bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors mt-2">
+<button class="w-full bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors mt-2" id="connect-onedrive-btn">
   Connect OneDrive / SharePoint Excel
 </button>
-
-<button id="connect-azure-btn"
-  class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 transition-colors mt-2 flex items-center justify-center gap-2">
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud">
-    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9Z"/>
-  </svg>
+<button class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 transition-colors mt-2 flex items-center justify-center gap-2" id="connect-azure-btn">
+<svg class="lucide lucide-cloud" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9Z"></path>
+</svg>
   Connect Azure Blob Storage
 </button>
 <!-- END OneDrive/Azure Buttons -->
-            <div id="file-name" class="text-xs text-gray-400" aria-live="polite"></div>
-            <button id="clear-btn" class="w-full text-sm text-gray-400 hover:text-red-400 transition-colors">Clear Stored Data</button>
-        </div>
-
-        <div class="mt-2 text-xs text-gray-400 leading-2">
-            <p><strong>Data Source Options:</strong></p>
-            <ul class="mb-4 space-y-1 text-xs">
-                <li>• <strong>Local Excel/CSV:</strong> Upload files directly from your computer</li>
-                <li>• <strong>OneDrive/SharePoint:</strong> Connect to shared Excel files with anyone-with-link access</li>
-                <li>• <strong>Azure Blob Storage:</strong> Use SAS URLs for direct file access (supports .xlsx, .csv, .json)</li>
-            </ul>
-            
-            <div class="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg mb-4">
-                <h4 class="text-blue-300 font-semibold text-sm mb-2">Azure Blob Storage Setup</h4>
-                <ol class="text-xs space-y-1">
-                    <li>1. Upload your Excel/CSV/JSON file to Azure Blob Storage</li>
-                    <li>2. Generate a SAS URL with <strong>Read</strong> permissions</li>
-                    <li>3. Ensure CORS is configured to allow your domain</li>
-                    <li>4. Use the SAS URL in the "Connect Azure Blob Storage" button</li>
-                </ol>
-                <p class="text-xs mt-2 text-blue-200">
-                    <strong>Supported formats:</strong> .xlsx, .xls, .csv, .json
+<div aria-live="polite" class="text-xs text-gray-400" id="file-name"></div>
+<button class="w-full text-sm text-gray-400 hover:text-red-400 transition-colors" id="clear-btn">Clear Stored Data</button>
+</button></div>
+<div class="mt-2 text-xs text-gray-400 leading-2">
+<p><strong>Data Source Options:</strong></p>
+<ul class="mb-4 space-y-1 text-xs">
+<li>• <strong>Local Excel/CSV:</strong> Upload files directly from your computer</li>
+<li>• <strong>OneDrive/SharePoint:</strong> Connect to shared Excel files with anyone-with-link access</li>
+<li>• <strong>Azure Blob Storage:</strong> Use SAS URLs for direct file access (supports .xlsx, .csv, .json)</li>
+</ul>
+<div class="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg mb-4">
+<h4 class="text-blue-300 font-semibold text-sm mb-2">Azure Blob Storage Setup</h4>
+<ol class="text-xs space-y-1">
+<li>1. Upload your Excel/CSV/JSON file to Azure Blob Storage</li>
+<li>2. Generate a SAS URL with <strong>Read</strong> permissions</li>
+<li>3. Ensure CORS is configured to allow your domain</li>
+<li>4. Use the SAS URL in the "Connect Azure Blob Storage" button</li>
+</ol>
+<p class="text-xs mt-2 text-blue-200">
+<strong>Supported formats:</strong> .xlsx, .xls, .csv, .json
                 </p>
-            </div>
-            
-            <p><strong>Expected sheets (flexible):</strong> "Profiles", "Accessories" (or first two sheets). Column names are matched loosely (e.g., <em>Code, Item Code, Profile Code</em>).</p>
-            <h2 class="text-xl font-semibold text-yellow-400 mb-1">Live Usage</h2>
-            <p class="text-sm text-gray-400 mb-2">Once uploaded, the data becomes instantly available in <span class="text-yellow-400 font-medium">profile-label-printing.html</span> and <span class="text-yellow-400 font-medium">acc-label-printing.html</span> for search and print preview.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <a href="profile-label-printing.html" class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler icon-color">
-                            <path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"/><path d="M2.25 10.5h19.5"/>
-                        </svg>
-                        <div>
-                            <div class="text-yellow-400 font-semibold">Profile Label Printing</div>
-                            <div class="text-xs text-gray-400">Uses uploaded Profiles data</div>
-                        </div>
-                    </div>
-                </a>
-                <a href="acc-label-printing.html" class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-nuts icon-color">
-                            <path d="M12 2v20"/><path d="M17 5v14"/><path d="M7 5v14"/><path d="M19 8v8"/><path d="M5 8v8"/><path d="M21 12v.01"/><path d="M3 12v.01"/>
-                        </svg>
-                        <div>
-                            <div class="text-yellow-400 font-semibold">Accessories Label Printing</div>
-                            <div class="text-xs text-gray-400">Uses uploaded Accessories data</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="mt-6 p-4 rounded-lg bg-gray-200/50 border border-gray-800">
-                <div class="text-sm text-gray-500 mb-2">Quick Stats</div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div>
-                        <div class="text-2xl font-bold text-yellow-400" id="stat-profiles">0</div>
-                        <div class="text-xs text-gray-400">Profiles</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-yellow-400" id="stat-accessories">0</div>
-                        <div class="text-xs text-gray-400">Accessories</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-yellow-400" id="stat-cols-profiles">0</div>
-                        <div class="text-xs text-gray-400">Profile Columns</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-yellow-400" id="stat-cols-accessories">0</div>
-                        <div class="text-xs text-gray-400">Accessory Columns</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+<p><strong>Expected sheets (flexible):</strong> "Profiles", "Accessories" (or first two sheets). Column names are matched loosely (e.g., <em>Code, Item Code, Profile Code</em>).</p>
+<h2 class="text-xl font-semibold text-yellow-400 mb-1">Live Usage</h2>
+<p class="text-sm text-gray-400 mb-2">Once uploaded, the data becomes instantly available in <span class="text-yellow-400 font-medium">profile-label-printing.html</span> and <span class="text-yellow-400 font-medium">acc-label-printing.html</span> for search and print preview.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<a class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors" href="profile-label-printing.html">
+<div class="flex items-center gap-2">
+<svg class="lucide lucide-ruler icon-color" fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="22" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"></path><path d="M2.25 10.5h19.5"></path>
+</svg>
+<div>
+<div class="text-yellow-400 font-semibold">Profile Label Printing</div>
+<div class="text-xs text-gray-400">Uses uploaded Profiles data</div>
+</div>
+</div>
+</a>
+<a class="p-4 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors" href="acc-label-printing.html">
+<div class="flex items-center gap-3">
+<svg class="lucide lucide-nuts icon-color" fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="22" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2v20"></path><path d="M17 5v14"></path><path d="M7 5v14"></path><path d="M19 8v8"></path><path d="M5 8v8"></path><path d="M21 12v.01"></path><path d="M3 12v.01"></path>
+</svg>
+<div>
+<div class="text-yellow-400 font-semibold">Accessories Label Printing</div>
+<div class="text-xs text-gray-400">Uses uploaded Accessories data</div>
+</div>
+</div>
+</a>
+</div>
+<div class="mt-6 p-4 rounded-lg bg-gray-200/50 border border-gray-800">
+<div class="text-sm text-gray-500 mb-2">Quick Stats</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+<div>
+<div class="text-2xl font-bold text-yellow-400" id="stat-profiles">0</div>
+<div class="text-xs text-gray-400">Profiles</div>
+</div>
+<div>
+<div class="text-2xl font-bold text-yellow-400" id="stat-accessories">0</div>
+<div class="text-xs text-gray-400">Accessories</div>
+</div>
+<div>
+<div class="text-2xl font-bold text-yellow-400" id="stat-cols-profiles">0</div>
+<div class="text-xs text-gray-400">Profile Columns</div>
+</div>
+<div>
+<div class="text-2xl font-bold text-yellow-400" id="stat-cols-accessories">0</div>
+<div class="text-xs text-gray-400">Accessory Columns</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain" id="settings-modal-overlay">
+<div aria-labelledby="settings-modal-title" aria-modal="true" class="w-full max-w-md max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card transform scale-95 opacity-0 transition-all duration-300" id="system-settings-modal" role="dialog">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-2xl font-bold title-text" id="settings-modal-title">System Settings</h2>
+<button aria-label="Close settings modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" id="close-settings-modal-btn">
+<svg class="lucide lucide-x" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+</button>
+</div>
+<div class="space-y-6">
+<div>
+<h3 class="text-lg font-semibold mb-6 subtitle-text">Theme</h3>
+<div class="flex space-x-5 mt-5">
+<button class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2" id="dark-mode-btn">
+<svg class="lucide lucide-moon text-gray-400" fill="none" height="25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+<span class="text-sm text-gray-400">Dark</span>
+</button>
+<button class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2" id="light-mode-btn"></button>
+<svg class="lucide lucide-sun text-gray-400" fill="none" height="25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="25" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+</svg>
+<span class="text-sm text-gray-400">Light</span>
 
-<div id="settings-modal-overlay"
-     class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain"
-     aria-hidden="true">
-    <div id="system-settings-modal"
-         class="w-full max-w-md max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card
-                 transform scale-95 opacity-0 transition-all duration-300"
-         role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="settings-modal-title" class="text-2xl font-bold title-text">System Settings</h2>
-            <button id="close-settings-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="Close settings modal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-        </div>
-
-        <div class="space-y-6">
-            <div>
-                <h3 class="text-lg font-semibold mb-6 subtitle-text">Theme</h3>
-                <div class="flex space-x-5 mt-5">
-                    <button id="dark-mode-btn" class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon text-gray-400"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                        <span class="text-sm text-gray-400">Dark</span>
-                    </button>
-                    <button id="light-mode-btn" class="flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2"></button>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun text-gray-400">
-                            <circle cx="12" cy="12" r="4" /><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <span class="text-sm text-gray-400">Light</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800"></div>
-
-            <div>
-                <h3 class="text-lg font-semibold mb-2 subtitle-text">Change Font</h3>
-                <div class="flex space-x-4 mt-4">
-                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Inter">
-                        <span class="text-sm text-gray-400">Inter</span>
-                    </button>
-                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Roboto">
-                        <span class="text-sm text-gray-500 font-roboto">Roboto</span>
-                    </button>
-                    <button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Open Sans">
-                        <span class="text-sm text-gray-400 font-open-sans">Open Sans</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800"></div>
-
-            <div>
-                <h3 class="text-lg font-semibold mb-2 subtitle-text">System Options</h3>
-                <div class="flex flex-col space-y-4 mt-4">
-                    <button id="clear-cache-btn" class="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg border border-red-700 hover:bg-red-700">
+</div>
+</div>
+<div class="border-t border-gray-800"></div>
+<div>
+<h3 class="text-lg font-semibold mb-2 subtitle-text">Change Font</h3>
+<div class="flex space-x-4 mt-4">
+<button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Inter">
+<span class="text-sm text-gray-400">Inter</span>
+</button>
+<button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Roboto">
+<span class="text-sm text-gray-500 font-roboto">Roboto</span>
+</button>
+<button class="font-btn flex-1 p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors duration-200" data-font="Open Sans">
+<span class="text-sm text-gray-400 font-open-sans">Open Sans</span>
+</button>
+</div>
+</div>
+<div class="border-t border-gray-800"></div>
+<div>
+<h3 class="text-lg font-semibold mb-2 subtitle-text">System Options</h3>
+<div class="flex flex-col space-y-4 mt-4">
+<button class="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg border border-red-700 hover:bg-red-700" id="clear-cache-btn">
                         Clear Cache Memory
                     </button>
-                    <button id="logo-change-btn" class="w-full bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded-lg border border-gray-700 hover:bg-gray-700">
+<button class="w-full bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded-lg border border-gray-700 hover:bg-gray-700" id="logo-change-btn">
                         Change Logo
                     </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
+</div>
+</div>
+</div>
+</div>
 <script>
     const body = document.body,
         header = document.getElementById("header"),
@@ -834,55 +790,54 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
         });
     }();
 </script>
-
 <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
 <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
-<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
-  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-    <span>Home</span>
-  </button>
-  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
-      <path d="M20 7h-9"/>
-      <path d="M14 17h-5"/>
-      <circle cx="17" cy="17" r="3"/>
-      <circle cx="7" cy="7" r="3"/>
-    </svg>
-    <span>Admin</span>
-  </button>
-  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
-      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-    </svg>
-  </button>
-  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
-      <path d="m7.5 4.27 9 5.15"/>
-      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"/>
-      <path d="m3.29 7.39 8.31 3.23"/>
-      <path d="m12 22.95 8.71-3.26"/>
-    </svg>
-    <span>Rack Label</span>
-  </button>
-  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
-      <circle cx="11" cy="11" r="8"/>
-      <path d="m21 21-4.3-4.3"/>
-    </svg>
-    <span>Search</span>
-  </button>
+<nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
+<button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
+</button>
+<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 7h-9"></path>
+<path d="M14 17h-5"></path>
+<circle cx="17" cy="17" r="3"></circle>
+<circle cx="7" cy="7" r="3"></circle>
+</svg>
+<span>Admin</span>
+</button>
+<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+<path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+<path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+<path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+</svg>
+</button>
+<button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m7.5 4.27 9 5.15"></path>
+<path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"></path>
+<path d="m3.29 7.39 8.31 3.23"></path>
+<path d="m12 22.95 8.71-3.26"></path>
+</svg>
+<span>Rack Label</span>
+</button>
+<button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="11" cy="11" r="8"></circle>
+<path d="m21 21-4.3-4.3"></path>
+</svg>
+<span>Search</span>
+</button>
 </nav>
-<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
-  <small>Alumil Inventory App @2025</small>
+<footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">
+<small>Alumil Inventory App @2025</small>
 </footer>
-<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text">
 <style>
   .alumil-bottom-nav {
     position: fixed; left: 0; right: 0;
@@ -998,7 +953,6 @@ if (trimmedCode.startsWith('acc')) {
   }catch(e){}
 })();
 </script>
-
 <script>
 (function(){
   var MOON = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -1047,7 +1001,6 @@ if (trimmedCode.startsWith('acc')) {
   });
 })();
 </script>
-
 <script>
 (function(){
   try{
@@ -1061,8 +1014,6 @@ if (trimmedCode.startsWith('acc')) {
   try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
 })();
 </script>
-
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1137,7 +1088,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   function updateFromCache(){
@@ -1213,11 +1163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 500);
 });
 </script>
-
-
-
-  <script src="js/sharepoint_loader.js"></script>
-
+<script src="js/sharepoint_loader.js"></script>
 <!-- BEGIN OneDrive/Azure Loaders -->
 <script>
 (() => {
@@ -1507,72 +1453,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 })();
 </script>
 <!-- END OneDrive/Azure Loaders -->
-
 <!-- Activity Modal -->
-<div id="activity-modal" class="fixed inset-0 z-[70] hidden items-center justify-center">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-  <div class="relative w-[95vw] max-w-5xl max-h-[85vh] overflow-hidden card rounded-xl p-4 sm:p-6">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-xl font-semibold title-text">User Activity Log</h2>
-      <button id="activity-close" class="icon-btn" aria-label="Close activity"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-    </div>
-    <div class="border-b border-color mb-3">
-      <div class="flex flex-wrap gap-2 pb-3">
-        <input id="activity-filter-user" placeholder="Filter by user" class="input-field px-3 py-2" />
-        <input id="activity-filter-page" placeholder="Filter by page" class="input-field px-3 py-2" />
-        <select id="activity-filter-action" class="input-field px-3 py-2">
-          <option value="">All actions</option>
-          <option value="print">Print labels</option>
-          <option value="pageview">Page views</option>
-          <option value="search">Searches</option>
-          <option value="login">Logins</option>
-          <option value="logout">Logouts</option>
-          <option value="export">Exports</option>
-        </select>
-        <input id="activity-filter-item" placeholder="Filter by item code" class="input-field px-3 py-2" />
-        <input id="activity-filter-warehouse" placeholder="Warehouse/Rack #" class="input-field px-3 py-2" />
-        <div class="flex flex-wrap gap-2 w-full">
-          <input id="activity-filter-from" type="datetime-local" class="input-field px-3 py-2" />
-          <input id="activity-filter-to" type="datetime-local" class="input-field px-3 py-2" />
-          <div class="ml-auto flex gap-2 items-center">
-            <select id="activity-sort-by" class="input-field px-2 py-2">
-              <option value="timestamp" selected>Sort by date</option>
-              <option value="user">Sort by user</option>
-              <option value="action">Sort by action</option>
-              <option value="page">Sort by page</option>
-            </select>
-            <select id="activity-sort-dir" class="input-field px-2 py-2">
-              <option value="desc" selected>Desc</option>
-              <option value="asc">Asc</option>
-            </select>
-            <button id="activity-export-csv" class="btn btn-amber">Export CSV</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="overflow-auto" style="max-height: 60vh;">
-      <table class="w-full text-sm">
-        <thead class="subtitle-text">
-          <tr>
-            <th class="text-left p-2 border-b border-color">Date</th>
-            <th class="text-left p-2 border-b border-color">User</th>
-            <th class="text-left p-2 border-b border-color">Action</th>
-            <th class="text-left p-2 border-b border-color">Page</th>
-            <th class="text-left p-2 border-b border-color">Item Code</th>
-            <th class="text-left p-2 border-b border-color">Warehouse/Rack</th>
-            <th class="text-left p-2 border-b border-color">Additional Details</th>
-          </tr>
-        </thead>
-        <tbody id="activity-tbody" class="title-text"></tbody>
-      </table>
-    </div>
-  </div>
-  <style>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center" id="activity-modal">
+<div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+<div class="relative w-[95vw] max-w-5xl max-h-[85vh] overflow-hidden card rounded-xl p-4 sm:p-6">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-xl font-semibold title-text">User Activity Log</h2>
+<button aria-label="Close activity" class="icon-btn" id="activity-close"><svg class="lucide lucide-x" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div class="border-b border-color mb-3">
+<div class="flex flex-wrap gap-2 pb-3">
+<input class="input-field px-3 py-2" id="activity-filter-user" placeholder="Filter by user"/>
+<input class="input-field px-3 py-2" id="activity-filter-page" placeholder="Filter by page"/>
+<select class="input-field px-3 py-2" id="activity-filter-action">
+<option value="">All actions</option>
+<option value="print">Print labels</option>
+<option value="pageview">Page views</option>
+<option value="search">Searches</option>
+<option value="login">Logins</option>
+<option value="logout">Logouts</option>
+<option value="export">Exports</option>
+</select>
+<input class="input-field px-3 py-2" id="activity-filter-item" placeholder="Filter by item code"/>
+<input class="input-field px-3 py-2" id="activity-filter-warehouse" placeholder="Warehouse/Rack #"/>
+<div class="flex flex-wrap gap-2 w-full">
+<input class="input-field px-3 py-2" id="activity-filter-from" type="datetime-local"/>
+<input class="input-field px-3 py-2" id="activity-filter-to" type="datetime-local"/>
+<div class="ml-auto flex gap-2 items-center">
+<select class="input-field px-2 py-2" id="activity-sort-by">
+<option selected="" value="timestamp">Sort by date</option>
+<option value="user">Sort by user</option>
+<option value="action">Sort by action</option>
+<option value="page">Sort by page</option>
+</select>
+<select class="input-field px-2 py-2" id="activity-sort-dir">
+<option selected="" value="desc">Desc</option>
+<option value="asc">Asc</option>
+</select>
+<button class="btn btn-amber" id="activity-export-csv">Export CSV</button>
+</div>
+</div>
+</div>
+</div>
+<div class="overflow-auto" style="max-height: 60vh;">
+<table class="w-full text-sm">
+<thead class="subtitle-text">
+<tr>
+<th class="text-left p-2 border-b border-color">Date</th>
+<th class="text-left p-2 border-b border-color">User</th>
+<th class="text-left p-2 border-b border-color">Action</th>
+<th class="text-left p-2 border-b border-color">Page</th>
+<th class="text-left p-2 border-b border-color">Item Code</th>
+<th class="text-left p-2 border-b border-color">Warehouse/Rack</th>
+<th class="text-left p-2 border-b border-color">Additional Details</th>
+</tr>
+</thead>
+<tbody class="title-text" id="activity-tbody"></tbody>
+</table>
+</div>
+</div>
+<style>
     #activity-modal.hidden{ display:none; }
     #activity-modal:not(.hidden){ display:flex; }
   </style>
 </div>
-
 <script>
 // Activity Modal logic
 (function(){
@@ -1795,11 +1739,105 @@ document.addEventListener('DOMContentLoaded', async () => {
   await checkAdminAccess();
 });
 </script>
+<!-- Footer -->
+<footer class="alumil-footer">
+<p>Alumil Labeling App @2025</p>
+</footer>
+</input>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
 
-  <!-- Footer -->
-  <footer class="alumil-footer">
-    <p>Alumil Labeling App @2025</p>
-  </footer>
+<!-- Live Data: admin upload + publish -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
 
+  function normalizeProfiles(rows){
+    return rows.map(r=>({
+      org_id: ORG,
+      code: String(r.code ?? r.item_code ?? r.profile_code ?? "").trim(),
+      description: String(r.description ?? r.desc ?? r.name ?? ""),
+      length: r.length ?? r.len ?? null,
+      color: r.color ?? r.colour ?? "",
+      updated_at: new Date().toISOString()
+    })).filter(x=>x.code);
+  }
+  function normalizeAccessories(rows){
+    return rows.map(r=>({
+      org_id: ORG,
+      code: String(r.code ?? r.item_code ?? r.accessory_code ?? r.acc_code ?? "").trim(),
+      description: String(r.description ?? r.desc ?? r.name ?? ""),
+      unit: r.unit ?? r.uom ?? "",
+      updated_at: new Date().toISOString()
+    })).filter(x=>x.code);
+  }
+  async function chunkedUpsert(table, rows, size=500){
+    for(let i=0;i<rows.length;i+=size){
+      const slice = rows.slice(i,i+size);
+      const { error } = await sb.from(table).upsert(slice, { onConflict: 'org_id,code' });
+      if(error) throw error;
+    }
+  }
+  async function recordVersion(kind, count){
+    const { data:prev } = await sb
+      .from('dataset_versions').select('version')
+      .eq('org_id', ORG).eq('kind', kind)
+      .order('version',{ascending:false}).limit(1);
+    const nextVer = (prev?.[0]?.version || 0) + 1;
+    await sb.from('dataset_versions').insert([{ org_id: ORG, kind, version: nextVer, row_count: count }]);
+  }
+  async function publishFromFile(file){
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, { type: 'array' });
+    const out = {};
+    wb.SheetNames.forEach(name => {
+      const ws = wb.Sheets[name];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+      out[name] = rows;
+    });
+    const p = normalizeProfiles(out.Profile || out.profile || out.PROFILE || out['Profiles'] || []);
+    const a = normalizeAccessories(out.Accessories || out.accessories || out.ACCESSORIES || out['Accessory'] || []);
+    await chunkedUpsert('profiles', p); await recordVersion('profiles', p.length);
+    await chunkedUpsert('accessories', a); await recordVersion('accessories', a.length);
+    localStorage.setItem('excelCache', JSON.stringify({profiles:p, accessories:a, loadedAt:new Date().toISOString()}));
+    alert('✅ Live dataset updated.');
+  }
+  async function publishFromCache(){
+    const cache = JSON.parse(localStorage.getItem('excelCache') || '{}');
+    const p = normalizeProfiles(cache.profiles || cache.Profile || []);
+    const a = normalizeAccessories(cache.accessories || cache.Accessories || []);
+    await chunkedUpsert('profiles', p); await recordVersion('profiles', p.length);
+    await chunkedUpsert('accessories', a); await recordVersion('accessories', a.length);
+    alert('✅ Live dataset updated from cache.');
+  }
+  // Wire a "Publish Live" button next to #excelInput if present
+  document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.querySelector('#excelInput') || document.querySelector('input[type="file"]');
+    if (fileInput && !document.querySelector('#publishLiveBtn')) {
+      const btn = document.createElement('button');
+      btn.id = 'publishLiveBtn';
+      btn.type = 'button';
+      btn.textContent = 'Publish Live for Everyone';
+      btn.className = 'btn btn-amber btn-primary';
+      btn.style.marginLeft = '12px';
+      btn.addEventListener('click', async () => {
+        if (fileInput.files && fileInput.files[0]) await publishFromFile(fileInput.files[0]);
+        else await publishFromCache();
+      });
+      fileInput.parentNode.insertBefore(btn, fileInput.nextSibling);
+    }
+  });
+  // expose for manual use
+  window.publishFromFile = publishFromFile;
+  window.publishFromCache = publishFromCache;
+})();
+</script>
 </body>
 </html>

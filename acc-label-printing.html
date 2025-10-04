@@ -1,27 +1,25 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Accessories Label Printing</title>
-
-  <!-- Favicons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-  <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <link rel="shortcut icon" href="/favicon/favicon.ico?v=6">
-  <meta name="msapplication-TileColor" content="#ffc107">
-  <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-  <meta name="theme-color" content="#ffffff">
-
-  <link rel="stylesheet" href="assets/css/logo-theme.css">
-  <!-- Brand CSS removed -->
-
-  <!-- Footer Styles -->
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>Accessories Label Printing</title>
+<!-- Favicons -->
+<link href="/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<link href="/favicon/favicon.ico?v=6" rel="shortcut icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="/favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="assets/css/logo-theme.css" rel="stylesheet"/>
+<!-- Brand CSS removed -->
+<!-- Footer Styles -->
+<style>
     .alumil-footer {
       position: fixed;
       bottom: 0;
@@ -55,21 +53,20 @@
   }
   
     /* Logo switching handled centrally in assets/css/alumil-brand.css */
-</style>  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Icons & libs -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-  <script src="https://unpkg.com/lucide@latest" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Supabase Overlay -->
-  <script src="assets/js/supabase-overlay.js"></script>
-
-  <!-- Instant theme boot (prevents flash) -->
-  <script>
+</style> <!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Icons & libs -->
+<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" referrerpolicy="no-referrer" rel="stylesheet">
+<script defer="" src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase Overlay -->
+<script src="assets/js/supabase-overlay.js"></script>
+<!-- Instant theme boot (prevents flash) -->
+<script>
     (function () {
       try {
         var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
@@ -79,8 +76,7 @@
       }
     })();
   </script>
-
-  <style>
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap');
@@ -241,162 +237,153 @@
     html[data-theme="light"] .badge--green { background:#16a34a14; }
     html[data-theme="light"] .badge--red   { background:#ef444414; }
   </style>
-</head>
-
+</link></head>
 <body>
-<header id="header" class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card dark animating">
-  <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-    <div class="logo-container">
-      <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-    </div>
-    <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
-    <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
-  </div>
-  <nav class="flex items-center space-x-4 text-sm sm:text-base">
-    <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+<header class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card dark animating" id="header">
+<div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+<span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
+<span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
+</div>
+<nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       Home
     </a>
-    <a href="admin.html" class="flex items-center space-x-4 text-sm sm:text-base">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg> Admin
+<a class="flex items-center space-x-4 text-sm sm:text-base" href="admin.html">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
     </a>
-    <div class="flex items-center gap-2">
-      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
-        <i class="fa-regular fa-moon" id="themeIcon"></i>
-      </button>
-    </div>
-  </nav>
+<div class="flex items-center gap-2">
+<button aria-label="Toggle theme" class="icon-btn" id="themeToggle">
+<i class="fa-regular fa-moon" id="themeIcon"></i>
+</button>
+</div>
+</nav>
 </header>
-
 <!-- Header -->
 <div class="min-h-screen font-sans antialiased p-4 sm:p-8">
-
-  <!-- Main -->
-  <main class="container mx-auto mt-24 p-4 sm:p-8">
-    <!-- Title row + live total -->
-    <div class="flex items-center justify-between mb-6 gap-4">
-      <h1 class="text-3xl font-bold title-text">Print Accessories Labels</h1>
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 text-sm subtitle-text">
-          <span class="dot" id="conn-dot" aria-hidden="true"></span>
-          <span id="conn-status">Not Connected</span>
-        </div>
-        <div class="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 text-sm" aria-live="polite" title="Total accessories loaded">
+<!-- Main -->
+<main class="container mx-auto mt-24 p-4 sm:p-8">
+<!-- Title row + live total -->
+<div class="flex items-center justify-between mb-6 gap-4">
+<h1 class="text-3xl font-bold title-text">Print Accessories Labels</h1>
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 text-sm subtitle-text">
+<span aria-hidden="true" class="dot" id="conn-dot"></span>
+<span id="conn-status">Not Connected</span>
+</div>
+<div aria-live="polite" class="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 text-sm" title="Total accessories loaded">
           Total Accessories: <span id="total-accessories">0</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search / Scan -->
-    <section class="card p-6 rounded-xl mb-8 flex flex-col sm:flex-row items-center gap-4">
-      <div class="relative flex-grow w-full">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" class="w-full pl-10 pr-4 py-2 input-field" placeholder="Search by Accessory Code / Description" autocomplete="off">
-        <ul id="suggestions" class="suggestions-list hidden"></ul>
-      </div>
-      <button id="scanButton" class="btn-scan" aria-label="Scan barcode" title="Scan">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan">
-          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-        </svg>
-      </button>
-    </section>
-
-    <!-- Form + Preview -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-      <!-- Form -->
-      <div class="card p-6 rounded-xl">
-        <h2 class="text-xl font-semibold title-text mb-4">Accessory Details</h2>
-        <form id="accessoryForm" class="space-y-4" autocomplete="off">
-          <div>
-            <label for="Code" class="block text-sm font-medium subtitle-text">Code</label>
-            <input id="Code" class="mt-1 block w-full input-field" readonly>
-          </div>
-          <div>
-            <label for="Description" class="block text-sm font-medium subtitle-text">Description</label>
-            <input id="Description" class="mt-1 block w-full input-field" readonly>
-          </div>
-          <div>
-            <label for="AccessoryType" class="block text-sm font-medium subtitle-text">Accessory type</label>
-            <input id="AccessoryType" class="mt-1 block w-full input-field" readonly>
-          </div>
-          <div>
-            <label for="Quantity" class="block text-sm font-medium subtitle-text">Quantity</label>
-            <input id="Quantity" type="text" class="mt-1 block w-full input-field" placeholder="Enter quantity (free text)">
-          </div>
-          <div>
-            <label for="labelSize" class="block text-sm font-medium subtitle-text">Print Label Size (mm)</label>
-            <select id="labelSize" class="mt-1 block w-full input-field">
-              <option value="" disabled selected>-- Select Size (W x H) --</option>
-              <option value="100x50">100 x 50 mm</option>
-              <option value="150x100">150 x 100 mm</option>
-              <option value="200x150">200 x 150 mm</option>
-              <option value="250x200">250 x 200 mm</option>
-            </select>
-          </div>
-          <div class="warehouse-field">
-            <label for="WarehouseNo" class="block text-sm font-medium subtitle-text">Warehouse No <span class="text-red-500">*</span></label>
-            <input id="WarehouseNo" type="text" class="mt-1 block w-full input-field" placeholder="Enter warehouse number" required>
-            <div id="warehouseSuggestions" class="warehouse-suggestions" style="display: none;"></div>
-          </div>
-          <div class="rack-field">
-            <label for="RackNo" class="block text-sm font-medium subtitle-text">Rack No <span class="text-red-500">*</span></label>
-            <input id="RackNo" type="text" class="mt-1 block w-full input-field" placeholder="Enter rack number" required>
-            <div id="rackSuggestions" class="rack-suggestions" style="display: none;"></div>
-          </div>
-          <div>
-            <label for="Remarks" class="block text-sm font-medium subtitle-text">Remarks</label>
-            <input id="Remarks" class="mt-1 block w-full input-field" placeholder="(optional) Notes for this label…)">
-          </div>
-          <button type="button" id="printViewButton" class="btn-primary w-full sm:w-auto">Print View</button>
-        </form>
-      </div>
-
-      <!-- Preview -->
-      <div class="card p-10 rounded-xl">
-        <h2 class="text-xl font-semibold title-text mb-4">Accessory Preview</h2>
-        <div class="text-center space-y-4">
-          <div class="img-holder">
-            <img id="accessoryImage" src="https://placehold.co/250x160/ffffff/111111?text=No+Image" alt="Accessory Image" class="preview-image" loading="lazy" decoding="async">
-          </div>
-          <div>
-            <p class="text-lg font-bold title-text" id="previewCode">Code: -</p>
-            <!-- NEW: Status & MRP preview -->
-            <p class="subtitle-text" id="previewStatus">Status: <span id="statusBadge" class="badge">-</span></p>
-            <p class="subtitle-text" id="previewDescription">Description: -</p>
-            <p class="subtitle-text" id="previewType">Accessory type: -</p>
-            <p class="subtitle-text" id="previewQuantity">Qty: </p>
-            <p class="subtitle-text" id="previewMRP">MRP comments: -</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Message Box -->
-    <div id="message-box" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card z-50 text-center">
-      <p class="text-lg mb-4" id="message-text"></p>
-      <button id="message-ok" class="btn-primary">OK</button>
-    </div>
-  </main>
-
-  <!-- Scanner Modal -->
-  <div id="scanModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="scanTitle" aria-hidden="true">
-    <div class="modal-panel">
-      <div class="flex items-center justify-between mb-3">
-        <h2 id="scanTitle" class="text-lg font-semibold title-text">Scan Barcode</h2>
-        <button id="closeScan" class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800">Close</button>
-      </div>
-      <div class="video-wrap">
-        <video id="scanVideo" playsinline muted autoplay></video>
-        <div class="scan-line"></div>
-      </div>
-      <div class="mt-3 flex items-center justify-between text-sm subtitle-text">
-        <div>Point camera at the barcode…</div>
-        <button id="flipCamera" class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800">Flip camera</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
+</div>
+</div>
+</div>
+<!-- Search / Scan -->
+<section class="card p-6 rounded-xl mb-8 flex flex-col sm:flex-row items-center gap-4">
+<div class="relative flex-grow w-full">
+<svg class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<input autocomplete="off" class="w-full pl-10 pr-4 py-2 input-field" id="searchInput" placeholder="Search by Accessory Code / Description"/>
+<ul class="suggestions-list hidden" id="suggestions"></ul>
+</div>
+<button aria-label="Scan barcode" class="btn-scan" id="scanButton" title="Scan">
+<svg class="lucide lucide-scan" fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="22" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+</svg>
+</button>
+</section>
+<!-- Form + Preview -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+<!-- Form -->
+<div class="card p-6 rounded-xl">
+<h2 class="text-xl font-semibold title-text mb-4">Accessory Details</h2>
+<form autocomplete="off" class="space-y-4" id="accessoryForm">
+<div>
+<label class="block text-sm font-medium subtitle-text" for="Code">Code</label>
+<input class="mt-1 block w-full input-field" id="Code" readonly=""/>
+</div>
+<div>
+<label class="block text-sm font-medium subtitle-text" for="Description">Description</label>
+<input class="mt-1 block w-full input-field" id="Description" readonly=""/>
+</div>
+<div>
+<label class="block text-sm font-medium subtitle-text" for="AccessoryType">Accessory type</label>
+<input class="mt-1 block w-full input-field" id="AccessoryType" readonly=""/>
+</div>
+<div>
+<label class="block text-sm font-medium subtitle-text" for="Quantity">Quantity</label>
+<input class="mt-1 block w-full input-field" id="Quantity" placeholder="Enter quantity (free text)" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium subtitle-text" for="labelSize">Print Label Size (mm)</label>
+<select class="mt-1 block w-full input-field" id="labelSize">
+<option disabled="" selected="" value="">-- Select Size (W x H) --</option>
+<option value="100x50">100 x 50 mm</option>
+<option value="150x100">150 x 100 mm</option>
+<option value="200x150">200 x 150 mm</option>
+<option value="250x200">250 x 200 mm</option>
+</select>
+</div>
+<div class="warehouse-field">
+<label class="block text-sm font-medium subtitle-text" for="WarehouseNo">Warehouse No <span class="text-red-500">*</span></label>
+<input class="mt-1 block w-full input-field" id="WarehouseNo" placeholder="Enter warehouse number" required="" type="text"/>
+<div class="warehouse-suggestions" id="warehouseSuggestions" style="display: none;"></div>
+</div>
+<div class="rack-field">
+<label class="block text-sm font-medium subtitle-text" for="RackNo">Rack No <span class="text-red-500">*</span></label>
+<input class="mt-1 block w-full input-field" id="RackNo" placeholder="Enter rack number" required="" type="text"/>
+<div class="rack-suggestions" id="rackSuggestions" style="display: none;"></div>
+</div>
+<div>
+<label class="block text-sm font-medium subtitle-text" for="Remarks">Remarks</label>
+<input class="mt-1 block w-full input-field" id="Remarks" placeholder="(optional) Notes for this label…)"/>
+</div>
+<button class="btn-primary w-full sm:w-auto" id="printViewButton" type="button">Print View</button>
+</form>
+</div>
+<!-- Preview -->
+<div class="card p-10 rounded-xl">
+<h2 class="text-xl font-semibold title-text mb-4">Accessory Preview</h2>
+<div class="text-center space-y-4">
+<div class="img-holder">
+<img alt="Accessory Image" class="preview-image" decoding="async" id="accessoryImage" loading="lazy" src="https://placehold.co/250x160/ffffff/111111?text=No+Image"/>
+</div>
+<div>
+<p class="text-lg font-bold title-text" id="previewCode">Code: -</p>
+<!-- NEW: Status & MRP preview -->
+<p class="subtitle-text" id="previewStatus">Status: <span class="badge" id="statusBadge">-</span></p>
+<p class="subtitle-text" id="previewDescription">Description: -</p>
+<p class="subtitle-text" id="previewType">Accessory type: -</p>
+<p class="subtitle-text" id="previewQuantity">Qty: </p>
+<p class="subtitle-text" id="previewMRP">MRP comments: -</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Message Box -->
+<div class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card z-50 text-center" id="message-box">
+<p class="text-lg mb-4" id="message-text"></p>
+<button class="btn-primary" id="message-ok">OK</button>
+</div>
+</main>
+<!-- Scanner Modal -->
+<div aria-hidden="true" aria-labelledby="scanTitle" aria-modal="true" class="modal" id="scanModal" role="dialog">
+<div class="modal-panel">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-lg font-semibold title-text" id="scanTitle">Scan Barcode</h2>
+<button class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800" id="closeScan">Close</button>
+</div>
+<div class="video-wrap">
+<video autoplay="" id="scanVideo" muted="" playsinline=""></video>
+<div class="scan-line"></div>
+</div>
+<div class="mt-3 flex items-center justify-between text-sm subtitle-text">
+<div>Point camera at the barcode…</div>
+<button class="px-2 py-1 rounded border border-gray-600 hover:bg-gray-800" id="flipCamera">Flip camera</button>
+</div>
+</div>
+</div>
+<script>
     /* ===== Theme: toggle + cross-app sync ===== */
     (function(){
       const $ = (id) => document.getElementById(id);
@@ -434,8 +421,7 @@
       });
     })();
   </script>
-
-  <script>
+<script>
     /* ===== Helpers ===== */
     function pickExactCI(obj, keyExact){
       const target = keyExact.toLowerCase();
@@ -1034,35 +1020,34 @@
     document.getElementById('flipCamera').addEventListener('click', () => flipCam());
     window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && scanModal.classList.contains('open')) stopScan(); });
   </script>
-
-  <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
-  <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
-  <nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
-    <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
-    <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2"><path d="M20 7h-9"/><path d="M14 17h-5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
-      <span>Admin</span>
-    </button>
-    <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
-    </button>
-    <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51Z"/><path d="m3.29 7.39 8.31 3.23"/><path d="m12 22.95 8.71-3.26"/></svg>
-      <span>Rack Label</span>
-    </button>
-    <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <span>Search</span>
-    </button>
-  </nav>
-  <footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
-    <small>Alumil Inventory App @2025</small>
-  </footer>
-  <input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
-  <style>
+<!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+<div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+<nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
+<button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+<span>Home</span>
+</button>
+<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17h-5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+<span>Admin</span>
+</button>
+<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
+</button>
+<button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51Z"></path><path d="m3.29 7.39 8.31 3.23"></path><path d="m12 22.95 8.71-3.26"></path></svg>
+<span>Rack Label</span>
+</button>
+<button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<span>Search</span>
+</button>
+</nav>
+<footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">
+<small>Alumil Inventory App @2025</small>
+</footer>
+<input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text">
+<style>
     .alumil-bottom-nav {
       position: fixed; left: 0; right: 0;
       bottom: calc(28px + env(safe-area-inset-bottom, 0px));
@@ -1089,7 +1074,7 @@
     @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
     .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   </style>
-  <script>
+<script>
   (function(){
     function routeByCode(raw){
       if(!raw) return;
@@ -1153,8 +1138,7 @@
     }catch(e){}
   })();
   </script>
-
-  <script>
+<script>
   (function(){
     try{
       var path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -1167,9 +1151,7 @@
     try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
   })();
   </script>
-
-</div>
-
+</input></div>
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1244,13 +1226,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+<script src="js/sharepoint_loader.js"></script>
+<!-- Footer -->
+<footer class="alumil-footer">
+<p>Alumil Labeling App @2025</p>
+</footer>
 
-  <script src="js/sharepoint_loader.js"></script>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
 
-  <!-- Footer -->
-  <footer class="alumil-footer">
-    <p>Alumil Labeling App @2025</p>
-  </footer>
-
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>

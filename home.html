@@ -1,26 +1,25 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>Alumil Inventory System</title>
-
-  <!-- Comprehensive Favicon Setup -->
-  <link rel="icon" href="/favicon.ico?v=6" type="image/x-icon">
-  <link rel="shortcut icon" href="/favicon.ico?v=6" type="image/x-icon">
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png?v=6">
-  <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <meta name="theme-color" content="#ffc107">
-  <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-
-  <!-- Footer and Logo Styles -->
-  <link rel="stylesheet" href="assets/css/logo-theme.css">
-  <!-- Brand CSS removed -->
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Alumil Inventory System</title>
+<!-- Comprehensive Favicon Setup -->
+<link href="/favicon.ico?v=6" rel="icon" type="image/x-icon"/>
+<link href="/favicon.ico?v=6" rel="shortcut icon" type="image/x-icon"/>
+<link href="/favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/apple-touch-icon.png?v=6" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<meta content="#ffc107" name="theme-color"/>
+<meta content="/favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<!-- Footer and Logo Styles -->
+<link href="assets/css/logo-theme.css" rel="stylesheet"/>
+<!-- Brand CSS removed -->
+<style>
     /* Logo switching handled centrally in assets/css/alumil-brand.css */
     
     .alumil-footer {
@@ -55,18 +54,16 @@
       padding-bottom: 60px;
     }
   </style>
-  <meta name="theme-color" content="#ffffff">
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Supabase Overlay -->
-  <script src="assets/js/supabase-overlay.js"></script>
-
-  <style>
+<meta content="#ffffff" name="theme-color"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase Overlay -->
+<script src="assets/js/supabase-overlay.js"></script>
+<style>
     /* Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
@@ -149,9 +146,8 @@
       #header { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
     }
   </style>
-
-  <!-- EARLY: Sync <html data-theme> so mobile bottom nav + footer can style immediately -->
-  <script>
+<!-- EARLY: Sync <html data-theme> so mobile bottom nav + footer can style immediately -->
+<script>
     (function(){
       try{
         var t = localStorage.getItem('theme') || 'light';
@@ -159,188 +155,169 @@
       }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
     })();
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-
 <body class="light">
-  <!-- NOTE: remove horizontal padding on mobile so header can touch edges; keep for >=sm -->
-  <div class="min-h-screen font-sans antialiased px-0 sm:px-8 py-4">
-    <!-- Header -->
-    <header id="header" class="app-header fixed top-0 inset-x-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-none sm:rounded-xl shadow-lg card dark animating">
-      <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-      <div class="logo-container">
-        <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-      </div>
-        <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
-        <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
-      </div>
-      <nav class="flex items-center space-x-4 text-sm sm:text-base">
-        <a href="home.html" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home mr-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+<!-- NOTE: remove horizontal padding on mobile so header can touch edges; keep for >=sm -->
+<div class="min-h-screen font-sans antialiased px-0 sm:px-8 py-4">
+<!-- Header -->
+<header class="app-header fixed top-0 inset-x-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-none sm:rounded-xl shadow-lg card dark animating" id="header">
+<div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+<span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
+<span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
+</div>
+<nav class="flex items-center space-x-4 text-sm sm:text-base">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           Home
         </a>
-        <a href="admin.html" id="admin-link" class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog mr-1"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><circle cx="17" cy="17" r="3"/><path d="M19.5 14.5l.7.7"/><path d="M14.3 19.7l.7.7"/><path d="M20.9 17l.7-.7"/><path d="M15.7 14.3l-.7-.7"/><path d="M17 11.5v-1"/><path d="M17 21.5v-1"/><path d="M12.5 17h-1"/><path d="M21.5 17h-1"/></svg>
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="admin.html" id="admin-link" style="display: none;">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg>
           Admin
         </a>
-        <button id="logout-btn" class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" onclick="handleLogout()" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+<button class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" id="logout-btn" onclick="handleLogout()" style="display: none;">
+<svg class="lucide lucide-log-out mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
           Logout
         </button>
-        </a>
 
-        <button id="theme-toggle" class="flex items-center icon-color" aria-label="Toggle theme" title="Toggle theme" style="margin-left: 0.5rem;">
-          <svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </nav>
-    </header>
-
-    <!-- Main -->
-    <main class="container mx-auto mt-24 px-4 sm:px-8" id="main" role="main" aria-labelledby="dashboardTitle">
-      <section id="greeting" class="p-6 rounded-xl shadow-lg mb-6 card dark" aria-labelledby="dashboardTitle" aria-live="polite">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <div>
-            <h1 id="dashboardTitle" class="text-4xl font-bold title-text dark greeting-animation">Good morning!</h1>
-            <p class="subtitle-text dark mt-2 greeting-animation">Welcome to your inventory dashboard. Here's a quick overview of today's status.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Summary cards -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" aria-label="Inventory summary">
-        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
-          <div class="flex items-center justify-center mb-4">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M10 16h30l8 8v24H10z"/><path d="M18 24h16v16H18z"/><path d="M34 24l6 6M34 40l6-6"/><path d="M40 16v8h8"/></svg>
-          </div>
-          <h3 id="total-profiles" class="text-4xl font-bold text-yellow-500">0</h3>
-          <p class="mt-2 text-sm text-gray-400">Total Profile</p>
-        </div>
-
-        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
-          <div class="flex items-center justify-center mb-4">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><g opacity="0.9"><circle cx="22" cy="22" r="5"/><path d="M22 12v3M22 29v3M12 22h3M29 22h3M16 16l2 2M28 28l2 2M16 28l2-2M28 16l-2 2"/></g><g><circle cx="38" cy="38" r="6"/><path d="M38 26v4M38 50v4M26 38h4M50 38h4M30 30l3 3M46 46l3 3M30 46l3-3M46 30l-3 3"/></g></svg>
-          </div>
-          <h3 id="total-accessories" class="text-4xl font-bold text-red-500">0</h3>
-          <p class="mt-2 text-sm text-gray-400">Total Accessories</p>
-        </div>
-
-        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
-          <div class="flex items-center justify-center mb-4">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M12 10v44M52 10v44"/><path d="M12 18h40M12 32h40M12 46h40"/><rect x="16" y="13.5" width="12" height="7" rx="1.2"/><rect x="36" y="13.5" width="12" height="7" rx="1.2"/><rect x="16" y="27.5" width="12" height="7" rx="1.2"/><rect x="36" y="27.5" width="12" height="7" rx="1.2"/><rect x="24" y="41.5" width="16" height="7" rx="1.2"/><path d="M10 54h44"/></svg>
-          </div>
-          <h3 id="total-racks" class="text-4xl font-bold text-green-500">0</h3>
-          <p class="mt-2 text-sm text-gray-400">Total Racks</p>
-        </div>
-
-        <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
-          <div class="flex items-center justify-center mb-4">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><rect x="14" y="12" width="36" height="40" rx="4"/><rect x="24" y="6" width="16" height="8" rx="2"/><path d="M26 10h12"/><rect x="18" y="20" width="12" height="12" rx="1.5"/><path d="M20 22h3M25 22h3M20 26h3M25 26h3M23 24h3M23 28h3"/><path d="M34 23h12M34 28h12M18 38h28M18 43h28"/></svg>
-          </div>
-          <h3 id="total-bincard" class="text-4xl font-bold text-gray-400">0</h3>
-          <p class="mt-2 text-sm text-gray-400">Bin card</p>
-        </div>
-      </section>
-
-      <!-- Actions -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <a href="search-inventory.html" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover">
-          <div class="mr-4 mt-1 icon-color dark">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold title-text dark">Search Inventory – Alumil</h3>
-            <p class="text-sm subtitle-text dark">Quickly find items using keywords or barcodes.</p>
-          </div>
-        </a>
-
-        <a href="bin-card.html" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Bin card Inventory">
-          <div class="mr-4 mt-1 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-square"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold title-text dark">Bin card Inventory</h3>
-            <p class="text-sm subtitle-text dark">Record and label a new item in your bin card inventory.</p>
-          </div>
-        </a>
-
-        <a href="javascript:void(0)" onclick="showPrintModal()" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Open print options" aria-controls="printModal">
-          <div class="mr-4 mt-1 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold title-text dark">Print Labels</h3>
-            <p class="text-sm subtitle-text dark">Generate and print labels for items or locations.</p>
-          </div>
-        </a>
-      </section>
-    </main>
-  </div>
-
-  <!-- Print Options Modal -->
-  <div id="printModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="printModalTitle" aria-describedby="printModalDesc" aria-hidden="true">
-    <div class="modal-content light">
-      <button class="close-button" onclick="hidePrintModal()" aria-label="Close print options">&times;</button>
-      <h2 id="printModalTitle" class="text-2xl font-bold title-text dark mb-2 text-center">Print Options</h2>
-      <p id="printModalDesc" class="subtitle-text dark mb-6 text-center">Choose what you’d like to print.</p>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <a href="javascript:void(0)" onclick="showPrintOptionModal()" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Open label printing options" aria-controls="printOptionModal">
-          <div class="mb-4 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 14 3h5a2 2 0 0 1 2 2v5a2 2 0 0 1-.586 1.414L12 19.414a2 2 0 0 1-2.828 0L2.586 12.586a2 2 0 0 1 0-2.828z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
-          </div>
-          <h3 class="text-lg font-semibold title-text dark">Label Printing</h3>
-          <p class="text-sm subtitle-text dark text-center mt-2">Print labels for specific items.</p>
-        </a>
-
-        <!-- Rack labeling -->
-        <a href="rack-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Rack labeling">
-          <div class="mb-4 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M6 16v.01"/><path d="M10 16v.01"/><path d="M14 16v.01"/><path d="M18 16v.01"/><path d="M6 20v.01"/><path d="M10 20v.01"/><path d="M14 20v.01"/><path d="M18 20v.01"/><rect width="8" height="8" x="14" y="2" rx="2"/><path d="M18 14v.01"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
-          </div>
-          <h3 class="text-lg font-semibold title-text dark">Rack Labeling</h3>
-          <p class="text-sm subtitle-text dark text-center mt-2">Generate labels for storage racks.</p>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Print Type Modal -->
-  <div id="printOptionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="printTypeTitle" aria-describedby="printTypeDesc" aria-hidden="true">
-    <div class="modal-content light">
-      <button class="close-button" onclick="hidePrintOptionModal()" aria-label="Close print type options">&times;</button>
-      <h2 id="printTypeTitle" class="text-2xl font-bold title-text dark mb-2 text-center">Select Type</h2>
-      <p id="printTypeDesc" class="subtitle-text dark mb-6 text-center">Pick what kind of label you want to print.</p>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <a href="profile-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Print profile label">
-          <div class="mb-4 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler"><path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"/><path d="M2.25 10.5h19.5"/></svg>
-          </div>
-          <h3 class="text-lg font-semibold title-text dark">Profile</h3>
-          <p class="text-sm subtitle-text dark text-center mt-2">Print a label for a profile.</p>
-        </a>
-
-        <a href="acc-label-printing.html" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" aria-label="Print accessories label">
-          <div class="mb-4 icon-color dark">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-nuts"><path d="M12 2v20"/><path d="M17 5v14"/><path d="M7 5v14"/><path d="M19 8v8"/><path d="M5 8v8"/><path d="M21 12v.01"/><path d="M3 12v.01"/></svg>
-          </div>
-          <h3 class="text-lg font-semibold title-text dark">Accessories</h3>
-          <p class="text-sm subtitle-text dark text-center mt-2">Print a label for an accessory.</p>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Message Box -->
-  <div id="message-box" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card dark z-50 text-center" role="alertdialog" aria-labelledby="message-title" aria-describedby="message-text" aria-modal="true" aria-hidden="true">
-    <h3 id="message-title" class="text-xl font-semibold mb-4">Message</h3>
-    <p class="text-lg mb-4" id="message-text"></p>
-    <button onclick="hideMessage()" class="btn-primary px-4 py-2 rounded bg-amber-500 text-black font-medium focus:outline-none focus:ring-2 focus:ring-amber-300" aria-label="Close message">OK</button>
-  </div>
-
-  <!-- Greeting -->
-  <script>
+<button aria-label="Toggle theme" class="flex items-center icon-color" id="theme-toggle" style="margin-left: 0.5rem;" title="Toggle theme">
+<svg fill="none" height="20" id="theme-toggle-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+</nav>
+</header>
+<!-- Main -->
+<main aria-labelledby="dashboardTitle" class="container mx-auto mt-24 px-4 sm:px-8" id="main" role="main">
+<section aria-labelledby="dashboardTitle" aria-live="polite" class="p-6 rounded-xl shadow-lg mb-6 card dark" id="greeting">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+<div>
+<h1 class="text-4xl font-bold title-text dark greeting-animation" id="dashboardTitle">Good morning!</h1>
+<p class="subtitle-text dark mt-2 greeting-animation">Welcome to your inventory dashboard. Here's a quick overview of today's status.</p>
+</div>
+</div>
+</section>
+<!-- Summary cards -->
+<section aria-label="Inventory summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+<div class="flex items-center justify-center mb-4">
+<svg aria-hidden="true" class="text-yellow-500" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><path d="M10 16h30l8 8v24H10z"></path><path d="M18 24h16v16H18z"></path><path d="M34 24l6 6M34 40l6-6"></path><path d="M40 16v8h8"></path></svg>
+</div>
+<h3 class="text-4xl font-bold text-yellow-500" id="total-profiles">0</h3>
+<p class="mt-2 text-sm text-gray-400">Total Profile</p>
+</div>
+<div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+<div class="flex items-center justify-center mb-4">
+<svg aria-hidden="true" class="text-red-500" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><g opacity="0.9"><circle cx="22" cy="22" r="5"></circle><path d="M22 12v3M22 29v3M12 22h3M29 22h3M16 16l2 2M28 28l2 2M16 28l2-2M28 16l-2 2"></path></g><g><circle cx="38" cy="38" r="6"></circle><path d="M38 26v4M38 50v4M26 38h4M50 38h4M30 30l3 3M46 46l3 3M30 46l3-3M46 30l-3 3"></path></g></svg>
+</div>
+<h3 class="text-4xl font-bold text-red-500" id="total-accessories">0</h3>
+<p class="mt-2 text-sm text-gray-400">Total Accessories</p>
+</div>
+<div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+<div class="flex items-center justify-center mb-4">
+<svg aria-hidden="true" class="text-green-500" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><path d="M12 10v44M52 10v44"></path><path d="M12 18h40M12 32h40M12 46h40"></path><rect height="7" rx="1.2" width="12" x="16" y="13.5"></rect><rect height="7" rx="1.2" width="12" x="36" y="13.5"></rect><rect height="7" rx="1.2" width="12" x="16" y="27.5"></rect><rect height="7" rx="1.2" width="12" x="36" y="27.5"></rect><rect height="7" rx="1.2" width="16" x="24" y="41.5"></rect><path d="M10 54h44"></path></svg>
+</div>
+<h3 class="text-4xl font-bold text-green-500" id="total-racks">0</h3>
+<p class="mt-2 text-sm text-gray-400">Total Racks</p>
+</div>
+<div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
+<div class="flex items-center justify-center mb-4">
+<svg aria-hidden="true" class="text-gray-400" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><rect height="40" rx="4" width="36" x="14" y="12"></rect><rect height="8" rx="2" width="16" x="24" y="6"></rect><path d="M26 10h12"></path><rect height="12" rx="1.5" width="12" x="18" y="20"></rect><path d="M20 22h3M25 22h3M20 26h3M25 26h3M23 24h3M23 28h3"></path><path d="M34 23h12M34 28h12M18 38h28M18 43h28"></path></svg>
+</div>
+<h3 class="text-4xl font-bold text-gray-400" id="total-bincard">0</h3>
+<p class="mt-2 text-sm text-gray-400">Bin card</p>
+</div>
+</section>
+<!-- Actions -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+<a class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="search-inventory.html">
+<div class="mr-4 mt-1 icon-color dark">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text dark">Search Inventory – Alumil</h3>
+<p class="text-sm subtitle-text dark">Quickly find items using keywords or barcodes.</p>
+</div>
+</a>
+<a aria-label="Bin card Inventory" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="bin-card.html">
+<div class="mr-4 mt-1 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-plus-square" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text dark">Bin card Inventory</h3>
+<p class="text-sm subtitle-text dark">Record and label a new item in your bin card inventory.</p>
+</div>
+</a>
+<a aria-controls="printModal" aria-label="Open print options" class="flex items-start p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="javascript:void(0)" onclick="showPrintModal()">
+<div class="mr-4 mt-1 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-printer" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect height="8" width="12" x="6" y="14"></rect></svg>
+</div>
+<div>
+<h3 class="text-lg font-semibold title-text dark">Print Labels</h3>
+<p class="text-sm subtitle-text dark">Generate and print labels for items or locations.</p>
+</div>
+</a>
+</section>
+</main>
+</div>
+<!-- Print Options Modal -->
+<div aria-describedby="printModalDesc" aria-hidden="true" aria-labelledby="printModalTitle" aria-modal="true" class="modal" id="printModal" role="dialog">
+<div class="modal-content light">
+<button aria-label="Close print options" class="close-button" onclick="hidePrintModal()">×</button>
+<h2 class="text-2xl font-bold title-text dark mb-2 text-center" id="printModalTitle">Print Options</h2>
+<p class="subtitle-text dark mb-6 text-center" id="printModalDesc">Choose what you’d like to print.</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<a aria-controls="printOptionModal" aria-label="Open label printing options" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="javascript:void(0)" onclick="showPrintOptionModal()">
+<div class="mb-4 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-tag" fill="none" height="48" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M12.586 2.586A2 2 0 0 0 14 3h5a2 2 0 0 1 2 2v5a2 2 0 0 1-.586 1.414L12 19.414a2 2 0 0 1-2.828 0L2.586 12.586a2 2 0 0 1 0-2.828z"></path><circle cx="7.5" cy="7.5" fill="currentColor" r=".5"></circle></svg>
+</div>
+<h3 class="text-lg font-semibold title-text dark">Label Printing</h3>
+<p class="text-sm subtitle-text dark text-center mt-2">Print labels for specific items.</p>
+</a>
+<!-- Rack labeling -->
+<a aria-label="Rack labeling" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="rack-label-printing.html">
+<div class="mb-4 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-qr-code" fill="none" height="48" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><rect height="8" rx="2" width="8" x="2" y="2"></rect><path d="M6 16v.01"></path><path d="M10 16v.01"></path><path d="M14 16v.01"></path><path d="M18 16v.01"></path><path d="M6 20v.01"></path><path d="M10 20v.01"></path><path d="M14 20v.01"></path><path d="M18 20v.01"></path><rect height="8" rx="2" width="8" x="14" y="2"></rect><path d="M18 14v.01"></path><rect height="8" rx="2" width="8" x="2" y="14"></rect></svg>
+</div>
+<h3 class="text-lg font-semibold title-text dark">Rack Labeling</h3>
+<p class="text-sm subtitle-text dark text-center mt-2">Generate labels for storage racks.</p>
+</a>
+</div>
+</div>
+</div>
+<!-- Print Type Modal -->
+<div aria-describedby="printTypeDesc" aria-hidden="true" aria-labelledby="printTypeTitle" aria-modal="true" class="modal" id="printOptionModal" role="dialog">
+<div class="modal-content light">
+<button aria-label="Close print type options" class="close-button" onclick="hidePrintOptionModal()">×</button>
+<h2 class="text-2xl font-bold title-text dark mb-2 text-center" id="printTypeTitle">Select Type</h2>
+<p class="subtitle-text dark mb-6 text-center" id="printTypeDesc">Pick what kind of label you want to print.</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<a aria-label="Print profile label" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="profile-label-printing.html">
+<div class="mb-4 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-ruler" fill="none" height="48" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M20.25 15a2.25 2.25 0 0 1-2.25 2.25h-10.5A2.25 2.25 0 0 1 5.25 15V9.75a2.25 2.25 0 0 1 2.25-2.25h10.5A2.25 2.25 0 0 1 20.25 9.75V15z"></path><path d="M2.25 10.5h19.5"></path></svg>
+</div>
+<h3 class="text-lg font-semibold title-text dark">Profile</h3>
+<p class="text-sm subtitle-text dark text-center mt-2">Print a label for a profile.</p>
+</a>
+<a aria-label="Print accessories label" class="flex flex-col items-center p-6 rounded-xl shadow-lg transition-all hover:scale-105 duration-300 card dark glow-hover" href="acc-label-printing.html">
+<div class="mb-4 icon-color dark">
+<svg aria-hidden="true" class="lucide lucide-nuts" fill="none" height="48" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20"></path><path d="M17 5v14"></path><path d="M7 5v14"></path><path d="M19 8v8"></path><path d="M5 8v8"></path><path d="M21 12v.01"></path><path d="M3 12v.01"></path></svg>
+</div>
+<h3 class="text-lg font-semibold title-text dark">Accessories</h3>
+<p class="text-sm subtitle-text dark text-center mt-2">Print a label for an accessory.</p>
+</a>
+</div>
+</div>
+</div>
+<!-- Message Box -->
+<div aria-describedby="message-text" aria-hidden="true" aria-labelledby="message-title" aria-modal="true" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl card dark z-50 text-center" id="message-box" role="alertdialog">
+<h3 class="text-xl font-semibold mb-4" id="message-title">Message</h3>
+<p class="text-lg mb-4" id="message-text"></p>
+<button aria-label="Close message" class="btn-primary px-4 py-2 rounded bg-amber-500 text-black font-medium focus:outline-none focus:ring-2 focus:ring-amber-300" onclick="hideMessage()">OK</button>
+</div>
+<!-- Greeting -->
+<script>
     function getGreeting(){ const hour = new Date().getHours(); if (hour < 12) return 'Good morning'; if (hour < 18) return 'Good afternoon'; return 'Good evening'; }
     document.addEventListener('DOMContentLoaded', async () => {
       const greetingElement = document.getElementById('greeting').querySelector('h1');
@@ -366,9 +343,8 @@
       greetingElement.textContent = `${getGreeting()}, ${userName}!`;
     });
   </script>
-
-  <!-- Modal + focus + message box (uses .open class) -->
-  <script>
+<!-- Modal + focus + message box (uses .open class) -->
+<script>
     const printModal = document.getElementById('printModal');
     const printOptionModal = document.getElementById('printOptionModal');
     const messageBox = document.getElementById('message-box');
@@ -416,9 +392,8 @@
     // click outside to close
     window.addEventListener('click', (e) => { if (e.target === printModal) hidePrintModal(); if (e.target === printOptionModal) hidePrintOptionModal(); });
   </script>
-
-  <!-- Header margin-top fixer (keeps content clear of the fixed header) -->
-  <script>
+<!-- Header margin-top fixer (keeps content clear of the fixed header) -->
+<script>
     (function () {
       try {
         var header = document.getElementById("header") || document.querySelector("header");
@@ -432,9 +407,8 @@
       } catch(e){ console.warn("alumil header fix error:", e); }
     })();
   </script>
-
-  <!-- Totals: auto-update from localStorage (profiles, accessories, racks, bin card) -->
-  <script>
+<!-- Totals: auto-update from localStorage (profiles, accessories, racks, bin card) -->
+<script>
     (function () {
       function toArray(x){
         return Array.isArray(x) ? x : (x && Array.isArray(x.rows) ? x.rows : []);
@@ -528,9 +502,8 @@
       } catch(e){}
     })();
   </script>
-
-  <!-- Theme + Font init -->
-  <script>
+<!-- Theme + Font init -->
+<script>
     document.addEventListener('DOMContentLoaded', () => {
       // Theme
       const theme = (localStorage.getItem('theme') || 'light');
@@ -544,35 +517,34 @@
       else document.body.classList.add('font-inter');
     });
   </script>
-
-  <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
-  <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
-  <nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
-    <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
-    <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2"><path d="M20 7h-9"/><path d="M14 17h-5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
-      <span>Admin</span>
-    </button>
-    <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
-    </button>
-    <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51Z"/><path d="m3.29 7.39 8.31 3.23"/><path d="m12 22.95 8.71-3.26"/></svg>
-      <span>Rack Label</span>
-    </button>
-    <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <span>Search</span>
-    </button>
-  </nav>
-  <footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
-    <small>Alumil Inventory App @2025</small>
-  </footer>
-  <input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
-  <style>
+<!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
+<div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
+<nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
+<button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+<span>Home</span>
+</button>
+<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17h-5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+<span>Admin</span>
+</button>
+<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
+</button>
+<button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51Z"></path><path d="m3.29 7.39 8.31 3.23"></path><path d="m12 22.95 8.71-3.26"></path></svg>
+<span>Rack Label</span>
+</button>
+<button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<span>Search</span>
+</button>
+</nav>
+<footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">
+<small>Alumil Inventory App @2025</small>
+</footer>
+<input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text"/>
+<style>
     .alumil-bottom-nav { position: fixed; left: 0; right: 0; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; z-index: 60; display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr; align-items: center; max-width: 720px; padding: 10px 12px; background: rgba(15, 23, 42, .92); color: #e5e7eb; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
     html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
     .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
@@ -586,7 +558,7 @@
     @media (min-width: 1025px) { #alumil-bottom-safe-pad, #alumil-bottom-nav, #alumil-fixed-footer { display: none !important; } }
     .alumil-scan-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   </style>
-  <script>
+<script>
     (function(){
       function routeByCode(raw){ if(!raw) return; const code = String(raw).trim(); if(!code) return; const isAcc = /(\bACC\b|^ACC-|ACC\d|ACCESS|ACCS)/i.test(code); const target = isAcc ? 'acc-label-printing.html' : 'profile-label-printing.html'; const url = target + '?code=' + encodeURIComponent(code); window.location.href = url; }
       // Keyboard wedge capture
@@ -608,9 +580,8 @@
         // logo switching is now handled by CSS in assets/css/alumil-brand.css
     })();
   </script>
-
-  <!-- Theme toggle (icon swap + <html data-theme> sync) -->
-  <script>
+<!-- Theme toggle (icon swap + <html data-theme> sync) -->
+<script>
     (function(){
       var MOON = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
       var SUN  = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
@@ -627,8 +598,7 @@
       document.addEventListener('DOMContentLoaded', function(){ applySaved(); var btn = document.getElementById('theme-toggle'); if (btn) btn.addEventListener('click', toggleTheme); });
     })();
   </script>
-
-  <script>
+<script>
     (function(){
       try{
         var path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -641,7 +611,6 @@
       try{ if(window.lucide && window.lucide.createIcons){ window.lucide.createIcons(); } }catch(e){}
     })();
   </script>
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -718,11 +687,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
-
-  <script src="js/sharepoint_loader.js"></script>
-  
-  <!-- Authentication and Role-based Navigation -->
-  <script>
+<script src="js/sharepoint_loader.js"></script>
+<!-- Authentication and Role-based Navigation -->
+<script>
     async function handleLogout() {
       if (window.SupabaseAPI) {
         await window.SupabaseAPI.signOut();
@@ -753,11 +720,49 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   </script>
+<!-- Footer -->
+<footer class="alumil-footer">
+<p>Alumil Labeling App @2025</p>
+</footer>
 
-  <!-- Footer -->
-  <footer class="alumil-footer">
-    <p>Alumil Labeling App @2025</p>
-  </footer>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
 
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>

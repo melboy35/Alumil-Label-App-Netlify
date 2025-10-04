@@ -1,22 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Label 1 – Print</title>
-
 <!-- Favicons -->
-<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=6">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png?v=6">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png?v=6">
-<link rel="icon" type="image/svg+xml" href="favicon/favicon.svg?v=6">
-<link rel="manifest" href="favicon/site.webmanifest?v=6">
-<link rel="mask-icon" href="favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-<link rel="shortcut icon" href="favicon/favicon.ico?v=6">
-<meta name="msapplication-TileColor" content="#ffc107">
-<meta name="msapplication-config" content="favicon/browserconfig.xml?v=6">
-<meta name="theme-color" content="#ffc107">
-
+<link href="favicon/apple-touch-icon.png?v=6" rel="apple-touch-icon" sizes="180x180"/>
+<link href="favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="favicon/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="favicon/site.webmanifest?v=6" rel="manifest"/>
+<link color="#ffc107" href="favicon/safari-pinned-tab.svg?v=6" rel="mask-icon"/>
+<link href="favicon/favicon.ico?v=6" rel="shortcut icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="favicon/browserconfig.xml?v=6" name="msapplication-config"/>
+<meta content="#ffc107" name="theme-color"/>
 <style>
   /* ---------- Size & base ---------- */
   @page { size: 160mm 110mm; margin: 4mm; }
@@ -117,77 +116,70 @@
   }
   @media print { .actions{ display:none; } .label{ border:none; } }
 </style>
-  <script src="https://unpkg.com/lucide@latest" defer></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script defer="" src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-
 <div class="actions">
-  <button onclick="window.print()">Print</button>
-  <button onclick="window.close()">Close</button>
+<button onclick="window.print()">Print</button>
+<button onclick="window.close()">Close</button>
 </div>
-
 <section class="label" id="label">
-  <!-- LEFT: IMAGE -->
-  <div class="imgPanel" id="imgPanel">
-    <h4>Profile Image</h4>
-    <div class="imgBox" id="imgBox">
-      <img id="img" alt="" />
-    </div>
-  </div>
-
-  <!-- RIGHT: DETAILS -->
-  <div class="right">
-    <!-- Top rows -->
-    <div class="topGrid">
-      <!-- FULL-WIDTH rows (NO CLAMP) -->
-      <div class="row span2">
-        <div class="k">Description</div>
-        <div class="v" id="desc">—</div>
-      </div>
-      <div class="row span2">
-        <div class="k">Profile Title</div>
-        <div class="v" id="ptitle">—</div>
-      </div>
-
-      <!-- Two-column rows -->
-      <div class="row" id="row-system">
-        <div class="k">System</div>
-        <div class="v" id="system">—</div>
-      </div>
-      <div class="row" id="row-alloy">
-        <div class="k">Alloy</div>
-        <div class="v" id="alloy">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Length</div>
-        <div class="v" id="length">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Warehouse No</div>
-        <div class="v" id="wh">—</div>
-      </div>
-      <div class="row">
-        <div class="k">Rack No</div>
-        <div class="v" id="rack">—</div>
-      </div>
-    </div>
-
-    <!-- Stacked: Sides (pill) then Polyamide (pill) -->
-    <div class="stack">
-      <div class="box" id="block-sides" hidden>
-        <h4>Sides (1–4)</h4>
-        <div class="pillWrap" id="sides"></div>
-      </div>
-      <div class="box" id="block-poly" hidden>
-        <h4>Polyamide (1–6)</h4>
-        <div class="pillWrap" id="polys"></div>
-      </div>
-    </div>
-  </div>
+<!-- LEFT: IMAGE -->
+<div class="imgPanel" id="imgPanel">
+<h4>Profile Image</h4>
+<div class="imgBox" id="imgBox">
+<img alt="" id="img"/>
+</div>
+</div>
+<!-- RIGHT: DETAILS -->
+<div class="right">
+<!-- Top rows -->
+<div class="topGrid">
+<!-- FULL-WIDTH rows (NO CLAMP) -->
+<div class="row span2">
+<div class="k">Description</div>
+<div class="v" id="desc">—</div>
+</div>
+<div class="row span2">
+<div class="k">Profile Title</div>
+<div class="v" id="ptitle">—</div>
+</div>
+<!-- Two-column rows -->
+<div class="row" id="row-system">
+<div class="k">System</div>
+<div class="v" id="system">—</div>
+</div>
+<div class="row" id="row-alloy">
+<div class="k">Alloy</div>
+<div class="v" id="alloy">—</div>
+</div>
+<div class="row">
+<div class="k">Length</div>
+<div class="v" id="length">—</div>
+</div>
+<div class="row">
+<div class="k">Warehouse No</div>
+<div class="v" id="wh">—</div>
+</div>
+<div class="row">
+<div class="k">Rack No</div>
+<div class="v" id="rack">—</div>
+</div>
+</div>
+<!-- Stacked: Sides (pill) then Polyamide (pill) -->
+<div class="stack">
+<div class="box" hidden="" id="block-sides">
+<h4>Sides (1–4)</h4>
+<div class="pillWrap" id="sides"></div>
+</div>
+<div class="box" hidden="" id="block-poly">
+<h4>Polyamide (1–6)</h4>
+<div class="pillWrap" id="polys"></div>
+</div>
+</div>
+</div>
 </section>
-
 <script>
   const $ = (id)=>document.getElementById(id);
 
@@ -298,50 +290,49 @@
     window.addEventListener('load', ()=> setTimeout(()=> window.print(), 150));
   }
 </script>
-
 <!-- MARKER: Alumil Mobile Bottom Nav + Footer (v1) -->
 <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
-<nav id="alumil-bottom-nav" aria-label="Primary" class="alumil-bottom-nav">
-  <button class="nav-btn" data-nav="home" onclick="location.href='home.html'" aria-label="Home">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home">
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-    <span>Home</span>
-  </button>
-  <button class="nav-btn" data-nav="admin" onclick="location.href='admin.html'" aria-label="Admin">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
-      <path d="M20 7h-9"/>
-      <path d="M14 17h-5"/>
-      <circle cx="17" cy="17" r="3"/>
-      <circle cx="7" cy="7" r="3"/>
-    </svg>
-    <span>Admin</span>
-  </button>
-  <button id="alumil-scan-btn" class="scan-btn" aria-label="Barcode scan (open)">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line">
-      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-    </svg>
-  </button>
-  <button class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'" aria-label="Rack Label">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
-      <path d="m7.5 4.27 9 5.15"/>
-      <path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"/>
-      <path d="m3.29 7.39 8.31 3.23"/>
-      <path d="m12 22.95 8.71-3.26"/>
-    </svg>
-    <span>Rack Label</span>
-  </button>
-  <button class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'" aria-label="Search Inventory">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
-      <circle cx="11" cy="11" r="8"/>
-      <path d="m21 21-4.3-4.3"/>
-    </svg>
-    <span>Search</span>
-  </button>
+<nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
+<button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
+</button>
+<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 7h-9"></path>
+<path d="M14 17h-5"></path>
+<circle cx="17" cy="17" r="3"></circle>
+<circle cx="7" cy="7" r="3"></circle>
+</svg>
+<span>Admin</span>
+</button>
+<button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+<path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+<path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+<path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+</svg>
+</button>
+<button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m7.5 4.27 9 5.15"></path>
+<path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"></path>
+<path d="m3.29 7.39 8.31 3.23"></path>
+<path d="m12 22.95 8.71-3.26"></path>
+</svg>
+<span>Rack Label</span>
+</button>
+<button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="11" cy="11" r="8"></circle>
+<path d="m21 21-4.3-4.3"></path>
+</svg>
+<span>Search</span>
+</button>
 <style media="print">
   /* Hide mobile chrome on print */
   #alumil-bottom-safe-pad,
@@ -353,10 +344,10 @@
   }
 </style>
 </nav>
-<footer id="alumil-fixed-footer" class="alumil-footer" role="contentinfo">
-  <small>Alumil Inventory App @2025</small>
+<footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">
+<small>Alumil Inventory App @2025</small>
 </footer>
-<input id="alumil-scan-input" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" class="alumil-scan-input" />
+<input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text"/>
 <style>
   .alumil-bottom-nav {
     position: fixed; left: 0; right: 0;
@@ -448,8 +439,6 @@
   }catch(e){}
 })();
 </script>
-
-
 <script>
 // Versioned global bootstrap (SharePoint + Config)
 document.addEventListener('DOMContentLoaded', async () => {
@@ -526,7 +515,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+<script src="js/sharepoint_loader.js"></script>
 
-  <script src="js/sharepoint_loader.js"></script>
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
+
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>

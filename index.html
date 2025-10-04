@@ -1,27 +1,26 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alumil Inventory System</title>
-    
-    <!-- Comprehensive Favicon Setup -->
-    <link rel="icon" href="/favicon.ico?v=6" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico?v=6" type="image/x-icon">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=6">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-    <link rel="manifest" href="/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#ffc107">
-    <meta name="msapplication-TileColor" content="#ffc107">
-    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="stylesheet" href="assets/css/logo-theme.css">
-    <!-- Brand CSS removed -->
-    
-    <!-- Footer Styles -->
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Alumil Inventory System</title>
+<!-- Comprehensive Favicon Setup -->
+<link href="/favicon.ico?v=6" rel="icon" type="image/x-icon"/>
+<link href="/favicon.ico?v=6" rel="shortcut icon" type="image/x-icon"/>
+<link href="/favicon.svg?v=6" rel="icon" type="image/svg+xml"/>
+<link href="/favicon/favicon-32x32.png?v=6" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon/favicon-16x16.png?v=6" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/favicon/site.webmanifest" rel="manifest"/>
+<link color="#ffc107" href="/favicon/safari-pinned-tab.svg" rel="mask-icon"/>
+<meta content="#ffc107" name="msapplication-TileColor"/>
+<meta content="/favicon/browserconfig.xml" name="msapplication-config"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="assets/css/logo-theme.css" rel="stylesheet"/>
+<!-- Brand CSS removed -->
+<!-- Footer Styles -->
+<style>
         .alumil-footer {
             position: fixed;
             bottom: 0;
@@ -50,13 +49,11 @@
             font-weight: 500;
         }
     </style>
-    
-    <script>
+<script>
         // Immediate redirect to login page
         window.location.href = '/login.html';
     </script>
-    
-    <style>
+<style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
             display: flex;
@@ -86,19 +83,58 @@
     </style>
 </head>
 <body>
-    <div class="loading">
-        <div class="spinner"></div>
-        <div class="logo-container">
-            <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager">
-        </div>
-    <h2>Alumil Inventory System</h2>
-        <p>Redirecting to login...</p>
-        <p><a href="/login.html" style="color: #ffc107;">Click here if not redirected automatically</a></p>
-    </div>
-    
-    <!-- Footer -->
-    <footer class="alumil-footer">
-        <p>Alumil Labeling App @2025</p>
-    </footer>
+<div class="loading">
+<div class="spinner"></div>
+<div class="logo-container">
+<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+</div>
+<h2>Alumil Inventory System</h2>
+<p>Redirecting to login...</p>
+<p><a href="/login.html" style="color: #ffc107;">Click here if not redirected automatically</a></p>
+</div>
+<!-- Footer -->
+<footer class="alumil-footer">
+<p>Alumil Labeling App @2025</p>
+</footer>
+
+<!-- Supabase v2 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
+  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
+  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+</script>
+
+<!-- Live Data: consumer fetch + realtime -->
+<script>
+(function(){
+  const sb = window._sbClient, ORG = window.ORG_ID;
+  async function fetchLiveData(){
+    try{
+      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
+        sb.from('profiles').select('*').eq('org_id', ORG),
+        sb.from('accessories').select('*').eq('org_id', ORG)
+      ]);
+      if(pe) throw pe; if(ae) throw ae;
+      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
+      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
+      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
+      return data;
+    }catch(err){
+      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
+      catch { return { profiles:[], accessories:[] }; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', fetchLiveData);
+  sb.channel('version-bumps')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
+      if (payload?.new?.org_id === ORG) await fetchLiveData();
+    })
+    .subscribe();
+  // expose for pages that want it
+  window.fetchLiveData = fetchLiveData;
+})();
+</script>
 </body>
 </html>
