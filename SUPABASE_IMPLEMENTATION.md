@@ -4,23 +4,37 @@ This directory contains the master files for implementing real-time data synchro
 
 ## Files Overview
 
-### 1. `supabase-schema.sql`
-- Database schema for Supabase
-- Creates tables: organizations, profiles, accessories, dataset_versions
-- Sets up Row Level Security (RLS) policies
-- Run this once in your Supabase SQL editor
+### 1. `supabase-schema.sql` (Multi-tenant with org_id)
+- Full schema with organizations and RLS
+- For multi-tenant setups
 
-### 2. `js/supabase-admin-sync.js`
-- Admin functionality for uploading and syncing data
-- Handles Excel file processing and cloud synchronization
-- Includes progress tracking and error handling
-- Integrate into your `admin.html`
+### 2. `supabase-schema-simple.sql` (Single-tenant, no org_id)
+- Simplified schema without organizations
+- Use this if you get "column org_id does not exist" error
 
-### 3. `js/supabase-consumer-sync.js`
-- Consumer functionality for fetching live data
-- Handles real-time subscriptions and automatic updates
-- Fallback to local cache when offline
-- Integrate into consumer pages (profile-label-printing.html, search-inventory.html, etc.)
+### 3. `supabase-migration.sql`
+- Migration script to add org_id to existing tables
+- Run this if you have existing tables without org_id
+
+### 4. Admin Sync Scripts
+- `js/supabase-admin-sync.js` - Full version with org_id
+- `js/supabase-admin-sync-simple.js` - Simple version without org_id
+
+### 5. Consumer Sync Scripts  
+- `js/supabase-consumer-sync.js` - Full version with org_id
+- `js/supabase-consumer-sync-simple.js` - Simple version without org_id
+
+## Quick Fix for "org_id does not exist" Error
+
+If you get the error `column "org_id" does not exist`, you have two options:
+
+### Option 1: Use Simple Schema (Recommended for single-tenant)
+1. Run `supabase-schema-simple.sql` in your Supabase SQL editor
+2. Use `js/supabase-admin-sync-simple.js` and `js/supabase-consumer-sync-simple.js`
+
+### Option 2: Migrate Existing Tables
+1. Run `supabase-migration.sql` in your Supabase SQL editor  
+2. Use the full versions with org_id support
 
 ## Setup Instructions
 
