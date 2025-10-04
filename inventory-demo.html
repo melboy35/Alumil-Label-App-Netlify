@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Excel Inventory Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .admin-section {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status.success { background: #e8f5e8; color: #2e7d2e; }
+        .status.error { background: #ffebee; color: #c62828; }
+        .status.info { background: #e3f2fd; color: #1976d2; }
+        .status.warning { background: #fff3e0; color: #f57c00; }
+        
+        .upload-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .search-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .inventory-card {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .inventory-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .inventory-card .sku {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .inventory-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .low-stock {
+            border-left: 4px solid #ff9800;
+        }
+        
+        .out-of-stock {
+            border-left: 4px solid #f44336;
+            opacity: 0.7;
+        }
+        
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #1976d2;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Direct Excel Inventory Management</h1>
+        <p>Option B1: Read Excel files directly from Supabase Storage</p>
+        
+        <div id="status" class="status hidden"></div>
+    </div>
+
+    <!-- Admin Section -->
+    <div class="container admin-section">
+        <h2>🔧 Admin Controls</h2>
+        <div id="admin-content">
+            <p>Checking admin permissions...</p>
+        </div>
+    </div>
+
+    <!-- Inventory Stats -->
+    <div class="container">
+        <h2>📈 Inventory Overview</h2>
+        <div id="stats-grid" class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-items">-</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="active-items">-</div>
+                <div class="stat-label">Active Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="categories-count">-</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="low-stock-count">-</div>
+                <div class="stat-label">Low Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-value">-</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="last-updated">-</div>
+                <div class="stat-label">Last Updated</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="container">
+        <h2>🔍 Search Inventory</h2>
+        <div class="search-section">
+            <input type="text" id="search-input" placeholder="Search by SKU, name, or category..." style="flex: 1; min-width: 200px;">
+            <select id="category-filter">
+                <option value="">All Categories</option>
+            </select>
+            <label>
+                <input type="checkbox" id="active-only" checked> Active only
+            </label>
+            <button onclick="searchInventory()">Search</button>
+            <button onclick="loadInventory(true)">Refresh Data</button>
+        </div>
+    </div>
+
+    <!-- Inventory Display -->
+    <div class="container">
+        <h2>📦 Inventory Items</h2>
+        <div id="inventory-results" class="loading">
+            Click "Load Inventory" to see items...
+        </div>
+    </div>
+
+    <!-- Include Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Include XLSX library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Include our direct Excel reader -->
+    <script src="js/direct-excel-reader.js"></script>
+
+    <script>
+        // Initialize Supabase (replace with your credentials)
+        const supabaseUrl = 'YOUR_SUPABASE_URL';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Initialize inventory manager
+        const inventory = new DirectExcelInventory(supabase);
+
+        // Initialize the app
+        async function initApp() {
+            try {
+                await checkAdminStatus();
+                await loadInventory();
+            } catch (error) {
+                showStatus(`Initialization error: ${error.message}`, 'error');
+            }
+        }
+
+        // Check if user is admin and show appropriate UI
+        async function checkAdminStatus() {
+            try {
+                const isAdmin = await inventory.isAdmin();
+                const adminContent = document.getElementById('admin-content');
+                
+                if (isAdmin) {
+                    adminContent.innerHTML = `
+                        <p>✅ You have admin privileges</p>
+                        <div class="upload-section">
+                            <input type="file" id="excel-file" accept=".xlsx,.xls" />
+                            <button onclick="uploadExcelFile()" id="upload-btn">Upload Excel File</button>
+                        </div>
+                        <p><small>Upload a new Excel file to update the inventory data for all users.</small></p>
+                    `;
+                } else {
+                    adminContent.innerHTML = `
+                        <p>ℹ️ You don't have admin privileges. Contact an admin to upload inventory files.</p>
+                        <button onclick="makeCurrentUserAdmin()">Make Me Admin</button>
+                        <p><small>Note: Only use this for initial setup.</small></p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Admin check failed:', error);
+            }
+        }
+
+        // Admin: Upload Excel file
+        async function uploadExcelFile() {
+            const fileInput = document.getElementById('excel-file');
+            const uploadBtn = document.getElementById('upload-btn');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select an Excel file', 'warning');
+                return;
+            }
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Uploading...';
+                
+                showStatus('Uploading Excel file...', 'info');
+                const result = await inventory.uploadExcelFile(file);
+                
+                showStatus(`✅ ${result.message}`, 'success');
+                
+                // Reload inventory data
+                await loadInventory(true);
+                
+            } catch (error) {
+                showStatus(`❌ Upload failed: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Excel File';
+            }
+        }
+
+        // Make current user admin (for initial setup)
+        async function makeCurrentUserAdmin() {
+            try {
+                await supabase.rpc('make_me_admin');
+                showStatus('✅ You are now an admin!', 'success');
+                await checkAdminStatus();
+            } catch (error) {
+                showStatus(`❌ Failed to set admin: ${error.message}`, 'error');
+            }
+        }
+
+        // Load inventory data
+        async function loadInventory(forceRefresh = false) {
+            try {
+                showStatus('Loading inventory data...', 'info');
+                
+                const data = await inventory.loadInventoryData(forceRefresh);
+                
+                // Update stats
+                updateStats();
+                
+                // Update category filter
+                updateCategoryFilter();
+                
+                // Display all items initially
+                displayInventoryData(data);
+                
+                showStatus(`✅ Loaded ${data.length} inventory items`, 'success');
+                
+            } catch (error) {
+                showStatus(`❌ ${error.message}`, 'error');
+                document.getElementById('inventory-results').innerHTML = `
+                    <p style="text-align: center; color: #666;">
+                        Failed to load inventory data.<br>
+                        ${error.message}
+                    </p>
+                `;
+            }
+        }
+
+        // Search inventory
+        function searchInventory() {
+            try {
+                const searchTerm = document.getElementById('search-input').value;
+                const category = document.getElementById('category-filter').value;
+                const activeOnly = document.getElementById('active-only').checked;
+                
+                const results = inventory.searchInventory(searchTerm, category, activeOnly);
+                displayInventoryData(results);
+                
+                showStatus(`Found ${results.length} items`, 'info');
+                
+            } catch (error) {
+                showStatus(`❌ Search failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Update inventory statistics
+        function updateStats() {
+            try {
+                const stats = inventory.getInventoryStats();
+                if (!stats) return;
+                
+                document.getElementById('total-items').textContent = stats.totalItems;
+                document.getElementById('active-items').textContent = stats.activeItems;
+                document.getElementById('categories-count').textContent = stats.categories;
+                document.getElementById('low-stock-count').textContent = stats.lowStockItems;
+                document.getElementById('total-value').textContent = `$${stats.totalValue.toFixed(2)}`;
+                document.getElementById('last-updated').textContent = stats.lastUpdated 
+                    ? stats.lastUpdated.toLocaleTimeString() 
+                    : 'Never';
+                
+            } catch (error) {
+                console.error('Stats update failed:', error);
+            }
+        }
+
+        // Update category filter dropdown
+        function updateCategoryFilter() {
+            try {
+                const categories = inventory.getCategories();
+                const categoryFilter = document.getElementById('category-filter');
+                
+                // Keep "All Categories" option and add categories
+                categoryFilter.innerHTML = '<option value="">All Categories</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.category;
+                    option.textContent = `${cat.category} (${cat.count})`;
+                    categoryFilter.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Category filter update failed:', error);
+            }
+        }
+
+        // Display inventory data
+        function displayInventoryData(items) {
+            const container = document.getElementById('inventory-results');
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No items found</p>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => {
+                let cardClass = 'inventory-card';
+                if (item.qty === 0) cardClass += ' out-of-stock';
+                else if (item.qty < 5) cardClass += ' low-stock';
+                
+                return `
+                    <div class="${cardClass}">
+                        <h3>${item.name}</h3>
+                        <div class="sku">SKU: ${item.sku}</div>
+                        <div class="inventory-details">
+                            <div><strong>Category:</strong> ${item.category || 'N/A'}</div>
+                            <div><strong>Quantity:</strong> ${item.qty || 0}</div>
+                            <div><strong>Cost:</strong> ${item.cost ? '$' + item.cost.toFixed(2) : 'N/A'}</div>
+                            <div><strong>Price:</strong> ${item.price ? '$' + item.price.toFixed(2) : 'N/A'}</div>
+                            <div><strong>Status:</strong> ${item.is_active ? '✅ Active' : '❌ Inactive'}</div>
+                            <div><strong>Stock:</strong> ${getStockStatus(item.qty)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get stock status indicator
+        function getStockStatus(qty) {
+            if (qty === 0) return '🔴 Out of Stock';
+            if (qty < 5) return '🟡 Low Stock';
+            if (qty < 20) return '🟢 In Stock';
+            return '🟢 Well Stocked';
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds for non-error messages
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Search on Enter key
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchInventory();
+            }
+        });
+        
+        // Auto-search on filter change
+        document.getElementById('category-filter').addEventListener('change', searchInventory);
+        document.getElementById('active-only').addEventListener('change', searchInventory);
+    </script>
+</body>
+</html>
