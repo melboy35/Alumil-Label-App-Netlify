@@ -14,9 +14,25 @@
 
     // Get Supabase client
     function getSupabaseClient() {
-        return window._sbClient || 
-               (window.supabase && window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY)) ||
-               null;
+        // Try multiple ways to get the Supabase client
+        const client = window._sbClient || 
+                      window._supabaseClient ||
+                      window.supabaseClient ||
+                      (window.supabase && window.SUPABASE_URL && window.SUPABASE_KEY && 
+                       window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY)) ||
+                      null;
+        
+        console.log('Supabase client check:', {
+            _sbClient: !!window._sbClient,
+            _supabaseClient: !!window._supabaseClient,
+            supabaseClient: !!window.supabaseClient,
+            supabaseGlobal: !!window.supabase,
+            SUPABASE_URL: !!window.SUPABASE_URL,
+            SUPABASE_KEY: !!window.SUPABASE_KEY,
+            finalClient: !!client
+        });
+        
+        return client;
     }
 
     // Utility: Compute SHA-256 hex hash for cache-busting
@@ -178,10 +194,21 @@
 
     // Add upload button to existing interface
     function addUploadButton() {
+        console.log('🔧 Adding upload button...');
+        
         const fileInput = document.getElementById('excel-input');
         const uploadBtn = document.getElementById('upload-btn');
         
-        if (!fileInput || document.getElementById('supabase-upload-btn')) return;
+        console.log('Elements found:', {
+            fileInput: !!fileInput,
+            uploadBtn: !!uploadBtn,
+            existingSupabaseBtn: !!document.getElementById('supabase-upload-btn')
+        });
+        
+        if (!fileInput || document.getElementById('supabase-upload-btn')) {
+            console.log('Upload button not added:', !fileInput ? 'no file input' : 'button already exists');
+            return;
+        }
 
         const supabaseBtn = document.createElement('button');
         supabaseBtn.id = 'supabase-upload-btn';
@@ -193,10 +220,13 @@
         // Insert after the existing upload button or file input
         const insertAfter = uploadBtn || fileInput;
         insertAfter.parentNode.insertBefore(supabaseBtn, insertAfter.nextSibling);
+        
+        console.log('✅ Upload button added successfully');
 
         // Add click handler
         supabaseBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            console.log('📤 Upload button clicked');
             
             const file = fileInput.files?.[0];
             if (!file) {
@@ -208,7 +238,9 @@
                 supabaseBtn.disabled = true;
                 supabaseBtn.textContent = '⏳ Uploading...';
                 
+                console.log('Starting upload for file:', file.name);
                 const result = await uploadExcelFile(file);
+                console.log('Upload completed:', result);
                 
                 // Optionally trigger any existing processing
                 if (window.processFile && typeof window.processFile === 'function') {
@@ -280,18 +312,27 @@
 
     // Initialize when DOM is ready
     function initialize() {
+        console.log('🚀 Initializing Supabase Excel upload integration...');
+        
         const sb = getSupabaseClient();
         if (!sb) {
-            console.warn('Supabase client not found. Upload functionality will not be available.');
+            console.warn('❌ Supabase client not found. Upload functionality will not be available.');
+            console.log('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')));
             return;
         }
 
+        console.log('✅ Supabase client found, adding upload button...');
         addUploadButton();
         addFileInfoDisplay();
 
         // Hook into existing file input if present
         const fileInput = document.getElementById('excel-input');
         const uploadBtn = document.getElementById('upload-btn');
+
+        console.log('Found elements:', {
+            fileInput: !!fileInput,
+            uploadBtn: !!uploadBtn
+        });
 
         if (uploadBtn && fileInput) {
             uploadBtn.addEventListener('click', (e) => {
@@ -305,10 +346,22 @@
 
     // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initialize);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add a small delay to ensure Supabase client is initialized
+            setTimeout(initialize, 100);
+        });
     } else {
-        initialize();
+        // Add a small delay to ensure Supabase client is initialized
+        setTimeout(initialize, 100);
     }
+
+    // Also try to initialize after a longer delay if the first attempt failed
+    setTimeout(() => {
+        if (!document.getElementById('supabase-upload-btn')) {
+            console.log('🔄 Retrying Supabase integration initialization...');
+            initialize();
+        }
+    }, 2000);
 
     // Export for debugging
     window.SupabaseExcelUpload = {
