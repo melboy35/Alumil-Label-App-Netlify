@@ -105,6 +105,51 @@ language sql stable as $$
   limit 1;
 $$;
 
+-- Admin function to insert file metadata and mark as current (SECURITY DEFINER)
+create or replace function public.insert_inventory_file_and_mark_current(
+  p_filename text,
+  p_uploaded_by uuid,
+  p_file_size bigint,
+  p_checksum text
+)
+returns json
+language plpgsql security definer as $$
+declare
+  new_record_id bigint;
+  result json;
+begin
+  -- Check if user is admin
+  if not exists (select 1 from public.profiles where id = auth.uid() and is_admin = true) then
+    raise exception 'Only admins can upload files';
+  end if;
+
+  -- Mark all existing files as not current
+  update public.inventory_files set is_current = false;
+
+  -- Insert new file record
+  insert into public.inventory_files (
+    filename, uploaded_by, file_size, checksum, is_current
+  ) values (
+    p_filename, p_uploaded_by, p_file_size, p_checksum, true
+  ) returning id into new_record_id;
+
+  -- Return success info
+  select json_build_object(
+    'success', true,
+    'file_id', new_record_id,
+    'filename', p_filename,
+    'checksum', p_checksum,
+    'uploaded_at', now()
+  ) into result;
+
+  return result;
+end;
+$$;
+
+-- Revoke execute from public, grant only to authenticated users (admin check is inside function)
+revoke execute on function public.insert_inventory_file_and_mark_current(text, uuid, bigint, text) from public;
+grant execute on function public.insert_inventory_file_and_mark_current(text, uuid, bigint, text) to authenticated;
+
 -- SETUP INSTRUCTIONS:
 -- 1. Run this schema in Supabase SQL Editor
 -- 2. Create storage bucket named 'inventory' (PUBLIC for direct client access)
