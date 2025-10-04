@@ -401,7 +401,6 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 </div>
 </div>
 </div>
-</div>
 <div aria-hidden="true" class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain" id="settings-modal-overlay">
 <div aria-labelledby="settings-modal-title" aria-modal="true" class="w-full max-w-md max-h-[min(90svh,700px)] overflow-y-auto p-6 rounded-xl shadow-2xl card transform scale-95 opacity-0 transition-all duration-300" id="system-settings-modal" role="dialog">
 <div class="flex justify-between items-center mb-4">
@@ -956,7 +955,8 @@ if (trimmedCode.startsWith('acc')) {
 <script>
 (function(){
   var MOON = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  var SUN = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+  var SUN = '<svg id="theme-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"></path>
+</svg>';
 
   function getSaved(){ return localStorage.getItem('theme') || 'light'; }
   function isDark(){ return getSaved() === 'dark'; }
@@ -1041,6 +1041,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return [];
     }
   }
+
+  
 
   // Fallback: original JSON fetch behavior
   const r = await fetch(u, {mode:'cors'});
@@ -1163,7 +1165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 500);
 });
 </script>
-<script src="js/sharepoint_loader.js"></script>
 <!-- BEGIN OneDrive/Azure Loaders -->
 <script>
 (() => {
@@ -1452,7 +1453,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 })();
 </script>
-<!-- END OneDrive/Azure Loaders -->
 <!-- Activity Modal -->
 <div class="fixed inset-0 z-[70] hidden items-center justify-center" id="activity-modal">
 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -1839,5 +1839,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.publishFromCache = publishFromCache;
 })();
 </script>
+<script src="js/supabase-excel-upload.js"></script>
 </body>
 </html>
