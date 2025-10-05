@@ -24,8 +24,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Supabase Configuration -->
-  <meta name="supabase-url" content="https://hpcylketkroahgieoeat.supabase.co">
-  <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwY3lsa2V0a3JvYWhnaWVvZWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAwNTE1NjksImV4cCI6MjAwNTYyNzU2OX0.DYPK9UWLjd-OlLN-P5fG7U8ilNJ6GVK1AHJVvaoJU-g">
+  <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
+  <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co wss://*.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-ancestors 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   
   <!-- Auth Helper -->
   <script src="/js/auth-helper.js"></script>
@@ -376,9 +382,24 @@
         const password = document.getElementById('password').value.trim();
         const confirmPassword = document.getElementById('confirm-password').value.trim();
         
-        // Validate inputs
+        // Apply rate limiting
+        const ipAddress = 'client-' + navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+        const rateLimitCheck = RateLimiter.checkLimit(ipAddress);
+        
+        if (!rateLimitCheck.allowed) {
+          showError(rateLimitCheck.message);
+          return;
+        }
+        
+        // Enhanced validation
         if (!email || !password) {
           showError('Please enter both email and password');
+          return;
+        }
+        
+        // Validate email format
+        if (!SecurityHelpers.validateEmail(email)) {
+          showError('Please enter a valid email address');
           return;
         }
         
@@ -387,8 +408,11 @@
             showError('Passwords do not match');
             return;
           }
-          if (password.length < 6) {
-            showError('Password must be at least 6 characters long');
+          
+          // Enhanced password validation
+          const passwordCheck = SecurityHelpers.validatePassword(password);
+          if (!passwordCheck.valid) {
+            showError(passwordCheck.message);
             return;
           }
         }
@@ -398,7 +422,12 @@
         loginBtn.innerHTML = isRegisterMode ? '<span>Registering...</span>' : '<span>Signing in...</span>';
         
         try {
-          // Use auth-helper.js methods
+          // Get Supabase client directly if needed
+          const supabaseUrl = document.querySelector('meta[name="supabase-url"]').getAttribute('content');
+          const supabaseKey = document.querySelector('meta[name="supabase-key"]').getAttribute('content');
+          const directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+          
+          // Use auth-helper.js methods as primary method
           if (window.authHelper) {
             let result;
             
@@ -407,6 +436,8 @@
               result = await window.authHelper.register(email, password);
               
               if (!result.success) {
+                // Record failed attempt
+                RateLimiter.recordAttempt(ipAddress);
                 showError(result.error?.message || 'Registration failed');
                 return;
               }
@@ -418,6 +449,13 @@
               result = await window.authHelper.loginWithEmail(email, password);
               
               if (!result.success) {
+                // Record failed attempt
+                const rateLimit = RateLimiter.recordAttempt(ipAddress);
+                if (!rateLimit.allowed) {
+                  showError(rateLimit.message);
+                  return;
+                }
+                
                 showError(result.error?.message || 'Login failed');
                 return;
               }
@@ -433,14 +471,70 @@
               }
             }
           } else {
-            // Fallback if auth helper is not available
-            showError('Authentication system not available. Please refresh the page.');
-            console.error('Auth helper not available');
+            // Fallback with direct Supabase if auth helper is not available
+            try {
+              let result;
+              
+              if (isRegisterMode) {
+                result = await directSupabase.auth.signUp({
+                  email,
+                  password,
+                });
+                
+                if (result.error) {
+                  RateLimiter.recordAttempt(ipAddress);
+                  showError(result.error.message || 'Registration failed');
+                  return;
+                }
+                
+                showError('Registration successful! You can now sign in.');
+                toggleAuthMode(); // Switch back to login mode
+              } else {
+                result = await directSupabase.auth.signInWithPassword({
+                  email,
+                  password,
+                });
+                
+                if (result.error) {
+                  // Record failed attempt
+                  const rateLimit = RateLimiter.recordAttempt(ipAddress);
+                  if (!rateLimit.allowed) {
+                    showError(rateLimit.message);
+                    return;
+                  }
+                  
+                  showError(result.error.message || 'Login failed');
+                  return;
+                }
+                
+                // Check role by querying profiles table or checking custom claims
+                const user = result.data.user;
+                const { data: profile } = await directSupabase
+                  .from('profiles')
+                  .select('role')
+                  .eq('id', user.id)
+                  .single();
+                
+                const isAdmin = profile && profile.role === 'admin';
+                
+                // Redirect based on role
+                if (isAdmin) {
+                  location.href = 'admin.html';
+                } else {
+                  location.href = 'home.html';
+                }
+              }
+            } catch (error) {
+              showError('Authentication system not available. Please try again.');
+              console.error('Supabase auth error:', error);
+            }
           }
           
         } catch (error) {
           showError('An unexpected error occurred. Please try again.');
           console.error('Auth error:', error);
+          // Record failed attempt due to exception
+          RateLimiter.recordAttempt(ipAddress);
         } finally {
           // Reset button state
           loginBtn.disabled = false;
@@ -462,6 +556,99 @@
         });
       }
     });
+    
+    // Rate limiter implementation to prevent brute force attacks
+    const RateLimiter = {
+      attempts: {},
+      maxAttempts: 5,
+      lockoutTime: 15 * 60 * 1000, // 15 minutes
+      
+      checkLimit: function(identifier) {
+        const now = Date.now();
+        const record = this.attempts[identifier];
+        
+        if (!record) return { allowed: true };
+        
+        if (record.lockedUntil && record.lockedUntil > now) {
+          const remainingTime = Math.ceil((record.lockedUntil - now) / 1000 / 60);
+          return { 
+            allowed: false, 
+            message: `Too many login attempts. Please try again in ${remainingTime} minute${remainingTime !== 1 ? 's' : ''}.`
+          };
+        }
+        
+        // Reset if lockout has expired
+        if (record.lockedUntil && record.lockedUntil <= now) {
+          delete this.attempts[identifier];
+          return { allowed: true };
+        }
+        
+        return { allowed: true };
+      },
+      
+      recordAttempt: function(identifier) {
+        const now = Date.now();
+        if (!this.attempts[identifier]) {
+          this.attempts[identifier] = { count: 1, firstAttempt: now };
+          return { allowed: true };
+        }
+        
+        const record = this.attempts[identifier];
+        record.count++;
+        
+        // Check if too many attempts within window
+        if (record.count >= this.maxAttempts) {
+          record.lockedUntil = now + this.lockoutTime;
+          return { 
+            allowed: false, 
+            message: `Too many login attempts. Please try again in 15 minutes.`
+          };
+        }
+        
+        return { allowed: true };
+      }
+    };
+    
+    // Enhanced input validation
+    const SecurityHelpers = {
+      validateEmail: function(email) {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return regex.test(email);
+      },
+      
+      validatePassword: function(password) {
+        // Check for minimum length
+        if (password.length < 8) {
+          return { valid: false, message: 'Password must be at least 8 characters long' };
+        }
+        
+        // Check for complexity
+        let strength = 0;
+        if (/[A-Z]/.test(password)) strength++; // Uppercase letters
+        if (/[a-z]/.test(password)) strength++; // Lowercase letters
+        if (/[0-9]/.test(password)) strength++; // Numbers
+        if (/[^A-Za-z0-9]/.test(password)) strength++; // Special characters
+        
+        if (strength < 3) {
+          return { 
+            valid: false, 
+            message: 'Password must contain at least 3 of: uppercase letters, lowercase letters, numbers, and special characters'
+          };
+        }
+        
+        return { valid: true };
+      },
+      
+      sanitizeInput: function(input) {
+        // Basic sanitization to prevent XSS
+        return input
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#x27;');
+      }
+    };
     
     // Handle flag clicks for future internationalization
     document.querySelectorAll('.flag').forEach(flag => {
