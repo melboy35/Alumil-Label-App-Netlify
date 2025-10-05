@@ -26,6 +26,7 @@ class AlumilExcelUploader {
     const fileInput = document.getElementById('excel-file-input');
     const clearBtn = document.getElementById('clear-data-btn');
     const publishBtn = document.getElementById('publish-live-btn');
+    const clearCacheBtn = document.getElementById('clear-all-cache-btn');
 
     if (uploadBtn && fileInput) {
       uploadBtn.addEventListener('click', () => fileInput.click());
@@ -38,6 +39,31 @@ class AlumilExcelUploader {
 
     if (publishBtn) {
       publishBtn.addEventListener('click', () => this.publishToDatabase());
+    }
+    
+    if (clearCacheBtn) {
+      clearCacheBtn.addEventListener('click', () => this.clearAllUsersCache());
+    }
+  }
+  
+  /**
+   * Clear cache for all users by bumping the inventory version
+   */
+  async clearAllUsersCache() {
+    try {
+      this.setUploadStatus('processing', 'Clearing cache for all users...');
+      
+      if (window.InventoryStateManager) {
+        const inventoryManager = new window.InventoryStateManager(this.supabase, this.orgId);
+        await inventoryManager.bumpInventoryVersion();
+        
+        this.setUploadStatus('success', 'Successfully cleared cache for all users. Their apps will refresh data automatically.');
+      } else {
+        throw new Error('InventoryStateManager not available');
+      }
+    } catch (error) {
+      console.error('Error clearing all users cache:', error);
+      this.setUploadStatus('error', `Failed to clear cache: ${error.message}`);
     }
   }
 
@@ -52,7 +78,22 @@ class AlumilExcelUploader {
 
     try {
       this.setUploadStatus('processing', `Processing ${file.name}...`);
+      
+      // Store the raw file data for later upload to storage
+      let rawExcelData = null;
+      try {
+        rawExcelData = await this.readFileAsArrayBuffer(file);
+      } catch (err) {
+        console.warn('Failed to read raw file data', err);
+        // Continue with processing as normal even if we can't store the raw data
+      }
+      
       const data = await this.processExcelFile(file);
+      
+      // Add the raw data if we have it
+      if (rawExcelData) {
+        data.rawExcelData = rawExcelData;
+      }
       
       // Store locally first
       this.storeDataLocally(data, file.name);
@@ -66,6 +107,18 @@ class AlumilExcelUploader {
       console.error('File processing error:', error);
       this.setUploadStatus('error', `Error processing file: ${error.message}`);
     }
+  }
+  
+  /**
+   * Read file as ArrayBuffer for raw storage
+   */
+  readFileAsArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
   }
 
   /**
@@ -362,7 +415,7 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Publish data to Supabase database
+   * Publish data to Supabase database using the InventoryStateManager
    */
   async publishToDatabase() {
     if (this.isUploading) return;
@@ -417,24 +470,46 @@ class AlumilExcelUploader {
         };
       });
 
-      // Upload in batches to avoid timeout
-      if (profilesData.length > 0) {
-        await this.uploadInBatches('inventory_profiles', profilesData);
+      // Check if we have the inventory state manager available
+      if (window.InventoryStateManager) {
+        const inventoryManager = new window.InventoryStateManager(this.supabase, this.orgId);
+        
+        // Use the inventory state manager to upload the Excel file
+        await inventoryManager.uploadExcelFile(
+          new Blob([cachedData.rawExcelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+          cachedData.fileName || 'inventory_data.xlsx',
+          true // Force an update even if the data hasn't changed
+        );
+
+        // Record upload history using the inventory state
+        await this.recordUploadHistory(user.id, cachedData, profilesData.length, accessoriesData.length);
+        
+        this.setUploadStatus('success',
+          `✅ Data published successfully through Inventory State Manager! ${profilesData.length} profiles and ${accessoriesData.length} accessories are now available to all users.`
+        );
+      } else {
+        // Fall back to the old method if inventory state manager isn't available
+        console.warn('InventoryStateManager not available, falling back to direct database upload');
+        
+        // Upload in batches to avoid timeout
+        if (profilesData.length > 0) {
+          await this.uploadInBatches('inventory_profiles', profilesData);
+        }
+
+        if (accessoriesData.length > 0) {
+          await this.uploadInBatches('inventory_accessories', accessoriesData);
+        }
+
+        // Record upload history
+        await this.recordUploadHistory(user.id, cachedData, profilesData.length, accessoriesData.length);
+
+        this.setUploadStatus('success', 
+          `✅ Data published successfully! ${profilesData.length} profiles and ${accessoriesData.length} accessories are now available to all users.`
+        );
       }
 
-      if (accessoriesData.length > 0) {
-        await this.uploadInBatches('inventory_accessories', accessoriesData);
-      }
-
-      // Record upload history
-      await this.recordUploadHistory(user.id, cachedData, profilesData.length, accessoriesData.length);
-
-      this.setUploadStatus('success', 
-        `✅ Data published successfully! ${profilesData.length} profiles and ${accessoriesData.length} accessories are now available to all users.`
-      );
-
-      // Trigger data refresh for all users
-      this.broadcastDataUpdate();
+      // No need to call broadcastDataUpdate() here as the InventoryStateManager 
+      // will handle notifying all clients through Supabase Realtime
 
     } catch (error) {
       console.error('Database upload error:', error);
@@ -621,11 +696,13 @@ class AlumilExcelUploader {
    * Broadcast data update to all connected users
    */
   broadcastDataUpdate() {
-    // This could be extended to use Supabase realtime subscriptions
-    // For now, we'll trigger a custom event that other parts of the app can listen to
+    // This is now handled by the InventoryStateManager through Supabase Realtime
+    // For backward compatibility, we'll still dispatch the local event
     window.dispatchEvent(new CustomEvent('alumilDataUpdated', {
       detail: { timestamp: new Date().toISOString() }
     }));
+    
+    console.log('📡 Data update broadcast event fired (Legacy method - InventoryStateManager provides real-time updates)');
   }
 }
 

@@ -441,5 +441,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.alumilData = new AlumilDataService(window._sbClient);
     window.alumilData.init();
     console.log('✅ Global AlumilDataService initialized');
+    
+    // Check if InventoryStateManager is available and initialize it
+    if (window.InventoryStateManager) {
+      console.log('🔄 InventoryStateManager detected - will use modern cache system');
+      
+      // Initialize the inventory state manager with the organization ID
+      const orgId = window.alumilData.orgId;
+      window.inventoryState = new InventoryStateManager(window._sbClient, orgId);
+      
+      // Initialize the inventory state (loads from cache or remote)
+      window.inventoryState.init();
+    } else {
+      console.log('⚠️ InventoryStateManager not available - using legacy cache system');
+    }
   }
 });
