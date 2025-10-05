@@ -196,14 +196,22 @@ class AlumilAuthHelper {
    * Update UI based on auth state
    */
   updateUI(isAuthenticated) {
-    // Update navigation elements
-    this.updateNavigation(isAuthenticated);
-    
-    // Show/hide admin button
-    this.updateAdminButton();
-    
-    // Show/hide logout button
-    this.updateLogoutButton(isAuthenticated);
+    try {
+      console.log('Updating UI for auth state:', isAuthenticated);
+      
+      // Update navigation elements
+      this.updateNavigation(isAuthenticated);
+      
+      // Show/hide admin button
+      this.updateAdminButton();
+      
+      // Show/hide logout button
+      this.updateLogoutButton(isAuthenticated);
+      
+      console.log('UI update completed successfully');
+    } catch (error) {
+      console.error('Error updating UI:', error);
+    }
   }
   
   /**
@@ -212,11 +220,15 @@ class AlumilAuthHelper {
   updateNavigation(isAuthenticated) {
     const navElements = document.querySelectorAll('[data-auth-required]');
     
+    console.log(`Found ${navElements.length} navigation elements requiring authentication`);
+    
     navElements.forEach(el => {
       if (isAuthenticated) {
         el.style.display = '';
+        console.log(`Showing auth element: ${el.id || el.textContent?.trim() || el.tagName}`);
       } else {
         el.style.display = 'none';
+        console.log(`Hiding auth element: ${el.id || el.textContent?.trim() || el.tagName}`);
       }
     });
   }
@@ -284,6 +296,19 @@ class AlumilAuthHelper {
         throw new Error('Supabase client not initialized');
       }
       
+      // Ensure we're using the singleton client
+      if (typeof window.getSupabaseClient === 'function') {
+        this.supabase = window.getSupabaseClient();
+      }
+      
+      // Clear any existing sessions first to prevent conflicts
+      try {
+        await this.supabase.auth.signOut({ scope: 'local' });
+        console.log('Cleared existing session for clean login');
+      } catch (e) {
+        console.warn('Failed to clear existing session:', e);
+      }
+      
       console.log('Attempting signInWithPassword...');
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
@@ -295,9 +320,30 @@ class AlumilAuthHelper {
         throw error;
       }
       
-      console.log('Login successful, refreshing auth state...');
+      console.log('Login successful:', {
+        user: data.user.email,
+        session: !!data.session,
+        expiresAt: data.session?.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : 'unknown'
+      });
+      
+      // Store the session in localStorage explicitly to ensure it's saved
+      if (data.session) {
+        try {
+          localStorage.setItem('alumil_auth_token', JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
+            user: data.user
+          }));
+          console.log('Explicitly stored session in localStorage');
+        } catch (e) {
+          console.warn('Failed to explicitly store session:', e);
+        }
+      }
+      
+      console.log('Refreshing auth state...');
       await this.refreshAuthState();
-      return { success: true, user: data.user };
+      return { success: true, user: data.user, session: data.session };
     } catch (error) {
       console.error('Login failed:', error);
       return { success: false, error };
@@ -444,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Export auth helper class
 window.AlumilAuthHelper = AlumilAuthHelper;
 
-// Convenience function for logout
+// Convenience functions for auth operations
 window.logoutUser = function() {
   if (window.authHelper) {
     return window.authHelper.logout();
@@ -468,5 +514,59 @@ window.logoutUser = function() {
     // Last resort fallback - just redirect
     window.location.href = 'login.html';
     return Promise.resolve({ success: true });
+  }
+};
+
+// Global handler for logout buttons (can be called from any page)
+window.AuthHelper = {
+  handleLogout: function() {
+    console.log('Logout requested');
+    
+    try {
+      // Show confirmation if needed
+      if (confirm('Are you sure you want to log out?')) {
+        // Try to use our auth helper first
+        if (window.authHelper) {
+          console.log('Using authHelper for logout');
+          window.authHelper.logout();
+        } else if (window.logoutUser) {
+          // Fallback to window.logoutUser
+          console.log('Using window.logoutUser for logout');
+          window.logoutUser();
+        } else {
+          // Last resort - just redirect
+          console.log('No auth helper found, redirecting to login page');
+          window.location.href = 'login.html';
+        }
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Emergency fallback - just redirect
+      window.location.href = 'login.html';
+    }
+  },
+  
+  checkAdminStatus: async function() {
+    try {
+      if (window.authHelper) {
+        return await window.authHelper.checkIsAdmin();
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  },
+  
+  updateNavigation: function() {
+    try {
+      if (window.authHelper) {
+        window.authHelper.refreshAuthState().then(state => {
+          window.authHelper.updateUI(state.isAuthenticated);
+        });
+      }
+    } catch (error) {
+      console.error('Error updating navigation:', error);
+    }
   }
 };

@@ -37,6 +37,9 @@
   <!-- Auth Helper -->
   <script src="/js/auth-helper.js"></script>
   
+  <!-- Session Checker - Validates auth state -->
+  <script src="/js/session-checker.js"></script>
+  
   <!-- Theme initialization -->
   <script>
     (function(){
@@ -624,7 +627,9 @@
               toggleAuthMode(); // Switch back to login mode
             } else {
               // Sign in using auth helper
+              console.log('Attempting login with auth helper...');
               result = await window.authHelper.loginWithEmail(email, password);
+              console.log('Auth helper login result:', result);
               
               if (!result.success) {
                 // Record failed attempt
@@ -639,19 +644,22 @@
               }
               
               // Get user role from auth helper
+              console.log('Login successful, checking admin status...');
               const isAdmin = await window.authHelper.checkIsAdmin();
+              console.log('User is admin:', isAdmin);
               
-              // Redirect based on role
-              if (isAdmin) {
-                location.href = 'admin.html';
-              } else {
-                location.href = 'home.html';
-              }
+              // Force navigation with a small delay to ensure session is properly stored
+              setTimeout(() => {
+                console.log('Redirecting to:', isAdmin ? 'admin.html' : 'home.html');
+                window.location.replace(isAdmin ? 'admin.html' : 'home.html');
+              }, 100);
+              return; // Early return to prevent further execution
             }
           } else {
             // Fallback with direct Supabase if auth helper is not available
             try {
               let result;
+              console.log('Using direct Supabase client for authentication...');
               
               if (isRegisterMode) {
                 result = await directSupabase.auth.signUp({
@@ -668,9 +676,16 @@
                 showError('Registration successful! You can now sign in.');
                 toggleAuthMode(); // Switch back to login mode
               } else {
+                console.log('Attempting direct login with Supabase...');
                 result = await directSupabase.auth.signInWithPassword({
                   email,
                   password,
+                });
+                
+                console.log('Direct login result:', { 
+                  success: !result.error, 
+                  user: result.data?.user?.email,
+                  error: result.error?.message
                 });
                 
                 if (result.error) {
@@ -687,20 +702,26 @@
                 
                 // Check role by querying profiles table or checking custom claims
                 const user = result.data.user;
-                const { data: profile } = await directSupabase
+                console.log('Fetching user profile for:', user.email);
+                const { data: profile, error: profileError } = await directSupabase
                   .from('profiles')
-                  .select('role')
+                  .select('role, is_admin')
                   .eq('id', user.id)
                   .single();
                 
-                const isAdmin = profile && profile.role === 'admin';
-                
-                // Redirect based on role
-                if (isAdmin) {
-                  location.href = 'admin.html';
-                } else {
-                  location.href = 'home.html';
+                if (profileError) {
+                  console.error('Error fetching profile:', profileError);
                 }
+                
+                console.log('User profile data:', profile);
+                const isAdmin = (profile && (profile.role === 'admin' || profile.is_admin === true));
+                
+                // Force navigation with a small delay to ensure session is properly stored
+                setTimeout(() => {
+                  console.log('Redirecting to:', isAdmin ? 'admin.html' : 'home.html');
+                  window.location.replace(isAdmin ? 'admin.html' : 'home.html');
+                }, 100);
+                return; // Early return to prevent further execution
               }
             } catch (error) {
               showError('Authentication system not available. Please try again.');
@@ -737,6 +758,7 @@
       // Check if user is already logged in - use singleton pattern to prevent multiple instances
       async function checkExistingSession() {
         try {
+          console.log('Checking existing session...');
           // Clear any existing conflicting auth items
           try {
             const storageKeys = Object.keys(localStorage);
