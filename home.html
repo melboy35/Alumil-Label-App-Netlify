@@ -324,9 +324,9 @@
       let userName = 'User';
       
       // Get user's name from Supabase authentication
-      if (window.SupabaseAPI) {
+      if (window._sbClient) {
         try {
-          const user = await window.SupabaseAPI.getCurrentUser();
+          const { data: { user } } = await window._sbClient.auth.getUser();
           if (user && user.user_metadata) {
             // Try to get full name first, then fall back to email or display name
             userName = user.user_metadata.full_name || 
@@ -691,30 +691,45 @@ document.addEventListener('DOMContentLoaded', async () => {
 <!-- Authentication and Role-based Navigation -->
 <script>
     async function handleLogout() {
-      if (window.SupabaseAPI) {
-        await window.SupabaseAPI.signOut();
+      try {
+        if (window._sbClient) {
+          await window._sbClient.auth.signOut();
+        }
+        location.href = 'login.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        location.href = 'login.html';
       }
-      location.href = 'login.html';
     }
     
     // Check authentication and show appropriate navigation
     document.addEventListener('DOMContentLoaded', async () => {
-      if (window.SupabaseAPI) {
-        const user = await window.SupabaseAPI.getCurrentUser();
-        const logoutBtn = document.getElementById('logout-btn');
-        const adminLink = document.getElementById('admin-link');
-        
-        if (user) {
-          // Show logout button
-          if (logoutBtn) logoutBtn.style.display = 'flex';
+      if (window._sbClient) {
+        try {
+          const { data: { user } } = await window._sbClient.auth.getUser();
+          const logoutBtn = document.getElementById('logout-btn');
+          const adminLink = document.getElementById('admin-link');
           
-          // Check if user is admin and show admin link
-          const isAdminUser = await window.SupabaseAPI.isAdmin();
-          if (isAdminUser && adminLink) {
-            adminLink.style.display = 'flex';
+          if (user) {
+            // Show logout button
+            if (logoutBtn) logoutBtn.style.display = 'flex';
+            
+            // Check if user is admin and show admin link
+            const { data: profile, error } = await window._sbClient
+              .from('profiles')
+              .select('is_admin')
+              .eq('id', user.id)
+              .single();
+            
+            if (!error && profile?.is_admin && adminLink) {
+              adminLink.style.display = 'flex';
+            }
+          } else {
+            // Not authenticated, redirect to login
+            location.href = 'login.html';
           }
-        } else {
-          // Not authenticated, redirect to login
+        } catch (error) {
+          console.error('Authentication check failed:', error);
           location.href = 'login.html';
         }
       }

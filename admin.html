@@ -1709,39 +1709,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Authentication and Admin Access Control
 async function checkAdminAccess() {
-  if (!window.SupabaseAPI) {
+  if (!window._sbClient) {
     location.href = 'login.html';
     return false;
   }
   
-  const user = await window.SupabaseAPI.getCurrentUser();
-  if (!user) {
+  try {
+    const { data: { user } } = await window._sbClient.auth.getUser();
+    if (!user) {
+      location.href = 'login.html';
+      return false;
+    }
+    
+    // Check if user has admin privileges
+    const { data: profile, error } = await window._sbClient
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+    
+    if (error || !profile?.is_admin) {
+      alert('Access denied. Admin privileges required.');
+      location.href = 'home.html';
+      return false;
+    }
+    
+    // Show logout button since user is authenticated and has admin access
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'flex';
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Admin access check failed:', error);
     location.href = 'login.html';
     return false;
   }
-  
-  const isAdminUser = await window.SupabaseAPI.isAdmin();
-  if (!isAdminUser) {
-    alert('Access denied. Admin privileges required.');
-    location.href = 'home.html';
-    return false;
-  }
-  
-  // Show logout button since user is authenticated and has admin access
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    logoutBtn.style.display = 'flex';
-  }
-  
-  return true;
 }
 
 // Logout functionality
 async function handleLogout() {
-  if (window.SupabaseAPI) {
-    await window.SupabaseAPI.signOut();
+  try {
+    if (window._sbClient) {
+      await window._sbClient.auth.signOut();
+    }
+    location.href = 'login.html';
+  } catch (error) {
+    console.error('Logout error:', error);
+    location.href = 'login.html';
   }
-  location.href = 'login.html';
 }
 
 // Check admin access on page load
