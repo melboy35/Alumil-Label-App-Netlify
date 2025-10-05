@@ -355,10 +355,11 @@
             throw new Error('Supabase credentials missing in meta tags');
           }
           
-          // Test direct connection
-          const url = urlMeta.content;
-          const key = keyMeta.content;
-          const testClient = supabase.createClient(url, key);
+          // Test connection using the singleton pattern
+          const testClient = getSupabaseClient();
+          if (!testClient) {
+            throw new Error('Failed to initialize Supabase client');
+          }
           
           // Try a simple operation
           const sessionResult = await testClient.auth.getSession();
@@ -397,18 +398,27 @@
   </main>
 
   <script>
-    // Initialize Supabase client directly for reliability
-    let directSupabase = null;
-    try {
-      const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
-      const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
-      console.log('Initializing direct Supabase client');
-      directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
-      window._sbClient = directSupabase;
-      console.log('Direct Supabase client initialized');
-    } catch (e) {
-      console.error('Failed to initialize direct Supabase client:', e);
-    }
+    // Singleton implementation for Supabase client to prevent multiple instances
+    let getSupabaseClient = function() {
+      // If we already have a client instance, return it
+      if (window._sbClient) {
+        return window._sbClient;
+      }
+      
+      try {
+        const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
+        const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
+        console.log('Initializing Supabase client (singleton)');
+        window._sbClient = supabase.createClient(supabaseUrl, supabaseKey);
+        return window._sbClient;
+      } catch (e) {
+        console.error('Failed to initialize Supabase client:', e);
+        return null;
+      }
+    };
+    
+    // Get the client instance
+    const directSupabase = getSupabaseClient();
     
     // Get authHelper reference from auth-helper.js
     document.addEventListener('DOMContentLoaded', () => {
@@ -502,19 +512,12 @@
         loginBtn.innerHTML = isRegisterMode ? '<span>Registering...</span>' : '<span>Signing in...</span>';
         
         try {
-          // Use already initialized direct client or create one if needed
-          let supabaseClient = directSupabase;
+          // Use the singleton pattern to get Supabase client
+          let supabaseClient = getSupabaseClient();
           if (!supabaseClient) {
-            try {
-              const supabaseUrl = document.querySelector('meta[name="supabase-url"]').getAttribute('content');
-              const supabaseKey = document.querySelector('meta[name="supabase-key"]').getAttribute('content');
-              console.log('Creating Supabase client on submit');
-              supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-            } catch (e) {
-              console.error('Failed to create Supabase client:', e);
-              showError('Authentication system error. Please try again.');
-              return;
-            }
+            console.error('Failed to get Supabase client');
+            showError('Authentication system error. Please try again.');
+            return;
           }
           
           // Use auth-helper.js methods as primary method
@@ -770,21 +773,18 @@
           .replace(/'/g, '&#x27;');
       }
     };
-    
-          });
       
       // Add a direct login function for debugging and fallback
       window.attemptDirectLogin = async function(email, password) {
         try {
-          // Create direct client if not exists
-          if (!directSupabase) {
-            const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
-            const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
-            directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+          // Get Supabase client using singleton pattern
+          const client = getSupabaseClient();
+          if (!client) {
+            throw new Error('Could not initialize Supabase client');
           }
           
           // Attempt direct login
-          const result = await directSupabase.auth.signInWithPassword({
+          const result = await client.auth.signInWithPassword({
             email, password
           });
           const { data, error } = result;

@@ -27,10 +27,14 @@ class AlumilAuthHelper {
       console.log('Auth helper init with URL:', supabaseUrl?.substring(0, 15) + '...');
       console.log('Auth helper init with key length:', supabaseKey?.length);
       
-      // Check if Supabase client already exists
+      // Use singleton pattern for Supabase client
       if (window._sbClient) {
         this.supabase = window._sbClient;
         console.log('✅ Using existing Supabase client');
+      } else if (typeof window.getSupabaseClient === 'function') {
+        // Use the singleton getter if available from login.html
+        this.supabase = window.getSupabaseClient();
+        console.log('✅ Got Supabase client from singleton getter');
       } else if (supabaseUrl && supabaseKey) {
         // Create new Supabase client
         console.log('Creating new Supabase client...');
