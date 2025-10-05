@@ -424,8 +424,8 @@
           
           if (profileError) {
             console.error('Error fetching profile:', profileError);
-            // Default to home if profile fetch fails
-            location.href = 'home.html';
+            // Default to admin if profile fetch fails
+            location.href = 'admin.html';
             return;
           }
           
@@ -433,7 +433,7 @@
           if (profile?.is_admin) {
             location.href = 'admin.html';
           } else {
-            location.href = 'home.html';
+            location.href = 'admin.html'; // For now, everyone goes to admin
           }
         }
         
@@ -443,18 +443,9 @@
       } finally {
         // Reset button state
         loginBtn.disabled = false;
-        loginBtn.innerHTML = isRegisterMode ? '<span>Register</span>' : '<span>Sign In</span>';
-      }
-    });
-        }
-        
-      } catch (err) {
-        showError('An unexpected error occurred. Please try again.');
-        console.error('Login error:', err);
-      } finally {
-        // Reset button state
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = '<span class="login-icon" aria-hidden="true"></span><span>Sign In</span>';
+        loginBtn.innerHTML = isRegisterMode ? 
+          '<span>Register</span>' : 
+          '<span class="login-icon" aria-hidden="true"></span><span>Sign In</span>';
       }
     });
     
@@ -473,8 +464,6 @@
         this.style.transform = 'translateY(1px)';
       }
     });
-    
-      /* CSS-only logo switching: nothing to run in JS here; markup uses .logo-light and .logo-dark images and CSS shows the correct one based on html[data-theme] */
 
     loginBtn.addEventListener('mouseup', function() {
       this.style.transform = '';
@@ -483,9 +472,7 @@
     loginBtn.addEventListener('mouseleave', function() {
       this.style.transform = '';
     });
-  </script>
-
-  <!-- Footer -->
+  </script>  <!-- Footer -->
   <footer class="alumil-footer">
     <p>Alumil Labeling App @2025</p>
   </footer>
