@@ -542,9 +542,13 @@
 <svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
 <span>Home</span>
 </button>
-<button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
+<button aria-label="Admin" class="nav-btn" data-nav="admin" id="mobile-admin-btn" onclick="location.href='admin.html'" style="display: none;">
 <svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17h-5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
 <span>Admin</span>
+</button>
+<button aria-label="Logout" class="nav-btn" data-nav="logout" id="mobile-logout-btn" onclick="handleLogout()" style="display: none;">
+<svg class="lucide lucide-log-out" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+<span>Logout</span>
 </button>
 <button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
 <svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
@@ -563,7 +567,10 @@
 </footer>
 <input aria-hidden="true" autocapitalize="off" autocomplete="off" class="alumil-scan-input" id="alumil-scan-input" inputmode="none" spellcheck="false" type="text"/>
 <style>
-    .alumil-bottom-nav { position: fixed; left: 0; right: 0; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; z-index: 60; display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr; align-items: center; max-width: 720px; padding: 10px 12px; background: rgba(15, 23, 42, .92); color: #e5e7eb; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .alumil-bottom-nav { position: fixed; left: 0; right: 0; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; z-index: 60; display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr; align-items: center; max-width: 720px; padding: 10px 12px; background: rgba(15, 23, 42, .92); color: #e5e7eb; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 10px 30px rgba(0,0,0,.35); gap: 8px; }
+    /* Dynamic grid layout - adjust based on visible buttons */
+    .alumil-bottom-nav.admin-user { grid-template-columns: 1fr 1fr auto 1fr 1fr; } /* Home, Admin, Scan, Rack, Search */
+    .alumil-bottom-nav.non-admin-user { grid-template-columns: 1fr 1fr auto 1fr 1fr; } /* Home, Logout, Scan, Rack, Search */
     html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
     .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
     .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
@@ -727,12 +734,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           const { data: { user } } = await window._sbClient.auth.getUser();
           const logoutBtn = document.getElementById('logout-btn');
           const adminLink = document.getElementById('admin-link');
+          const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+          const mobileAdminBtn = document.getElementById('mobile-admin-btn');
           
           if (user) {
-            // Show logout button for ALL authenticated users
+            // Show logout button for ALL authenticated users (both header and mobile)
             if (logoutBtn) {
               logoutBtn.style.display = 'flex';
-              console.log('✅ Logout button shown for authenticated user');
+              console.log('✅ Header logout button shown for authenticated user');
+            }
+            if (mobileLogoutBtn) {
+              mobileLogoutBtn.style.display = 'flex';
+              console.log('✅ Mobile logout button shown for authenticated user');
             }
             
             // Check if user is admin and show admin link
@@ -742,9 +755,37 @@ document.addEventListener('DOMContentLoaded', async () => {
               .eq('id', user.id)
               .single();
             
-            if (!error && profile?.is_admin && adminLink) {
-              adminLink.style.display = 'flex';
-              console.log('✅ Admin link shown for admin user');
+            if (!error && profile?.is_admin) {
+              if (adminLink) {
+                adminLink.style.display = 'flex';
+                console.log('✅ Header admin link shown for admin user');
+              }
+              if (mobileAdminBtn) {
+                mobileAdminBtn.style.display = 'flex';
+                console.log('✅ Mobile admin button shown for admin user');
+              }
+              // Add admin user class to bottom nav
+              const bottomNav = document.getElementById('alumil-bottom-nav');
+              if (bottomNav) {
+                bottomNav.classList.add('admin-user');
+                bottomNav.classList.remove('non-admin-user');
+              }
+            } else {
+              // Non-admin users: hide admin buttons but show logout
+              if (mobileAdminBtn) {
+                mobileAdminBtn.style.display = 'none';
+                console.log('ℹ️ Mobile admin button hidden for non-admin user');
+              }
+              if (adminLink) {
+                adminLink.style.display = 'none';
+                console.log('ℹ️ Header admin link hidden for non-admin user');
+              }
+              // Add non-admin user class to bottom nav
+              const bottomNav = document.getElementById('alumil-bottom-nav');
+              if (bottomNav) {
+                bottomNav.classList.add('non-admin-user');
+                bottomNav.classList.remove('admin-user');
+              }
             }
           } else {
             // Not authenticated, redirect to login
@@ -753,6 +794,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
           console.error('Authentication check failed:', error);
           location.href = 'login.html';
+        }
+      }
     });
   </script>
 
