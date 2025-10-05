@@ -20,7 +20,7 @@ create policy "org can read" on public.inventory_state
 for select using (
   exists (select 1 from public.profiles
           where profiles.id = auth.uid()
-            and profiles.organization_id = public.inventory_state.organization_id)
+            and profiles.org_id = public.inventory_state.organization_id)
 );
 
 -- Only admins in org can update
@@ -28,7 +28,7 @@ create policy "org admins can update" on public.inventory_state
 for update using (
   exists (select 1 from public.profiles
           where profiles.id = auth.uid()
-            and profiles.organization_id = public.inventory_state.organization_id
+            and profiles.org_id = public.inventory_state.organization_id
             and profiles.is_admin = true)
 );
 
@@ -37,7 +37,7 @@ create policy "org admins can insert" on public.inventory_state
 for insert with check (
   exists (select 1 from public.profiles
           where profiles.id = auth.uid()
-            and profiles.organization_id = public.inventory_state.organization_id
+            and profiles.org_id = public.inventory_state.organization_id
             and profiles.is_admin = true)
 );
 
