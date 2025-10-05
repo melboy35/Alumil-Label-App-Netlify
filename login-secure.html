@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sign In | Alumil Inventory System</title>
   
+  <!-- Security Headers -->
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;">
+  
   <!-- Comprehensive Favicon Setup -->
   <link rel="icon" href="/favicon.ico?v=6" type="image/x-icon">
   <link rel="shortcut icon" href="/favicon.ico?v=6" type="image/x-icon">
@@ -28,6 +34,17 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/security.js"></script>
   <script src="assets/js/supabase-service.js"></script>
+  
+  <!-- Supabase Configuration -->
+  <script>
+    // Supabase project configuration
+    window.SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
+    window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
+    
+    // Initialize Supabase client
+    window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+    console.log('✅ Supabase client initialized');
+  </script>
   
   <!-- Theme initialization -->
   <script>
@@ -326,11 +343,121 @@
   </main>
 
   <script>
+    // Security utilities for input validation and sanitization
+    const SecurityHelpers = {
+      // Enhanced email validation
+      isValidEmail: function(email) {
+        if (!email) return false;
+        // RFC 5322 compliant email regex
+        const emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+        return emailPattern.test(String(email).toLowerCase());
+      },
+
+      // Enhanced password validation
+      isStrongPassword: function(password) {
+        if (!password) return false;
+        // At least 8 characters with a mix of requirements
+        return password.length >= 8 && 
+               /[A-Z]/.test(password) && // has uppercase
+               /[a-z]/.test(password) && // has lowercase
+               /[0-9]/.test(password);   // has number
+      },
+
+      // Input sanitization
+      sanitizeInput: function(input) {
+        // Basic sanitization - convert to string and trim
+        return (input === null || input === undefined) ? '' : String(input).trim();
+      }
+    };
+
+    // Rate limiting utilities
+    const RateLimiter = {
+      KEY_PREFIX: 'alumil_auth_',
+      MAX_ATTEMPTS: 5,
+      LOCKOUT_TIME: 15 * 60 * 1000, // 15 minutes
+
+      // Get attempt count for an email
+      getAttempts: function(email) {
+        const key = this.KEY_PREFIX + email;
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          // Clear expired lockouts
+          if (data.lockoutUntil && Date.now() > data.lockoutUntil) {
+            this.resetAttempts(email);
+            return 0;
+          }
+          return data.attempts || 0;
+        } catch (e) {
+          return 0;
+        }
+      },
+
+      // Check if account is locked
+      isLocked: function(email) {
+        const key = this.KEY_PREFIX + email;
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          return data.lockoutUntil && Date.now() < data.lockoutUntil;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      // Get remaining lockout time in minutes
+      getLockoutMinutes: function(email) {
+        const key = this.KEY_PREFIX + email;
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          if (!data.lockoutUntil || Date.now() > data.lockoutUntil) return 0;
+          return Math.ceil((data.lockoutUntil - Date.now()) / 60000);
+        } catch (e) {
+          return 0;
+        }
+      },
+
+      // Record a failed attempt
+      recordFailedAttempt: function(email) {
+        const key = this.KEY_PREFIX + email;
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          const attempts = (data.attempts || 0) + 1;
+          
+          // Lock account if max attempts reached
+          if (attempts >= this.MAX_ATTEMPTS) {
+            localStorage.setItem(key, JSON.stringify({
+              attempts: attempts,
+              lockoutUntil: Date.now() + this.LOCKOUT_TIME
+            }));
+          } else {
+            localStorage.setItem(key, JSON.stringify({
+              attempts: attempts,
+              lockoutUntil: data.lockoutUntil
+            }));
+          }
+          
+          return attempts;
+        } catch (e) {
+          console.error('Failed to record attempt:', e);
+          return 1;
+        }
+      },
+
+      // Reset attempts after successful login
+      resetAttempts: function(email) {
+        const key = this.KEY_PREFIX + email;
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.error('Failed to reset attempts:', e);
+        }
+      }
+    };
+
     // Check if we already have a session
     (async function() {
       try {
-        // Initialize Supabase
-        const supabaseClient = window.SupabaseService.init();
+        // Use either the supabase service or direct client
+        const supabaseClient = window._sbClient || window.SupabaseService?.init();
         if (!supabaseClient) {
           console.error('Failed to initialize Supabase client');
           return;
@@ -408,13 +535,19 @@
       e.preventDefault();
       hideError();
       
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const confirmPassword = document.getElementById('confirm-password').value.trim();
+      // Sanitize inputs
+      const email = SecurityHelpers.sanitizeInput(document.getElementById('email').value);
+      const password = document.getElementById('password').value; // Don't trim passwords
+      const confirmPassword = document.getElementById('confirm-password').value;
       
-      // Validate inputs
+      // Enhanced input validation
       if (!email || !password) {
         showError('Please enter both email and password');
+        return;
+      }
+      
+      if (!SecurityHelpers.isValidEmail(email)) {
+        showError('Please enter a valid email address');
         return;
       }
       
@@ -423,8 +556,16 @@
           showError('Passwords do not match');
           return;
         }
-        if (password.length < 6) {
-          showError('Password must be at least 6 characters long');
+        
+        if (!SecurityHelpers.isStrongPassword(password)) {
+          showError('Password must be at least 8 characters and include uppercase, lowercase, and numbers');
+          return;
+        }
+      } else {
+        // Check for rate limiting on login attempts
+        if (RateLimiter.isLocked(email)) {
+          const minutes = RateLimiter.getLockoutMinutes(email);
+          showError(`Too many failed login attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`);
           return;
         }
       }
@@ -436,12 +577,31 @@
       try {
         let result;
         
+        // Determine which Supabase client to use (direct or via service)
+        const supabaseService = window.SupabaseService;
+        const supabaseClient = window._sbClient;
+        
         if (isRegisterMode) {
           // Register new user
-          result = await window.SupabaseService.signUp(email, password, email.split('@')[0]);
+          if (supabaseService && typeof supabaseService.signUp === 'function') {
+            result = await supabaseService.signUp(email, password, email.split('@')[0]);
+          } else {
+            // Direct Supabase client fallback
+            const { data, error } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: { data: { full_name: email.split('@')[0] } }
+            });
+            
+            result = {
+              success: !error,
+              data: data || {},
+              error: error
+            };
+          }
           
           if (!result.success) {
-            showError(result.error.message);
+            showError(result.error?.message || 'Registration failed');
             return;
           }
           
@@ -452,26 +612,73 @@
           }
         } else {
           // Sign in existing user
-          result = await window.SupabaseService.signIn(email, password);
+          if (supabaseService && typeof supabaseService.signIn === 'function') {
+            result = await supabaseService.signIn(email, password);
+          } else {
+            // Direct Supabase client fallback
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+              email,
+              password
+            });
+            
+            result = {
+              success: !error,
+              data: data || {},
+              error: error
+            };
+          }
           
           if (!result.success) {
-            showError(result.error.message);
+            // Record failed attempt for rate limiting
+            const attempts = RateLimiter.recordFailedAttempt(email);
+            const attemptsLeft = RateLimiter.MAX_ATTEMPTS - attempts;
+            
+            if (attemptsLeft <= 0) {
+              showError(`Too many failed login attempts. Your account is locked for 15 minutes.`);
+            } else if (attemptsLeft <= 2) {
+              showError(`${result.error?.message || 'Invalid login'}. ${attemptsLeft} attempt${attemptsLeft !== 1 ? 's' : ''} remaining before lockout.`);
+            } else {
+              showError(result.error?.message || 'Invalid email or password');
+            }
             return;
           }
           
-          // Check user role after successful login
-          const supabase = window.AppConfig.initSupabase();
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', result.data.user.id)
-            .single();
+          // Reset attempt counter on successful login
+          RateLimiter.resetAttempts(email);
           
-          if (profileError) {
+          // Check user role after successful login
+          let profile;
+          
+          try {
+            // Try to use direct client first
+            const { data: profileData, error: profileError } = await supabaseClient
+              .from('profiles')
+              .select('is_admin')
+              .eq('id', result.data.user.id)
+              .single();
+              
+            if (profileError) throw profileError;
+            profile = profileData;
+          } catch (profileError) {
             console.error('Error fetching profile:', profileError);
-            // Default to admin if profile fetch fails
-            location.href = 'admin.html';
-            return;
+            try {
+              // Fallback to config method if available
+              const configSupabase = window.AppConfig?.initSupabase();
+              if (configSupabase) {
+                const { data: configProfileData } = await configSupabase
+                  .from('profiles')
+                  .select('is_admin')
+                  .eq('id', result.data.user.id)
+                  .single();
+                  
+                profile = configProfileData;
+              }
+            } catch (e) {
+              console.error('Fallback profile fetch failed:', e);
+              // Default to non-admin if all profile fetches fail
+              location.href = 'home.html';
+              return;
+            }
           }
           
           // Route based on user role
