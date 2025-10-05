@@ -15,30 +15,24 @@ create table if not exists public.inventory_state (
 alter table public.inventory_state enable row level security;
 
 -- Create RLS policies
--- Everyone in org can read inventory_state
-create policy "org can read" on public.inventory_state
+-- Any authenticated user can read inventory_state
+create policy "authenticated users can read" on public.inventory_state
 for select using (
-  exists (select 1 from public.profiles
-          where profiles.id = auth.uid()
-            and profiles.org_id = public.inventory_state.organization_id)
+  auth.role() = 'authenticated'
 );
 
--- Only admins in org can update
-create policy "org admins can update" on public.inventory_state
+-- Only admins can update
+create policy "admins can update" on public.inventory_state
 for update using (
-  exists (select 1 from public.profiles
-          where profiles.id = auth.uid()
-            and profiles.org_id = public.inventory_state.organization_id
-            and profiles.is_admin = true)
+  auth.role() = 'authenticated' AND 
+  exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
 );
 
--- Only admins in org can insert
-create policy "org admins can insert" on public.inventory_state
+-- Only admins can insert
+create policy "admins can insert" on public.inventory_state
 for insert with check (
-  exists (select 1 from public.profiles
-          where profiles.id = auth.uid()
-            and profiles.org_id = public.inventory_state.organization_id
-            and profiles.is_admin = true)
+  auth.role() = 'authenticated' AND 
+  exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
 );
 
 -- Create RPC function for version bump
