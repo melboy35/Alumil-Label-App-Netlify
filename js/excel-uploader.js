@@ -310,19 +310,55 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Store data locally in localStorage
+   * Store data locally in storage (uses both sessionStorage and localStorage)
    */
   storeDataLocally(data, fileName) {
-    const cacheData = {
-      profiles: data.profiles,
-      accessories: data.accessories,
+    const meta = {
       fileName: fileName,
       fileSize: data.fileSize,
       loadedAt: data.processedAt,
+      profilesCount: data.profiles.length,
+      accessoriesCount: data.accessories.length,
       version: Date.now() // Simple versioning
     };
     
-    localStorage.setItem('excelCache', JSON.stringify(cacheData));
+    // Store in sessionStorage (better for large datasets)
+    try {
+      sessionStorage.setItem('excelCache_profiles', JSON.stringify(data.profiles));
+      sessionStorage.setItem('excelCache_accessories', JSON.stringify(data.accessories));
+      sessionStorage.setItem('excelCache_meta', JSON.stringify(meta));
+      console.log(`📦 Data saved to sessionStorage: ${data.profiles.length} profiles, ${data.accessories.length} accessories`);
+    } catch (sessionError) {
+      console.warn('Failed to save to sessionStorage (likely size limit):', sessionError);
+    }
+    
+    // Try to store in localStorage for persistence (may fail if data is too large)
+    try {
+      const cacheData = {
+        profiles: data.profiles,
+        accessories: data.accessories,
+        fileName: fileName,
+        fileSize: data.fileSize,
+        loadedAt: data.processedAt,
+        version: meta.version
+      };
+      
+      localStorage.setItem('excelCache', JSON.stringify(cacheData));
+      console.log(`📦 Data also saved to localStorage: ${data.profiles.length} profiles, ${data.accessories.length} accessories`);
+    } catch (localError) {
+      console.warn('Failed to save full data to localStorage (likely size limit) - will use sessionStorage for large data:', localError);
+      
+      // Try to save just metadata to localStorage
+      try {
+        localStorage.setItem('excelCache_meta', JSON.stringify({
+          ...meta,
+          noticeUseSessionStorage: true,
+          fullDataInSessionStorage: true
+        }));
+      } catch (metaError) {
+        console.warn('Failed to save even metadata to localStorage:', metaError);
+      }
+    }
   }
 
   /**

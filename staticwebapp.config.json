@@ -4,17 +4,77 @@
       "route": "/admin.html",
       "allowedRoles": [
         "authenticated"
+      ],
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; frame-ancestors 'none';"
+      }
+    },
+    {
+      "route": "/*.html",
+      "allowedRoles": [
+        "authenticated"
+      ],
+      "exclude": [
+        "/login.html",
+        "/index.html"
+      ],
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; frame-ancestors 'none';"
+      }
+    },
+    {
+      "route": "/login.html",
+      "allowedRoles": [
+        "anonymous",
+        "authenticated"
+      ],
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff", 
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none';"
+      }
+    },
+    {
+      "route": "/",
+      "rewrite": "/login.html",
+      "allowedRoles": [
+        "anonymous",
+        "authenticated"
       ]
     },
     {
-      "route": "/**",
-      "allowedRoles": [
-        "anonymous"
-      ]
+      "route": "/*",
+      "headers": {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      }
     }
   ],
   "navigationFallback": {
-    "rewrite": "/index.html"
+    "rewrite": "/login.html"
+  },
+  "responseOverrides": {
+    "401": {
+      "statusCode": 302,
+      "redirect": "/login.html"
+    },
+    "403": {
+      "statusCode": 302,
+      "redirect": "/login.html"
+    }
   },
   "globalHeaders": {
     "Cache-Control": "no-store"

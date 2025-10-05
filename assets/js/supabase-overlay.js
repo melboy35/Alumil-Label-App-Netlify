@@ -1,16 +1,27 @@
 // SUPABASE CONFIGURATION
 // Replace these values with your actual Supabase project credentials
 
-const SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
+// Use global constants if defined, otherwise use local constants
+const SUPABASE_URL = window.SUPABASE_URL || 'https://grsikgldzkqntlotawyi.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
 
 // Initialize Supabase client
 let supabaseClient = null;
 
 // Initialize Supabase when the script loads
 function initSupabase() {
+  // First check if the global _sbClient exists (set by home.html)
+  if (window._sbClient) {
+    supabaseClient = window._sbClient;
+    console.log('Supabase client reused from global _sbClient');
+    return;
+  }
+  
+  // Otherwise create a new client
   if (typeof supabase !== 'undefined') {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Also set the global client for consistency
+    window._sbClient = supabaseClient;
     console.log('Supabase client initialized');
   } else {
     console.error('Supabase library not loaded. Make sure to include the Supabase CDN script.');
@@ -20,8 +31,14 @@ function initSupabase() {
 // Helper function to get current user
 async function getCurrentUser() {
   if (!supabaseClient) {
-    console.error('Supabase client not initialized');
-    return null;
+    // Try to initialize if not already done
+    initSupabase();
+    
+    // If still not initialized
+    if (!supabaseClient) {
+      console.error('Supabase client not initialized');
+      return null;
+    }
   }
   
   const { data: { user }, error } = await supabaseClient.auth.getUser();
@@ -37,18 +54,39 @@ async function isAdmin() {
   const user = await getCurrentUser();
   if (!user) return false;
   
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  try {
+    // Try first with 'role' field
+    const { data: roleData, error: roleError } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+      
+    if (!roleError && roleData?.role === 'admin') {
+      return true;
+    }
     
-  if (error) {
-    console.error('Error checking admin status:', error);
+    // If that fails or returns false, try with 'is_admin' field
+    const { data: isAdminData, error: isAdminError } = await supabaseClient
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+      
+    if (!isAdminError && isAdminData?.is_admin === true) {
+      return true;
+    }
+    
+    // If both checks fail, log error and return false
+    if (roleError && isAdminError) {
+      console.error('Error checking admin status:', roleError, isAdminError);
+    }
+    
+    return false;
+  } catch (err) {
+    console.error('Exception checking admin status:', err);
     return false;
   }
-  
-  return data?.role === 'admin';
 }
 
 // Helper function to get user profile
@@ -105,12 +143,21 @@ async function signIn(email, password) {
 }
 
 async function signOut() {
+  // Use authHelper for logout if available
+  if (window.authHelper) {
+    return window.authHelper.logout();
+  }
+  
+  // Fallback to direct Supabase call
   const { error } = await supabaseClient.auth.signOut();
   
   if (error) {
     console.error('Sign out error:', error);
     return { success: false, error };
   }
+  
+  // Redirect to login page
+  window.location.href = 'login.html';
   
   return { success: true };
 }
@@ -292,7 +339,27 @@ async function getPrintReports(startDate = null, endDate = null) {
 }
 
 // Initialize Supabase when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initSupabase);
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if authHelper exists first
+  if (window.authHelper && window.authHelper.supabase) {
+    // Use the supabase client from authHelper
+    supabaseClient = window.authHelper.supabase;
+    window._sbClient = supabaseClient;
+    console.log('✅ Supabase client reused from authHelper');
+  } else {
+    // Initialize our own if authHelper is not available
+    initSupabase();
+  }
+});
+
+// Also try to initialize immediately in case the DOM is already loaded
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(() => {
+    if (!supabaseClient) {
+      initSupabase();
+    }
+  }, 0);
+}
 
 // Helper function to auto-read SKU/Qty/Size from page inputs
 function autoReadPageInputs() {

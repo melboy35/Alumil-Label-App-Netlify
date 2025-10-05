@@ -148,43 +148,18 @@ class AlumilDataService {
 
       console.log('🔄 Loading fresh data from Supabase...');
 
-      // Then fetch fresh data from database - UNLIMITED FETCH
-      const [profilesResult, accessoriesResult] = await Promise.all([
-        this.supabase
-          .from('inventory_profiles')
-          .select('*')
-          .eq('organization_id', this.orgId)
-          .order('code')
-          .limit(10000), // Explicit high limit to override default Supabase limits
-        this.supabase
-          .from('inventory_accessories')
-          .select('*')
-          .eq('organization_id', this.orgId)
-          .order('code')
-          .limit(10000) // Explicit high limit to override default Supabase limits
-      ]);
-
-      if (profilesResult.error) {
-        console.error('Profiles fetch error:', profilesResult.error);
-        throw profilesResult.error;
-      }
-      if (accessoriesResult.error) {
-        console.error('Accessories fetch error:', accessoriesResult.error);
-        throw accessoriesResult.error;
-      }
-
-      // Update cache
-      this.cache.profiles = profilesResult.data || [];
-      this.cache.accessories = accessoriesResult.data || [];
+      // Fetch profiles and accessories with pagination to overcome limits - TRULY UNLIMITED
+      this.cache.profiles = await this.fetchAllRecords('inventory_profiles');
+      this.cache.accessories = await this.fetchAllRecords('inventory_accessories');
       this.cache.lastFetch = Date.now();
 
-      // Update localStorage for offline access
-      this.saveToLocalStorage();
+      console.log(`✅ Data loaded from database with pagination: ${this.cache.profiles.length} profiles, ${this.cache.accessories.length} accessories`);
+
+      // Update localStorage for offline access - using session storage for large datasets
+      this.saveToStorage();
 
       // Notify listeners of data update
       this.notifyDataUpdated();
-
-      console.log(`✅ Data loaded from database: ${this.cache.profiles.length} profiles, ${this.cache.accessories.length} accessories`);
 
     } catch (error) {
       console.error('Failed to load data from database:', error);
@@ -196,40 +171,166 @@ class AlumilDataService {
       console.warn('📦 Using cached data due to database connection issue');
     }
   }
+  
+  /**
+   * Fetch all records from a table using pagination - TRULY UNLIMITED
+   */
+  async fetchAllRecords(table) {
+    const pageSize = 10000; // Maximum Supabase page size
+    let allRecords = [];
+    let page = 0;
+    let hasMoreData = true;
+    
+    while (hasMoreData) {
+      const start = page * pageSize;
+      console.log(`📄 Fetching ${table} page ${page + 1} (offset: ${start}, limit: ${pageSize})...`);
+      
+      const { data, error, count } = await this.supabase
+        .from(table)
+        .select('*', { count: 'exact' })
+        .eq('organization_id', this.orgId)
+        .order('code')
+        .range(start, start + pageSize - 1);
+        
+      if (error) {
+        console.error(`Error fetching ${table} page ${page + 1}:`, error);
+        break;
+      }
+      
+      if (!data || data.length === 0) {
+        hasMoreData = false;
+      } else {
+        allRecords = [...allRecords, ...data];
+        console.log(`✅ Received ${data.length} records from ${table}, total so far: ${allRecords.length}`);
+        
+        // Check if we've received fewer records than the page size
+        if (data.length < pageSize) {
+          hasMoreData = false;
+        } else {
+          page++;
+        }
+      }
+    }
+    
+    console.log(`� Total ${table} records loaded: ${allRecords.length}`);
+    return allRecords;
+  }
 
   /**
-   * Load data from localStorage as fallback
+   * Load data from storage as fallback (tries both sessionStorage and localStorage)
    */
   loadFromLocalStorage() {
     try {
-      const cached = localStorage.getItem('excelCache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        this.cache.profiles = data.profiles || [];
-        this.cache.accessories = data.accessories || [];
-        this.cache.lastFetch = Date.now();
-        console.log('📦 Loaded data from localStorage cache');
+      // First try sessionStorage (better for larger datasets)
+      let data;
+      let source = 'none';
+      
+      // Try to load from sessionStorage first (for larger datasets)
+      try {
+        const profilesJson = sessionStorage.getItem('excelCache_profiles');
+        const accessoriesJson = sessionStorage.getItem('excelCache_accessories');
+        const metaJson = sessionStorage.getItem('excelCache_meta');
+        
+        if (profilesJson && accessoriesJson && metaJson) {
+          const profiles = JSON.parse(profilesJson);
+          const accessories = JSON.parse(accessoriesJson);
+          const meta = JSON.parse(metaJson);
+          
+          if (Array.isArray(profiles) && Array.isArray(accessories)) {
+            this.cache.profiles = profiles;
+            this.cache.accessories = accessories;
+            this.cache.lastFetch = meta.timestamp || Date.now();
+            source = 'sessionStorage';
+          }
+        }
+      } catch (sessionError) {
+        console.warn('Could not load from sessionStorage:', sessionError);
+      }
+      
+      // If sessionStorage failed, try localStorage
+      if (source === 'none') {
+        try {
+          const cached = localStorage.getItem('excelCache');
+          if (cached) {
+            data = JSON.parse(cached);
+            this.cache.profiles = data.profiles || [];
+            this.cache.accessories = data.accessories || [];
+            this.cache.lastFetch = Date.now();
+            source = 'localStorage';
+          }
+        } catch (localError) {
+          console.warn('Could not load from localStorage:', localError);
+        }
+      }
+      
+      if (source !== 'none') {
+        console.log(`📦 Loaded data from ${source}: ${this.cache.profiles.length} profiles, ${this.cache.accessories.length} accessories`);
       }
     } catch (error) {
-      console.warn('Failed to load from localStorage:', error);
+      console.warn('Failed to load from any storage:', error);
     }
   }
 
   /**
-   * Save data to localStorage
+   * Save data to storage (uses both sessionStorage and localStorage)
    */
-  saveToLocalStorage() {
+  saveToStorage() {
     try {
-      const cacheData = {
-        profiles: this.cache.profiles,
-        accessories: this.cache.accessories,
+      const meta = {
         fileName: 'Database Export',
         loadedAt: new Date().toISOString(),
+        timestamp: this.cache.lastFetch,
+        profilesCount: this.cache.profiles.length,
+        accessoriesCount: this.cache.accessories.length,
         version: this.cache.lastFetch
       };
-      localStorage.setItem('excelCache', JSON.stringify(cacheData));
+      
+      // Save to sessionStorage in chunks (better for large datasets)
+      try {
+        sessionStorage.setItem('excelCache_profiles', JSON.stringify(this.cache.profiles));
+        sessionStorage.setItem('excelCache_accessories', JSON.stringify(this.cache.accessories));
+        sessionStorage.setItem('excelCache_meta', JSON.stringify(meta));
+        console.log('📦 Data saved to sessionStorage successfully');
+        
+        // Dispatch custom event for sessionStorage updates
+        window.dispatchEvent(new CustomEvent('sessionStorageUpdate', {
+          detail: {
+            profiles: this.cache.profiles.length,
+            accessories: this.cache.accessories.length,
+            timestamp: Date.now()
+          }
+        }));
+      } catch (sessionError) {
+        console.warn('Failed to save to sessionStorage (likely size limit):', sessionError);
+      }
+      
+      // Also try to save to localStorage for persistence across sessions
+      // This may fail if the data is too large
+      try {
+        const cacheData = {
+          profiles: this.cache.profiles,
+          accessories: this.cache.accessories,
+          ...meta
+        };
+        localStorage.setItem('excelCache', JSON.stringify(cacheData));
+        console.log('📦 Data also saved to localStorage successfully');
+      } catch (localError) {
+        console.warn('Failed to save to localStorage (likely size limit):', localError);
+        
+        // Try to save just metadata to localStorage
+        try {
+          localStorage.setItem('excelCache_meta', JSON.stringify({
+            ...meta,
+            noticeUseSessionStorage: true,
+            fullDataInSessionStorage: true
+          }));
+          console.log('📦 Metadata saved to localStorage successfully');
+        } catch (metaError) {
+          console.warn('Failed to save even metadata to localStorage:', metaError);
+        }
+      }
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
+      console.warn('Failed to save data to storage:', error);
     }
   }
 

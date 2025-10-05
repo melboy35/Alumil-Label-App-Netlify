@@ -55,12 +55,21 @@
     }
   </style>
 <meta content="#ffffff" name="theme-color"/>
+<!-- Supabase Configuration -->
+<meta name="supabase-url" content="https://hpcylketkroahgieoeat.supabase.co">
+<meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwY3lsa2V0a3JvYWhnaWVvZWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAwNTE1NjksImV4cCI6MjAwNTYyNzU2OX0.DYPK9UWLjd-OlLN-P5fG7U8ilNJ6GVK1AHJVvaoJU-g">
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script>
+</script>
+</script>
+<!-- Auth Helper - Must come before other Supabase scripts -->
+<script src="assets/js/auth-helper.js"></script>
+
 <!-- Supabase Overlay -->
 <script src="assets/js/supabase-overlay.js"></script>
 <!-- Data Service for accessing published inventory data -->
@@ -176,11 +185,11 @@
 <svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           Home
         </a>
-<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="admin.html" id="admin-link" style="display: none;">
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="admin.html" id="admin-link" data-admin-only>
 <svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg>
           Admin
         </a>
-<button class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" id="logout-btn" onclick="handleLogout()" style="display: none;">
+<button class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" id="logout-btn" onclick="window.AuthHelper.handleLogout()" data-auth-required>
 <svg class="lucide lucide-log-out mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
           Logout
         </button>
@@ -432,10 +441,58 @@
         return Array.isArray(x) ? x : (x && Array.isArray(x.rows) ? x.rows : []);
       }
       function readCache(){
-        try { const raw = localStorage.getItem('excelCache'); return raw ? JSON.parse(raw) : null; }
+        // Try to read from both sessionStorage and localStorage
+        try {
+          // First check if we have data in sessionStorage
+          const profilesJson = sessionStorage.getItem('excelCache_profiles');
+          const accessoriesJson = sessionStorage.getItem('excelCache_accessories');
+          const metaJson = sessionStorage.getItem('excelCache_meta');
+          
+          if (profilesJson && accessoriesJson && metaJson) {
+            const meta = JSON.parse(metaJson);
+            return {
+              profiles: JSON.parse(profilesJson),
+              accessories: JSON.parse(accessoriesJson),
+              version: meta.version || null,
+              fileName: meta.fileName || 'SessionStorage Data',
+              loadedAt: meta.loadedAt || new Date().toISOString(),
+              fromSessionStorage: true
+            };
+          }
+        } catch (sessionError) {
+          console.warn('Could not read from sessionStorage:', sessionError);
+        }
+        
+        // Fallback to localStorage
+        try { 
+          const raw = localStorage.getItem('excelCache'); 
+          return raw ? JSON.parse(raw) : null; 
+        }
         catch { return null; }
       }
       function getProfilesAndAccessories(){
+        // First try to get from sessionStorage (optimized for larger datasets)
+        try {
+          const profilesJson = sessionStorage.getItem('excelCache_profiles');
+          const accessoriesJson = sessionStorage.getItem('excelCache_accessories');
+          
+          if (profilesJson && accessoriesJson) {
+            const profiles = JSON.parse(profilesJson);
+            const accessories = JSON.parse(accessoriesJson);
+            
+            if (Array.isArray(profiles) && Array.isArray(accessories)) {
+              console.log('📦 Using sessionStorage data: found', profiles.length, 'profiles,', accessories.length, 'accessories');
+              return {
+                profiles: profiles,
+                accessories: accessories
+              };
+            }
+          }
+        } catch (sessionError) {
+          console.warn('Could not load from sessionStorage:', sessionError);
+        }
+        
+        // Fallback to localStorage
         const cache = readCache() || {};
         const profilesRaw =
           (Array.isArray(cache.inventory) && cache.inventory.length) ? cache.inventory :
@@ -446,6 +503,7 @@
           (Array.isArray(cache.accessories) && cache.accessories.length) ? cache.accessories :
           toArray(cache.accessories);
 
+        console.log('📦 Using localStorage data: found', profilesRaw.length, 'profiles,', accessoriesRaw.length, 'accessories');
         return {
           profiles: Array.isArray(profilesRaw) ? profilesRaw : [],
           accessories: Array.isArray(accessoriesRaw) ? accessoriesRaw : []
@@ -508,10 +566,20 @@
       document.addEventListener('DOMContentLoaded', applyTotals);
       window.addEventListener('focus', applyTotals);
       document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) applyTotals(); });
+      // Listen for storage events from localStorage and sessionStorage
       window.addEventListener('storage', (e)=>{
         if (!e.key) return;
         const k = e.key.toLowerCase();
-        if (k.includes('excelcache') || k.includes('bincard')) applyTotals();
+        if (k.includes('excelcache') || k.includes('bincard')) {
+          console.log('📊 Storage update detected:', e.key);
+          applyTotals();
+        }
+      });
+      
+      // Additional event listener for our custom session storage updates
+      window.addEventListener('sessionStorageUpdate', () => {
+        console.log('📊 Session storage update detected');
+        applyTotals();
       });
       // Optional: broadcast channel if uploader posts message
       try {
@@ -542,11 +610,11 @@
 <svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
 <span>Home</span>
 </button>
-<button aria-label="Admin" class="nav-btn" data-nav="admin" id="mobile-admin-btn" onclick="location.href='admin.html'" style="display: none;">
+<button aria-label="Admin" class="nav-btn" data-nav="admin" id="mobile-admin-btn" onclick="location.href='admin.html'" data-admin-only>
 <svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17h-5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
 <span>Admin</span>
 </button>
-<button aria-label="Logout" class="nav-btn" data-nav="logout" id="mobile-logout-btn" onclick="handleLogout()" style="display: none;">
+<button aria-label="Logout" class="nav-btn" data-nav="logout" id="mobile-logout-btn" onclick="window.AuthHelper.handleLogout()" data-auth-required>
 <svg class="lucide lucide-log-out" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
 <span>Logout</span>
 </button>
@@ -571,6 +639,7 @@
     /* Dynamic grid layout - adjust based on visible buttons */
     .alumil-bottom-nav.admin-user { grid-template-columns: 1fr 1fr auto 1fr 1fr; } /* Home, Admin, Scan, Rack, Search */
     .alumil-bottom-nav.non-admin-user { grid-template-columns: 1fr 1fr auto 1fr 1fr; } /* Home, Logout, Scan, Rack, Search */
+    .alumil-bottom-nav button[style*="display: none"] { display: none !important; } /* Ensure hidden buttons stay hidden */
     html[data-theme="light"] .alumil-bottom-nav { background: rgba(255,255,255,.96); color:#111827; border-color: rgba(0,0,0,.06); }
     .alumil-bottom-nav .nav-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border:0; color: inherit; font-weight: 600; font-size: 12px; padding: 6px 8px; border-radius: 10px; }
     .alumil-bottom-nav .nav-btn:hover { background: rgba(255,255,255,.06); }
@@ -670,8 +739,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   return r.json();
 }
 
-); if(!r.ok) throw 0; return r.json(); }
-
   // 1) Local cache + version
   let local = {}, localVersion = null;
   try { local = JSON.parse(localStorage.getItem('excelCache') || '{}'); localVersion = local?.version || null; } catch { local = {}; }
@@ -713,91 +780,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 <script src="js/sharepoint_loader.js"></script>
-<!-- Authentication and Role-based Navigation -->
+<!-- Authentication and Role-based Navigation is now handled by auth-helper.js -->
 <script>
-    async function handleLogout() {
-      try {
-        if (window._sbClient) {
-          await window._sbClient.auth.signOut();
-        }
-        location.href = 'login.html';
-      } catch (error) {
-        console.error('Logout error:', error);
-        location.href = 'login.html';
-      }
+  // Check the authentication on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.AuthHelper) {
+      console.log('✅ AuthHelper detected and running');
+      // Force visibility update
+      setTimeout(() => {
+        window.AuthHelper.updateNavigation();
+      }, 100);
+    } else {
+      console.error('❌ AuthHelper not found! Authentication may not work properly.');
     }
-    
-    // Check authentication and show appropriate navigation
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (window._sbClient) {
-        try {
-          const { data: { user } } = await window._sbClient.auth.getUser();
-          const logoutBtn = document.getElementById('logout-btn');
-          const adminLink = document.getElementById('admin-link');
-          const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-          const mobileAdminBtn = document.getElementById('mobile-admin-btn');
-          
-          if (user) {
-            // Show logout button for ALL authenticated users (both header and mobile)
-            if (logoutBtn) {
-              logoutBtn.style.display = 'flex';
-              console.log('✅ Header logout button shown for authenticated user');
-            }
-            if (mobileLogoutBtn) {
-              mobileLogoutBtn.style.display = 'flex';
-              console.log('✅ Mobile logout button shown for authenticated user');
-            }
-            
-            // Check if user is admin and show admin link
-            const { data: profile, error } = await window._sbClient
-              .from('profiles')
-              .select('is_admin')
-              .eq('id', user.id)
-              .single();
-            
-            if (!error && profile?.is_admin) {
-              if (adminLink) {
-                adminLink.style.display = 'flex';
-                console.log('✅ Header admin link shown for admin user');
-              }
-              if (mobileAdminBtn) {
-                mobileAdminBtn.style.display = 'flex';
-                console.log('✅ Mobile admin button shown for admin user');
-              }
-              // Add admin user class to bottom nav
-              const bottomNav = document.getElementById('alumil-bottom-nav');
-              if (bottomNav) {
-                bottomNav.classList.add('admin-user');
-                bottomNav.classList.remove('non-admin-user');
-              }
-            } else {
-              // Non-admin users: hide admin buttons but show logout
-              if (mobileAdminBtn) {
-                mobileAdminBtn.style.display = 'none';
-                console.log('ℹ️ Mobile admin button hidden for non-admin user');
-              }
-              if (adminLink) {
-                adminLink.style.display = 'none';
-                console.log('ℹ️ Header admin link hidden for non-admin user');
-              }
-              // Add non-admin user class to bottom nav
-              const bottomNav = document.getElementById('alumil-bottom-nav');
-              if (bottomNav) {
-                bottomNav.classList.add('non-admin-user');
-                bottomNav.classList.remove('admin-user');
-              }
-            }
-          } else {
-            // Not authenticated, redirect to login
-            location.href = 'login.html';
-          }
-        } catch (error) {
-          console.error('Authentication check failed:', error);
-          location.href = 'login.html';
-        }
-      }
-    });
-  </script>
+  });
+  
+  // Run the authentication check again after a short delay to ensure everything is loaded
+  setTimeout(() => {
+    if (window.AuthHelper) {
+      window.AuthHelper.updateNavigation();
+    }
+  }, 1000);
+</script>
 
   <!-- Data Status and Counter Updates -->
   <script>
@@ -898,44 +902,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 <p>Alumil Labeling App @2025</p>
 </footer>
 
-<!-- Supabase v2 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- Data service integration -->
 <script>
-  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
-  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
-  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
-  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-</script>
-
-<!-- Live Data: consumer fetch + realtime -->
-<script>
-(function(){
-  const sb = window._sbClient, ORG = window.ORG_ID;
-  async function fetchLiveData(){
-    try{
-      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
-        sb.from('profiles').select('*').eq('org_id', ORG),
-        sb.from('accessories').select('*').eq('org_id', ORG)
-      ]);
-      if(pe) throw pe; if(ae) throw ae;
-      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
-      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
-      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
-      return data;
-    }catch(err){
-      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
-      catch { return { profiles:[], accessories:[] }; }
+  document.addEventListener('DOMContentLoaded', () => {
+    // If a data loading function exists, call it
+    if (typeof window.fetchLiveData === 'function') {
+      console.log('📊 Fetching live data...');
+      window.fetchLiveData();
     }
-  }
-  document.addEventListener('DOMContentLoaded', fetchLiveData);
-  sb.channel('version-bumps')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
-      if (payload?.new?.org_id === ORG) await fetchLiveData();
-    })
-    .subscribe();
-  // expose for pages that want it
-  window.fetchLiveData = fetchLiveData;
-})();
+  });
 </script>
 </body>
 </html>
