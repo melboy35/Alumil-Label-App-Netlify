@@ -60,7 +60,7 @@ class AlumilExcelUploader {
       // Update UI
       this.updateUI(data, file.name);
       
-      this.setUploadStatus('success', `File processed successfully! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded.`);
+      this.setUploadStatus('success', `File processed successfully! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded (${data.totalRows} total rows processed).`);
       
     } catch (error) {
       console.error('File processing error:', error);
@@ -92,7 +92,7 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Process Excel file and extract data
+   * Process Excel file and extract data - handles unlimited rows and columns
    */
   async processExcelFile(file) {
     return new Promise((resolve, reject) => {
@@ -101,21 +101,33 @@ class AlumilExcelUploader {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const workbook = XLSX.read(data, { 
+            type: 'array',
+            cellDates: true, // Parse dates properly
+            cellNF: false,   // Don't apply number formats
+            cellText: false  // Don't convert to text
+          });
+          
+          console.log(`📁 Processing Excel file with ${workbook.SheetNames.length} sheets:`, workbook.SheetNames);
           
           // Find profiles and accessories sheets
           const profilesSheet = this.findSheet(workbook, ['profiles', 'profile', 'prof']);
           const accessoriesSheet = this.findSheet(workbook, ['accessories', 'accessory', 'acc']);
           
+          console.log(`🔍 Found sheets - Profiles: ${profilesSheet}, Accessories: ${accessoriesSheet}`);
+          
           const profiles = profilesSheet ? this.processProfilesSheet(workbook.Sheets[profilesSheet]) : [];
           const accessories = accessoriesSheet ? this.processAccessoriesSheet(workbook.Sheets[accessoriesSheet]) : [];
+          
+          console.log(`✅ Processed complete data - Profiles: ${profiles.length}, Accessories: ${accessories.length}`);
           
           resolve({
             profiles,
             accessories,
             fileName: file.name,
             fileSize: file.size,
-            processedAt: new Date().toISOString()
+            processedAt: new Date().toISOString(),
+            totalRows: profiles.length + accessories.length
           });
           
         } catch (error) {
@@ -146,40 +158,96 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Process profiles sheet data
+   * Process profiles sheet data - imports ALL rows and columns without limits
    */
   processProfilesSheet(worksheet) {
-    const rawData = XLSX.utils.sheet_to_json(worksheet);
+    // Import ALL data without any row or column limits
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { 
+      defval: '', // Default value for empty cells
+      raw: false, // Convert all values to strings first
+      header: 1 // Use first row as headers
+    });
     
-    return rawData.map(row => ({
-      code: this.cleanString(row['Code'] || row['Item Code'] || row['Profile Code'] || row['code'] || ''),
-      description: this.cleanString(row['Description'] || row['Desc'] || row['Name'] || row['description'] || ''),
-      length: this.parseNumber(row['Length'] || row['Len'] || row['length']),
-      color: this.cleanString(row['Color'] || row['Colour'] || row['color'] || ''),
-      alloy: this.cleanString(row['Alloy'] || row['alloy'] || ''),
-      system: this.cleanString(row['System'] || row['system'] || ''),
-      warehouse_no: this.cleanString(row['Warehouse'] || row['Warehouse No'] || row['warehouse_no'] || ''),
-      rack_no: this.cleanString(row['Rack'] || row['Rack No'] || row['rack_no'] || ''),
-      quantity: this.parseNumber(row['Quantity'] || row['Qty'] || row['quantity']) || 0,
-      unit: this.cleanString(row['Unit'] || row['UOM'] || row['unit'] || 'pcs')
-    })).filter(item => item.code); // Only include items with codes
+    if (rawData.length === 0) return [];
+    
+    // Get headers from first row
+    const headers = rawData[0];
+    const dataRows = rawData.slice(1); // All data rows without limits
+    
+    console.log(`📊 Processing ${dataRows.length} profile rows with ${headers.length} columns`);
+    
+    return dataRows.map((row, index) => {
+      const profileData = {
+        // Primary fields with multiple column name variations
+        code: this.cleanString(row[this.findColumnIndex(headers, ['Code', 'Item Code', 'Profile Code', 'code', 'CODE'])] || ''),
+        description: this.cleanString(row[this.findColumnIndex(headers, ['Description', 'Desc', 'Name', 'description', 'DESCRIPTION'])] || ''),
+        length: this.parseNumber(row[this.findColumnIndex(headers, ['Length', 'Len', 'length', 'LENGTH'])]),
+        color: this.cleanString(row[this.findColumnIndex(headers, ['Color', 'Colour', 'color', 'COLOR'])] || ''),
+        alloy: this.cleanString(row[this.findColumnIndex(headers, ['Alloy', 'alloy', 'ALLOY'])] || ''),
+        system: this.cleanString(row[this.findColumnIndex(headers, ['System', 'system', 'SYSTEM'])] || ''),
+        warehouse_no: this.cleanString(row[this.findColumnIndex(headers, ['Warehouse', 'Warehouse No', 'warehouse_no', 'WAREHOUSE'])] || ''),
+        rack_no: this.cleanString(row[this.findColumnIndex(headers, ['Rack', 'Rack No', 'rack_no', 'RACK'])] || ''),
+        quantity: this.parseNumber(row[this.findColumnIndex(headers, ['Quantity', 'Qty', 'quantity', 'QUANTITY'])]) || 0,
+        unit: this.cleanString(row[this.findColumnIndex(headers, ['Unit', 'UOM', 'unit', 'UNIT'])] || 'pcs')
+      };
+      
+      // Add ALL additional columns as custom fields to preserve complete data
+      headers.forEach((header, colIndex) => {
+        if (header && row[colIndex] !== undefined && row[colIndex] !== '') {
+          const fieldName = this.sanitizeFieldName(header);
+          if (!profileData.hasOwnProperty(fieldName) && !this.isStandardField(fieldName)) {
+            profileData[fieldName] = this.cleanString(row[colIndex]);
+          }
+        }
+      });
+      
+      return profileData;
+    }).filter(item => item.code); // Only include items with codes
   }
 
   /**
-   * Process accessories sheet data
+   * Process accessories sheet data - imports ALL rows and columns without limits
    */
   processAccessoriesSheet(worksheet) {
-    const rawData = XLSX.utils.sheet_to_json(worksheet);
+    // Import ALL data without any row or column limits
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { 
+      defval: '', // Default value for empty cells
+      raw: false, // Convert all values to strings first
+      header: 1 // Use first row as headers
+    });
     
-    return rawData.map(row => ({
-      code: this.cleanString(row['Code'] || row['Item Code'] || row['Accessory Code'] || row['code'] || ''),
-      description: this.cleanString(row['Description'] || row['Desc'] || row['Name'] || row['description'] || ''),
-      unit: this.cleanString(row['Unit'] || row['UOM'] || row['unit'] || 'pcs'),
-      category: this.cleanString(row['Category'] || row['Type'] || row['category'] || ''),
-      warehouse_no: this.cleanString(row['Warehouse'] || row['Warehouse No'] || row['warehouse_no'] || ''),
-      rack_no: this.cleanString(row['Rack'] || row['Rack No'] || row['rack_no'] || ''),
-      quantity: this.parseNumber(row['Quantity'] || row['Qty'] || row['quantity']) || 0
-    })).filter(item => item.code); // Only include items with codes
+    if (rawData.length === 0) return [];
+    
+    // Get headers from first row
+    const headers = rawData[0];
+    const dataRows = rawData.slice(1); // All data rows without limits
+    
+    console.log(`📦 Processing ${dataRows.length} accessory rows with ${headers.length} columns`);
+    
+    return dataRows.map((row, index) => {
+      const accessoryData = {
+        // Primary fields with multiple column name variations
+        code: this.cleanString(row[this.findColumnIndex(headers, ['Code', 'Item Code', 'Accessory Code', 'code', 'CODE'])] || ''),
+        description: this.cleanString(row[this.findColumnIndex(headers, ['Description', 'Desc', 'Name', 'description', 'DESCRIPTION'])] || ''),
+        unit: this.cleanString(row[this.findColumnIndex(headers, ['Unit', 'UOM', 'unit', 'UNIT'])] || 'pcs'),
+        category: this.cleanString(row[this.findColumnIndex(headers, ['Category', 'Type', 'category', 'CATEGORY'])] || ''),
+        warehouse_no: this.cleanString(row[this.findColumnIndex(headers, ['Warehouse', 'Warehouse No', 'warehouse_no', 'WAREHOUSE'])] || ''),
+        rack_no: this.cleanString(row[this.findColumnIndex(headers, ['Rack', 'Rack No', 'rack_no', 'RACK'])] || ''),
+        quantity: this.parseNumber(row[this.findColumnIndex(headers, ['Quantity', 'Qty', 'quantity', 'QUANTITY'])]) || 0
+      };
+      
+      // Add ALL additional columns as custom fields to preserve complete data
+      headers.forEach((header, colIndex) => {
+        if (header && row[colIndex] !== undefined && row[colIndex] !== '') {
+          const fieldName = this.sanitizeFieldName(header);
+          if (!accessoryData.hasOwnProperty(fieldName) && !this.isStandardField(fieldName)) {
+            accessoryData[fieldName] = this.cleanString(row[colIndex]);
+          }
+        }
+      });
+      
+      return accessoryData;
+    }).filter(item => item.code); // Only include items with codes
   }
 
   /**
@@ -197,6 +265,42 @@ class AlumilExcelUploader {
     if (value === null || value === undefined || value === '') return null;
     const num = parseFloat(value);
     return isNaN(num) ? null : num;
+  }
+
+  /**
+   * Find column index by multiple possible header names
+   */
+  findColumnIndex(headers, possibleNames) {
+    for (const name of possibleNames) {
+      const index = headers.findIndex(header => 
+        header && header.toString().toLowerCase().trim() === name.toLowerCase()
+      );
+      if (index !== -1) return index;
+    }
+    return -1;
+  }
+
+  /**
+   * Sanitize field name for database compatibility
+   */
+  sanitizeFieldName(fieldName) {
+    return fieldName.toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_{2,}/g, '_')
+      .replace(/^_|_$/g, '');
+  }
+
+  /**
+   * Check if field is a standard database field
+   */
+  isStandardField(fieldName) {
+    const standardFields = [
+      'code', 'description', 'length', 'color', 'alloy', 'system', 
+      'warehouse_no', 'rack_no', 'quantity', 'unit', 'category',
+      'id', 'organization_id', 'created_at', 'updated_at'
+    ];
+    return standardFields.includes(fieldName);
   }
 
   /**
@@ -236,17 +340,40 @@ class AlumilExcelUploader {
       }
 
       // Prepare data for database
-      const profilesData = cachedData.profiles.map(item => ({
-        ...item,
-        organization_id: this.orgId,
-        updated_at: new Date().toISOString()
-      }));
+      const profilesData = cachedData.profiles.map(item => {
+        const { code, description, length, color, alloy, system, warehouse_no, rack_no, quantity, unit, ...additionalData } = item;
+        return {
+          code,
+          description,
+          length,
+          color,
+          alloy,
+          system,
+          warehouse_no,
+          rack_no,
+          quantity,
+          unit,
+          additional_data: additionalData, // Store extra columns in JSONB field
+          organization_id: this.orgId,
+          updated_at: new Date().toISOString()
+        };
+      });
 
-      const accessoriesData = cachedData.accessories.map(item => ({
-        ...item,
-        organization_id: this.orgId,
-        updated_at: new Date().toISOString()
-      }));
+      const accessoriesData = cachedData.accessories.map(item => {
+        const { code, description, unit, category, warehouse_no, rack_no, quantity, ...additionalData } = item;
+        return {
+          code,
+          description,
+          unit,
+          category,
+          warehouse_no,
+          rack_no,
+          quantity,
+          additional_data: additionalData, // Store extra columns in JSONB field
+          organization_id: this.orgId,
+          updated_at: new Date().toISOString()
+        };
+      });
 
       // Upload in batches to avoid timeout
       if (profilesData.length > 0) {

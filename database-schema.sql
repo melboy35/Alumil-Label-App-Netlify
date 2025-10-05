@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS inventory_profiles (
   rack_no TEXT,
   quantity INTEGER DEFAULT 0,
   unit TEXT DEFAULT 'pcs',
+  additional_data JSONB DEFAULT '{}', -- Store additional Excel columns
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(organization_id, code)
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS inventory_accessories (
   warehouse_no TEXT,
   rack_no TEXT,
   quantity INTEGER DEFAULT 0,
+  additional_data JSONB DEFAULT '{}', -- Store additional Excel columns
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(organization_id, code)
@@ -177,8 +179,10 @@ CREATE POLICY "Only admins can insert upload records" ON data_uploads
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_inventory_profiles_org_code ON inventory_profiles(organization_id, code);
 CREATE INDEX IF NOT EXISTS idx_inventory_profiles_description ON inventory_profiles USING gin(to_tsvector('english', description));
+CREATE INDEX IF NOT EXISTS idx_inventory_profiles_additional_data ON inventory_profiles USING gin(additional_data);
 CREATE INDEX IF NOT EXISTS idx_inventory_accessories_org_code ON inventory_accessories(organization_id, code);
 CREATE INDEX IF NOT EXISTS idx_inventory_accessories_description ON inventory_accessories USING gin(to_tsvector('english', description));
+CREATE INDEX IF NOT EXISTS idx_inventory_accessories_additional_data ON inventory_accessories USING gin(additional_data);
 CREATE INDEX IF NOT EXISTS idx_data_uploads_org_date ON data_uploads(organization_id, upload_date DESC);
 
 -- Functions for data management
