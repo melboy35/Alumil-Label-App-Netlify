@@ -1,35 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign In | Alumil Inventory System</title>
-  
-  <!-- Comprehensive Favicon Setup -->
-  <link rel="icon" href="/favicon.ico?v=6" type="image/x-icon">
-  <link rel="shortcut icon" href="/favicon.ico?v=6" type="image/x-icon">
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg?v=6">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=6">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=6">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png?v=6">
-  <link rel="manifest" href="/favicon/site.webmanifest?v=6">
-  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=6" color="#ffc107">
-  <meta name="theme-color" content="#ffc107">
-  <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=6">
-  <meta name="theme-color" content="#ffffff">
-  
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alumil • Sign In</title>
+
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' data: blob:;
+                 script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self' data:;
+                 connect-src 'self' https://*.supabase.co">
+
+  <link rel="preload" as="image" href="./assets/images/alumil-logo.svg" />
   
   <!-- Supabase Configuration -->
   <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
   <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
-  
-  <!-- Security Headers with expanded CORS permissions -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co wss://*.supabase.co https://*.supabase.co https://api.supabase.io; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-ancestors 'none'">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   
   <!-- Supabase JS Library (loading before auth helper) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,395 +27,200 @@
   
   <!-- Session Checker - Validates auth state -->
   <script src="/js/session-checker.js"></script>
-  
-  <!-- Theme initialization -->
-  <script>
-    (function(){
-      try{
-        var t = localStorage.getItem('alumil:theme') || localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', t);
-      }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
-    })();
-  </script>
-  
-  <style>
-    :root {
-      --panel-bg: rgba(60, 60, 60, 0.55);
-      --panel-border: rgba(255,255,255,.15);
-      --text: #eaeaea;
-      --muted: #d6d6d6;
-      --blue: #2a7de1;      /* primary button */
-      --blue-press: #1f66bd;
-      --yellow: #d9b531;     /* separators */
-      --input-bg: rgba(255,255,255,.08);
-      --input-border: rgba(255,255,255,.2);
-      --shadow: 0 18px 45px rgba(0,0,0,.25);
-      --radius: 12px;
-    }
 
+  <style>
+    :root{
+      --overlay-top: .35;
+      --overlay-bottom: .45;
+      --card-bg: rgb(255 255 255 / .08);
+      --card-border: rgb(255 255 255 / .15);
+      --text-dim: rgb(255 255 255 /.85);
+      --accent: #ffc107;
+    }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      background: #111;
-      overflow: hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: #f8f9fa; background:#111; overflow:hidden;
     }
+    .bg { position:fixed; inset:0;
+      background:
+        linear-gradient(180deg,
+          rgb(0 0 0 / var(--overlay-top)) 0%,
+          rgb(0 0 0 / var(--overlay-bottom)) 100%),
+        linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      z-index:-1;
+    }
+    .bg::after{content:"";position:absolute;inset:0;pointer-events:none;
+      background:
+        radial-gradient(60% 60% at 70% 30%, rgb(255 255 255 / .06) 0%, transparent 60%),
+        radial-gradient(50% 50% at 10% 90%, rgb(255 193 7 / .08) 0%, transparent 50%);
+      mix-blend-mode:screen;
+    }
+    .wrap{ position:relative; height:100%; display:grid; place-items:center; padding:24px; }
+    .card{
+      width:100%; max-width:480px; backdrop-filter: blur(8px);
+      background: var(--card-bg); border:1px solid var(--card-border);
+      border-radius:20px; padding:22px 22px 18px; box-shadow:0 10px 30px rgb(0 0 0 / .35);
+    }
+    .brand{ display:grid; place-items:center; gap:6px; margin-bottom:6px; text-align:center; }
+    .brand img{ display:block; height:40px; width:auto; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+    .tagline{ font-size:12px; color:var(--text-dim); letter-spacing:.2px; }
 
-    /* Background with Alumil branding */
-    .bg {
-      position: fixed; inset: 0;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      z-index: -1;
+    /* Flags row — fixed with inline SVG, centered and evenly spaced */
+    .flags{
+      display:flex; justify-content:center; align-items:center;
+      flex-wrap:wrap; gap:10px; margin: 10px 0 14px;
     }
+    .flag{ width:32px; height:22px; border-radius:4px; overflow:hidden;
+      border:1px solid rgb(255 255 255 / .35); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .15);
+      display:inline-block;
+    }
+    .flag svg{ display:block; width:100%; height:100%; }
 
-    /* Optional: Add subtle pattern overlay */
-    .bg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 193, 7, 0.1) 0%, transparent 50%);
-    }
+    h1{ margin:8px 0 12px; font-size:24px; font-weight:800; letter-spacing:.2px; text-align:center; }
+    p.sub{ margin:0 0 16px; font-size:14px; color:var(--text-dim); text-align:center; }
 
-    .panel {
-      width: min(420px, calc(100vw - 32px));
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      backdrop-filter: blur(6px);
-      box-shadow: var(--shadow);
-      border-radius: 16px;
-      padding: 28px 26px;
-      position: relative;
-      z-index: 1;
+    label{ display:block; font-size:13px; opacity:.9; margin:12px 0 6px; }
+    input{
+      width:100%; height:44px; border-radius:10px; border:1px solid rgb(255 255 255 / .25);
+      background: rgb(255 255 255 / .1); color:#fff; padding:0 12px; outline:none;
     }
+    input::placeholder{ color: rgb(255 255 255 / .7); }
 
-    .brand {
-      display:flex; align-items:center; justify-content:center;
-      margin-bottom: 20px;
-      user-select:none;
+    .btn{
+      position:relative; width:100%; height:46px; margin-top:16px; border:0; border-radius:12px;
+      background: var(--accent); color:#222; font-weight:700; cursor:pointer;
+      box-shadow: 0 6px 18px rgb(0 0 0 / .25);
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      overflow:hidden; isolation:isolate;
     }
-    .brand img { 
-      height: 40px; 
-      opacity: .95;
-      filter: brightness(0) invert(1); /* Make logo white for dark theme */
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 10px 22px rgb(0 0 0 / .30); filter: brightness(1.03); }
+    .btn:active{ transform: translateY(0); box-shadow:0 6px 18px rgb(0 0 0 / .25); filter: brightness(.98); }
+    .btn:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn::after{
+      content:""; position:absolute; top:-100%; left:-30%; width:60%; height:300%; transform: rotate(25deg);
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0));
+      animation: sheen 2.4s infinite; opacity:.9;
     }
-    html[data-theme="light"] .brand img {
-      filter: none; /* Show normal logo for light theme */
-    }
+    @keyframes sheen{ 0%{transform:translateX(-140%) rotate(25deg);} 60%,100%{transform:translateX(240%) rotate(25deg);} }
 
-    .flags {
-      display:flex; gap: 10px; justify-content:center; margin: 8px 0 18px;
-      opacity:.95; flex-wrap: wrap;
-    }
-    .flag {
-      width: 20px; height: 14px; border-radius: 2px;
-      background: #bbb; box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .flag:hover { transform: scale(1.1); }
+    .or{ display:flex; align-items:center; gap:10px; margin:10px 0 6px; opacity:.9; font-size:12px; justify-content:center; }
+    .or::before, .or::after{ content:""; height:1px; width:80px; background: rgb(255 255 255 / .35); }
 
-    /* Country flag colors */
-    .flag-gr { background: linear-gradient(to bottom, #0d5eaf 0%, #0d5eaf 50%, #ffffff 50%, #ffffff 100%); }
-    .flag-ro { background: linear-gradient(to right, #002b7f 0%, #002b7f 33%, #fcd116 33%, #fcd116 66%, #ce1126 66%); }
-    .flag-bg { background: linear-gradient(to bottom, #ffffff 0%, #ffffff 33%, #00966e 33%, #00966e 66%, #d62612 66%); }
-    .flag-pl { background: linear-gradient(to bottom, #ffffff 0%, #ffffff 50%, #dc143c 50%); }
-    .flag-rs { background: linear-gradient(to bottom, #c6363c 0%, #c6363c 33%, #0c4076 33%, #0c4076 66%, #ffffff 66%); }
-    .flag-al { background: #e41e20; }
-    .flag-mk { background: linear-gradient(to bottom, #d20000 0%, #d20000 50%, #ffce00 50%); }
-
-    /* Footer Styles */
-    .alumil-footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border);
-      padding: 12px 0;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      z-index: 1000;
-    }
+    .aux{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:13px; color:var(--text-dim); }
+    .aux a{ color:#ffd54f; text-decoration:none; } .aux a:hover{ text-decoration:underline; }
     
-    .alumil-footer p {
-      margin: 0;
-      font-weight: 500;
-    }
-
-    h1 {
-      text-align:center; margin: 6px 0 8px; font-size: 24px; font-weight: 600; letter-spacing:.2px;
-    }
-
-    .subtitle {
-      text-align: center; 
-      color: var(--muted); 
-      font-size: 14px; 
-      margin-bottom: 24px;
-      font-weight: 400;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    input[type="email"], input[type="password"] {
-      width: 100%;
-      padding: 12px 16px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 15px;
-      transition: all 0.2s ease;
-    }
-
-    input[type="email"]:focus, input[type="password"]:focus {
-      outline: none;
-      border-color: #ffc107;
-      box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
-    }
-
-    input[type="email"]::placeholder, input[type="password"]::placeholder {
-      color: var(--muted);
-    }
-
-    .btn {
-      display:flex; align-items:center; justify-content:center;
-      gap:10px; width:100%;
-      padding: 14px 16px; border-radius: var(--radius);
-      text-decoration:none; color:#000; font-weight: 600;
-      background: #ffc107;
-      box-shadow: 0 6px 14px rgba(255, 193, 7, .35);
-      transition: transform .04s ease, background .15s ease, box-shadow .15s ease;
-      border: 0;
-      cursor: pointer;
-      font-size: 15px;
-      margin-top: 8px;
-    }
-    .btn:active { transform: translateY(1px); background: #e0a800; box-shadow: 0 4px 10px rgba(255, 193, 7, .28); }
-    .btn:hover { box-shadow: 0 8px 18px rgba(255, 193, 7, .45); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .login-icon {
-      width: 18px; height: 18px; display:inline-block;
-      background: currentColor;
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4'/%3E%3Cpolyline points='10,17 15,12 10,7'/%3E%3Cline x1='15' y1='12' x2='3' y2='12'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .divider {
-      display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px;
-      color: var(--muted); font-size: 12px; margin: 20px 0;
-    }
-    .divider::before, .divider::after {
-      content:""; height: 2px; background: linear-gradient(90deg, transparent, var(--yellow), transparent);
-      border-radius: 2px;
-    }
-
-    .actions { display:flex; gap:10px; margin-top: 14px; justify-content: center; }
-    .ghost {
-      flex: none;
-      display:flex; align-items:center; justify-content:center;
-      padding: 12px 24px; border-radius: var(--radius);
-      text-decoration:none; color:#eaeaea; font-weight: 500;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      transition: all 0.2s ease;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .ghost:hover {
-      background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.3);
-    }
-
-    .muted { color: var(--muted); text-align:center; font-size: 12px; margin-top:14px; }
-
     .error-message {
-      background: rgba(255, 80, 80, .12);
+      background: rgba(255, 80, 80, .15);
       color: #ffd1d1;
-      border: 1px solid rgba(255, 120, 120, .25);
+      border: 1px solid rgba(255, 120, 120, .3);
       padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px;
       display: none;
-    }
-
-    @media (max-height: 620px) {
-      .panel { transform: scale(.96); }
-    }
-
-    @media (max-width: 480px) {
-      .panel { padding: 24px 20px; }
-      h1 { font-size: 22px; }
-      .actions { flex-direction: column; }
-      .ghost { text-align: center; }
     }
   </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
+  <div class="bg"></div>
 
-  <main class="panel" role="main" aria-labelledby="title">
-    <!-- Adding the brand logo section -->
-    <div class="brand">
-      <img src="assets/images/alumil-logo.svg" alt="Alumil Logo" loading="eager" style="height:40px;">
-    </div>
-    
-    <div class="flags" aria-label="Available regions">
-      <div class="flag flag-gr" title="Greece"></div>
-      <div class="flag flag-ro" title="Romania"></div>
-      <div class="flag flag-bg" title="Bulgaria"></div>
-      <div class="flag flag-pl" title="Poland"></div>
-      <div class="flag flag-rs" title="Serbia"></div>
-      <div class="flag flag-al" title="Albania"></div>
-      <div class="flag flag-mk" title="North Macedonia"></div>
-    </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">
+        <img src="./assets/images/alumil-logo.svg" alt="Alumil logo" />
+        <div class="tagline">Building excellence every day</div>
+      </div>
 
-    <h1 id="title">Sign In</h1>
-    <p class="subtitle">Access your Inventory Management System</p>
+      <!-- Flags as inline SVG for perfect placement -->
+      <div class="flags" aria-label="Languages">
+        <!-- Greece -->
+        <span class="flag" title="Greece">
+          <svg viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+            <rect width="640" height="480" fill="#0D5EAF"/>
+            <g fill="#fff">
+              <rect y="60" width="640" height="60"/>
+              <rect y="180" width="640" height="60"/>
+              <rect y="300" width="640" height="60"/>
+              <rect y="420" width="640" height="60"/>
+              <rect x="0" y="0" width="280" height="240" fill="#0D5EAF"/>
+              <rect x="110" y="0" width="60" height="240"/>
+              <rect x="0" y="90" width="280" height="60"/>
+            </g>
+          </svg>
+        </span>
+        <!-- Romania -->
+        <span class="flag" title="Romania">
+          <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1" height="2" fill="#002B7F"/>
+            <rect x="1" width="1" height="2" fill="#FCD116"/>
+            <rect x="2" width="1" height="2" fill="#CE1126"/>
+          </svg>
+        </span>
+        <!-- Italy -->
+        <span class="flag" title="Italy">
+          <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1" height="2" fill="#009246"/>
+            <rect x="1" width="1" height="2" fill="#F1F2F1"/>
+            <rect x="2" width="1" height="2" fill="#CE2B37"/>
+          </svg>
+        </span>
+        <!-- Bulgaria -->
+        <span class="flag" title="Bulgaria">
+          <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+            <rect width="3" height="2" fill="#FFFFFF"/>
+            <rect y="0.666" width="3" height="0.667" fill="#00966E"/>
+            <rect y="1.333" width="3" height="0.667" fill="#D62612"/>
+          </svg>
+        </span>
+        <!-- Germany -->
+        <span class="flag" title="Germany">
+          <svg viewBox="0 0 5 3" xmlns="http://www.w3.org/2000/svg">
+            <rect width="5" height="1" fill="#000000"/>
+            <rect y="1" width="5" height="1" fill="#DD0000"/>
+            <rect y="2" width="5" height="1" fill="#FFCE00"/>
+          </svg>
+        </span>
+        <!-- United Arab Emirates -->
+        <span class="flag" title="United Arab Emirates">
+          <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+            <rect width="0.6" height="2" fill="#FF0000"/>
+            <rect x="0.6" width="2.4" height="0.666" fill="#00732F"/>
+            <rect x="0.6" y="0.666" width="2.4" height="0.667" fill="#FFFFFF"/>
+            <rect x="0.6" y="1.333" width="2.4" height="0.667" fill="#000000"/>
+          </svg>
+        </span>
+        <!-- Spain -->
+        <span class="flag" title="Spain">
+          <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+            <rect width="3" height="2" fill="#AA151B"/>
+            <rect y="0.333" width="3" height="1.334" fill="#F1BF00"/>
+          </svg>
+        </span>
+      </div>
 
-    <div class="error-message" id="error-message"></div>
+      <h1>Sign In</h1>
+      <p class="sub">Access your Inventory Management System</p>
 
-    <form id="login-form">
-      <div class="form-group">
+      <div class="error-message" id="error-message"></div>
+
+      <form id="login-form">
         <label for="email">Email Address</label>
-        <input id="email" type="email" placeholder="Enter your email" required>
-      </div>
+        <input id="email" type="email" placeholder="you@example.com" required />
 
-      <div class="form-group">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter your password" required>
+        <input id="password" type="password" placeholder="••••••••" required />
+
+        <button class="btn" type="submit" id="login-btn">Sign In</button>
+      </form>
+
+      <div class="or"><span>OR</span></div>
+
+      <div class="aux">
+        <a href="#" onclick="alert('Password reset flow goes here');return false;">Forgot password?</a>
+        <a href="/signup.html">Don't have an account? Request access</a>
       </div>
-
-      <div class="form-group" id="confirm-password-group" style="display: none;">
-        <label for="confirm-password">Confirm Password</label>
-        <input id="confirm-password" type="password" placeholder="Confirm your password">
-      </div>
-
-      <button type="submit" class="btn" id="login-btn">
-        <span class="login-icon" aria-hidden="true"></span>
-        <span id="btn-text">Sign In</span>
-      </button>
-    </form>
-
-    <div class="divider">OR</div>
-
-    <div class="actions">
-      <button type="button" class="ghost" id="toggle-mode">Don't have an account? Register</button>
     </div>
-
-    <p class="muted">Secure access to Alumil inventory system</p>
-    
-    <div style="margin-top: 15px; text-align: center;">
-      <button type="button" id="diagnostic-login" style="background: transparent; border: 1px dashed rgba(255,255,255,.2); color: rgba(255,255,255,.5); padding: 6px 12px; cursor: pointer; font-size: 12px; border-radius: 6px;">
-        Check Login Connection
-      </button>
-    </div>
-    
-    <script>
-      // Enhanced diagnostic login button functionality with GoTrueClient instance check
-      document.getElementById('diagnostic-login').addEventListener('click', async function() {
-        this.textContent = 'Testing connection...';
-        
-        try {
-          // Test Supabase availability
-          const supabaseAvailable = typeof supabase !== 'undefined';
-          if (!supabaseAvailable) {
-            throw new Error('Supabase library not loaded');
-          }
-          
-          // Test meta tags
-          const urlMeta = document.querySelector('meta[name="supabase-url"]');
-          const keyMeta = document.querySelector('meta[name="supabase-key"]');
-          
-          if (!urlMeta || !keyMeta || !urlMeta.content || !keyMeta.content) {
-            throw new Error('Supabase credentials missing in meta tags');
-          }
-          
-          // Test connection using the singleton pattern
-          const testClient = getSupabaseClient();
-          if (!testClient) {
-            throw new Error('Failed to initialize Supabase client');
-          }
-          
-          // Check for multiple GoTrueClient instances
-          const instanceCountTest = await testClient.functions.invoke('countGoTrueInstances')
-            .catch(() => ({ data: { count: 'unknown', error: 'function unavailable' } }));
-          
-          console.log('GoTrueClient instance check:', instanceCountTest.data || 'Not available');
-          
-          // Try a simple operation
-          const sessionResult = await testClient.auth.getSession();
-          
-          if (sessionResult.error) {
-            throw sessionResult.error;
-          }
-          
-          // Clear any existing sessions in localStorage to ensure clean state
-          try {
-            const storageKeys = Object.keys(localStorage);
-            const authKeys = storageKeys.filter(key => 
-              key.includes('supabase') || 
-              key.includes('auth') || 
-              key.includes('token')
-            );
-            
-            console.log('Found auth-related localStorage keys:', authKeys);
-            
-            // Keep only the current session key
-            const currentKey = 'alumil_auth_token';
-            authKeys.forEach(key => {
-              if (key !== currentKey) {
-                console.log('Removing potential duplicate session key:', key);
-                localStorage.removeItem(key);
-              }
-            });
-          } catch (storageErr) {
-            console.warn('Could not clean localStorage:', storageErr);
-          }
-          
-          // All tests passed
-          this.textContent = 'Connection OK ✓';
-          this.style.borderColor = 'rgba(0,255,0,.3)';
-          this.style.color = 'rgba(0,255,0,.8)';
-          
-          setTimeout(() => {
-            this.textContent = 'Check Login Connection';
-            this.style.borderColor = 'rgba(255,255,255,.2)';
-            this.style.color = 'rgba(255,255,255,.5)';
-          }, 5000);
-          
-          console.log('Diagnostic test successful');
-        } catch (err) {
-          this.textContent = 'Connection Failed ✗';
-          this.style.borderColor = 'rgba(255,0,0,.3)';
-          this.style.color = 'rgba(255,0,0,.8)';
-          
-          console.error('Diagnostic test failed:', err);
-          
-          setTimeout(() => {
-            this.textContent = 'Check Login Connection';
-            this.style.borderColor = 'rgba(255,255,255,.2)';
-            this.style.color = 'rgba(255,255,255,.5)';
-          }, 5000);
-        }
-      });
-    </script>
-  </main>
+  </div>
 
   <script>
     // Enhanced Singleton implementation for Supabase client to prevent "Multiple GoTrueClient instances" warning
@@ -453,43 +246,11 @@
           }
         });
         
-        // Add to window for debugging
-        window._supabaseClientCreatedAt = new Date().toISOString();
-        
-        // Clear duplicate localStorage keys that might be causing conflicts
-        try {
-          const storageKeys = Object.keys(localStorage);
-          const authKeys = storageKeys.filter(key => 
-            key.includes('supabase') || 
-            key.includes('auth') || 
-            key !== 'alumil_auth_token'
-          );
-          
-          authKeys.forEach(key => {
-            if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
-              console.log('Removing potential conflicting auth key:', key);
-              localStorage.removeItem(key);
-            }
-          });
-        } catch (storageErr) {
-          console.warn('Could not clean localStorage:', storageErr);
-        }
-        
         return window._sbClient;
       } catch (e) {
         console.error('Failed to initialize Supabase client:', e);
         return null;
       }
-    };
-    
-    // For debug purposes: log if multiple instances are being created
-    window.getSupabaseClientDebug = function() {
-      console.log('Debug info for Supabase client:', {
-        hasClient: !!window._sbClient,
-        createdAt: window._supabaseClientCreatedAt || 'unknown',
-        authObject: window._sbClient ? !!window._sbClient.auth : 'n/a'
-      });
-      return getSupabaseClient();
     };
     
     // Get the client instance
@@ -501,12 +262,6 @@
       const loginForm = document.getElementById('login-form');
       const loginBtn = document.getElementById('login-btn');
       const errorMessage = document.getElementById('error-message');
-      const toggleMode = document.getElementById('toggle-mode');
-      const title = document.getElementById('title');
-      const btnText = document.getElementById('btn-text');
-      const confirmPasswordGroup = document.getElementById('confirm-password-group');
-      
-      let isRegisterMode = false;
       
       function showError(message) {
         errorMessage.textContent = message;
@@ -517,26 +272,12 @@
         errorMessage.style.display = 'none';
       }
       
-      function toggleAuthMode() {
-        isRegisterMode = !isRegisterMode;
-        
-        if (isRegisterMode) {
-          title.textContent = 'Register';
-          btnText.textContent = 'Register';
-          toggleMode.textContent = 'Already have an account? Sign In';
-          confirmPasswordGroup.style.display = 'block';
-          document.getElementById('confirm-password').required = true;
-        } else {
-          title.textContent = 'Sign In';
-          btnText.textContent = 'Sign In';
-          toggleMode.textContent = "Don't have an account? Register";
-          confirmPasswordGroup.style.display = 'none';
-          document.getElementById('confirm-password').required = false;
-        }
-        hideError();
+      function pulse(el) {
+        el.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(0.98)' }, { transform: 'scale(1)' }],
+          { duration: 180, easing: 'ease-out' }
+        );
       }
-      
-      toggleMode.addEventListener('click', toggleAuthMode);
       
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -545,16 +286,6 @@
         // Get form values
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const confirmPassword = document.getElementById('confirm-password').value.trim();
-        
-        // Apply rate limiting
-        const ipAddress = 'client-' + navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
-        const rateLimitCheck = RateLimiter.checkLimit(ipAddress);
-        
-        if (!rateLimitCheck.allowed) {
-          showError(rateLimitCheck.message);
-          return;
-        }
         
         // Enhanced validation
         if (!email || !password) {
@@ -563,90 +294,77 @@
         }
         
         // Validate email format
-        if (!SecurityHelpers.validateEmail(email)) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
           showError('Please enter a valid email address');
           return;
         }
         
-        if (isRegisterMode) {
-          if (password !== confirmPassword) {
-            showError('Passwords do not match');
-            return;
-          }
-          
-          // Enhanced password validation
-          const passwordCheck = SecurityHelpers.validatePassword(password);
-          if (!passwordCheck.valid) {
-            showError(passwordCheck.message);
-            return;
-          }
-        }
-        
         // Show loading state
         loginBtn.disabled = true;
-        loginBtn.innerHTML = isRegisterMode ? '<span>Registering...</span>' : '<span>Signing in...</span>';
+        loginBtn.textContent = 'Signing in...';
+        pulse(loginBtn);
         
         try {
-          // Use the singleton pattern to get Supabase client
-          // Clear any existing auth-related localStorage items first to prevent conflicts
-          try {
-            const storageKeys = Object.keys(localStorage);
-            storageKeys.forEach(key => {
-              if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
-                console.log('Removing conflicting auth key before login:', key);
-                localStorage.removeItem(key);
-              }
-            });
-          } catch (err) {
-            console.warn('Error clearing localStorage:', err);
-          }
-          
-          let supabaseClient = window.getSupabaseClient();
-          if (!supabaseClient) {
-            console.error('Failed to get Supabase client');
-            showError('Authentication system error. Please try again.');
-            return;
-          }
-          
           // Use auth-helper.js methods as primary method
           if (window.authHelper) {
-            let result;
+            console.log('Attempting login with auth helper...');
+            const result = await window.authHelper.loginWithEmail(email, password);
+            console.log('Auth helper login result:', result);
             
-            if (isRegisterMode) {
-              // Register new user using auth helper
-              result = await window.authHelper.register(email, password);
+            if (!result.success) {
+              showError(result.error?.message || 'Login failed');
+              return;
+            }
+            
+            // Get user role from auth helper
+            console.log('Login successful, checking admin status...');
+            const isAdmin = await window.authHelper.checkIsAdmin();
+            console.log('User is admin:', isAdmin);
+            
+            // Force navigation with a small delay to ensure session is properly stored
+            setTimeout(() => {
+              console.log('Redirecting to:', isAdmin ? 'admin.html' : 'home.html');
+              window.location.replace(isAdmin ? 'admin.html' : 'home.html');
+            }, 100);
+            return; // Early return to prevent further execution
+          } else {
+            // Fallback with direct Supabase if auth helper is not available
+            try {
+              console.log('Using direct Supabase client for authentication...');
               
-              if (!result.success) {
-                // Record failed attempt
-                RateLimiter.recordAttempt(ipAddress);
-                showError(result.error?.message || 'Registration failed');
+              console.log('Attempting direct login with Supabase...');
+              const result = await directSupabase.auth.signInWithPassword({
+                email,
+                password,
+              });
+              
+              console.log('Direct login result:', { 
+                success: !result.error, 
+                user: result.data?.user?.email,
+                error: result.error?.message
+              });
+              
+              if (result.error) {
+                showError(result.error.message || 'Login failed');
                 return;
               }
               
-              showError('Registration successful! You can now sign in.');
-              toggleAuthMode(); // Switch back to login mode
-            } else {
-              // Sign in using auth helper
-              console.log('Attempting login with auth helper...');
-              result = await window.authHelper.loginWithEmail(email, password);
-              console.log('Auth helper login result:', result);
+              // Check role by querying profiles table
+              const user = result.data.user;
+              console.log('Fetching user profile for:', user.email);
+              const { data: profile, error: profileError } = await directSupabase
+                .from('profiles')
+                .select('role, is_admin')
+                .eq('id', user.id)
+                .single();
               
-              if (!result.success) {
-                // Record failed attempt
-                const rateLimit = RateLimiter.recordAttempt(ipAddress);
-                if (!rateLimit.allowed) {
-                  showError(rateLimit.message);
-                  return;
-                }
-                
-                showError(result.error?.message || 'Login failed');
-                return;
+              if (profileError) {
+                console.error('Error fetching profile:', profileError);
               }
               
-              // Get user role from auth helper
-              console.log('Login successful, checking admin status...');
-              const isAdmin = await window.authHelper.checkIsAdmin();
-              console.log('User is admin:', isAdmin);
+              console.log('User profile data:', profile);
+              const isAdmin = (profile && (profile.role === 'admin' || profile.is_admin === true));
               
               // Force navigation with a small delay to ensure session is properly stored
               setTimeout(() => {
@@ -654,75 +372,6 @@
                 window.location.replace(isAdmin ? 'admin.html' : 'home.html');
               }, 100);
               return; // Early return to prevent further execution
-            }
-          } else {
-            // Fallback with direct Supabase if auth helper is not available
-            try {
-              let result;
-              console.log('Using direct Supabase client for authentication...');
-              
-              if (isRegisterMode) {
-                result = await directSupabase.auth.signUp({
-                  email,
-                  password,
-                });
-                
-                if (result.error) {
-                  RateLimiter.recordAttempt(ipAddress);
-                  showError(result.error.message || 'Registration failed');
-                  return;
-                }
-                
-                showError('Registration successful! You can now sign in.');
-                toggleAuthMode(); // Switch back to login mode
-              } else {
-                console.log('Attempting direct login with Supabase...');
-                result = await directSupabase.auth.signInWithPassword({
-                  email,
-                  password,
-                });
-                
-                console.log('Direct login result:', { 
-                  success: !result.error, 
-                  user: result.data?.user?.email,
-                  error: result.error?.message
-                });
-                
-                if (result.error) {
-                  // Record failed attempt
-                  const rateLimit = RateLimiter.recordAttempt(ipAddress);
-                  if (!rateLimit.allowed) {
-                    showError(rateLimit.message);
-                    return;
-                  }
-                  
-                  showError(result.error.message || 'Login failed');
-                  return;
-                }
-                
-                // Check role by querying profiles table or checking custom claims
-                const user = result.data.user;
-                console.log('Fetching user profile for:', user.email);
-                const { data: profile, error: profileError } = await directSupabase
-                  .from('profiles')
-                  .select('role, is_admin')
-                  .eq('id', user.id)
-                  .single();
-                
-                if (profileError) {
-                  console.error('Error fetching profile:', profileError);
-                }
-                
-                console.log('User profile data:', profile);
-                const isAdmin = (profile && (profile.role === 'admin' || profile.is_admin === true));
-                
-                // Force navigation with a small delay to ensure session is properly stored
-                setTimeout(() => {
-                  console.log('Redirecting to:', isAdmin ? 'admin.html' : 'home.html');
-                  window.location.replace(isAdmin ? 'admin.html' : 'home.html');
-                }, 100);
-                return; // Early return to prevent further execution
-              }
             } catch (error) {
               showError('Authentication system not available. Please try again.');
               console.error('Supabase auth error:', error);
@@ -743,15 +392,10 @@
           } else {
             showError('An unexpected error occurred. Please try again.');
           }
-          
-          // Record failed attempt due to exception
-          RateLimiter.recordAttempt(ipAddress);
         } finally {
           // Reset button state
           loginBtn.disabled = false;
-          loginBtn.innerHTML = isRegisterMode ? 
-            '<span>Register</span>' : 
-            '<span class="login-icon" aria-hidden="true"></span><span>Sign In</span>';
+          loginBtn.textContent = 'Sign In';
         }
       });
       
@@ -759,19 +403,6 @@
       async function checkExistingSession() {
         try {
           console.log('Checking existing session...');
-          // Clear any existing conflicting auth items
-          try {
-            const storageKeys = Object.keys(localStorage);
-            storageKeys.forEach(key => {
-              if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
-                console.log('Removing conflicting auth key before session check:', key);
-                localStorage.removeItem(key);
-              }
-            });
-          } catch (err) {
-            console.warn('Error clearing localStorage:', err);
-          }
-          
           // Get the singleton client
           const supabaseClient = window.getSupabaseClient();
           
@@ -824,160 +455,8 @@
       
       // Run session check
       checkExistingSession();
-      
-      // For compatibility with any existing code that might use authHelper
-      if (!window.authHelper && window.AuthHelper) {
-        window.authHelper = window.AuthHelper;
-      }
     });
-    
-    // Rate limiter implementation to prevent brute force attacks
-    const RateLimiter = {
-      attempts: {},
-      maxAttempts: 5,
-      lockoutTime: 15 * 60 * 1000, // 15 minutes
-      
-      checkLimit: function(identifier) {
-        const now = Date.now();
-        const record = this.attempts[identifier];
-        
-        if (!record) return { allowed: true };
-        
-        if (record.lockedUntil && record.lockedUntil > now) {
-          const remainingTime = Math.ceil((record.lockedUntil - now) / 1000 / 60);
-          return { 
-            allowed: false, 
-            message: `Too many login attempts. Please try again in ${remainingTime} minute${remainingTime !== 1 ? 's' : ''}.`
-          };
-        }
-        
-        // Reset if lockout has expired
-        if (record.lockedUntil && record.lockedUntil <= now) {
-          delete this.attempts[identifier];
-          return { allowed: true };
-        }
-        
-        return { allowed: true };
-      },
-      
-      recordAttempt: function(identifier) {
-        const now = Date.now();
-        if (!this.attempts[identifier]) {
-          this.attempts[identifier] = { count: 1, firstAttempt: now };
-          return { allowed: true };
-        }
-        
-        const record = this.attempts[identifier];
-        record.count++;
-        
-        // Check if too many attempts within window
-        if (record.count >= this.maxAttempts) {
-          record.lockedUntil = now + this.lockoutTime;
-          return { 
-            allowed: false, 
-            message: `Too many login attempts. Please try again in 15 minutes.`
-          };
-        }
-        
-        return { allowed: true };
-      }
-    };
-    
-    // Enhanced input validation
-    const SecurityHelpers = {
-      validateEmail: function(email) {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(email);
-      },
-      
-      validatePassword: function(password) {
-        // Check for minimum length
-        if (password.length < 8) {
-          return { valid: false, message: 'Password must be at least 8 characters long' };
-        }
-        
-        // Check for complexity
-        let strength = 0;
-        if (/[A-Z]/.test(password)) strength++; // Uppercase letters
-        if (/[a-z]/.test(password)) strength++; // Lowercase letters
-        if (/[0-9]/.test(password)) strength++; // Numbers
-        if (/[^A-Za-z0-9]/.test(password)) strength++; // Special characters
-        
-        if (strength < 3) {
-          return { 
-            valid: false, 
-            message: 'Password must contain at least 3 of: uppercase letters, lowercase letters, numbers, and special characters'
-          };
-        }
-        
-        return { valid: true };
-      },
-      
-      sanitizeInput: function(input) {
-        // Basic sanitization to prevent XSS
-        return input
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;');
-      }
-    };
-      
-      // Add a direct login function for debugging and fallback
-      window.attemptDirectLogin = async function(email, password) {
-        try {
-          // Get Supabase client using singleton pattern
-          const client = getSupabaseClient();
-          if (!client) {
-            throw new Error('Could not initialize Supabase client');
-          }
-          
-          // Attempt direct login
-          const result = await client.auth.signInWithPassword({
-            email, password
-          });
-          const { data, error } = result;
-          
-          console.log('Direct login result:', { success: !error, user: data?.user?.email });
-          return { success: !error, data, error };
-        } catch (e) {
-          console.error('Direct login failed:', e);
-          return { success: false, error: e };
-        }
-      };
-      
-      // Handle flag clicks for future internationalization
-    document.querySelectorAll('.flag').forEach(flag => {
-      flag.addEventListener('click', function() {
-        const country = this.title;
-        console.log(`Selected region: ${country}`);
-        // Future: implement language/region switching
-      });
-    });
-    
-    // Add some visual feedback
-    document.addEventListener('DOMContentLoaded', () => {
-      const loginBtn = document.getElementById('login-btn');
-      
-      loginBtn.addEventListener('mousedown', function() {
-        if (!this.disabled) {
-          this.style.transform = 'translateY(1px)';
-        }
-      });
-  
-      loginBtn.addEventListener('mouseup', function() {
-        this.style.transform = '';
-      });
-  
-      loginBtn.addEventListener('mouseleave', function() {
-        this.style.transform = '';
-      });
-    });
-  </script>  <!-- Footer -->
-  <footer class="alumil-footer">
-    <p>Alumil Labeling App @2025</p>
-  </footer>
+  </script>
 
 </body>
 </html>
