@@ -23,12 +23,17 @@ class AlumilAuthHelper {
    */
   async init(supabaseUrl, supabaseKey) {
     try {
+      // Log init parameters for debugging
+      console.log('Auth helper init with URL:', supabaseUrl?.substring(0, 15) + '...');
+      console.log('Auth helper init with key length:', supabaseKey?.length);
+      
       // Check if Supabase client already exists
       if (window._sbClient) {
         this.supabase = window._sbClient;
         console.log('✅ Using existing Supabase client');
       } else if (supabaseUrl && supabaseKey) {
         // Create new Supabase client
+        console.log('Creating new Supabase client...');
         this.supabase = supabase.createClient(supabaseUrl, supabaseKey);
         window._sbClient = this.supabase;
         console.log('✅ Created new Supabase client');
@@ -238,19 +243,25 @@ class AlumilAuthHelper {
    */
   async loginWithEmail(email, password) {
     try {
+      console.log('Login attempt with email:', email);
+      
       if (!this.supabase) {
+        console.error('Login failed: Supabase client not initialized');
         throw new Error('Supabase client not initialized');
       }
       
+      console.log('Attempting signInWithPassword...');
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
+        console.error('Login API error:', error.message);
         throw error;
       }
       
+      console.log('Login successful, refreshing auth state...');
       await this.refreshAuthState();
       return { success: true, user: data.user };
     } catch (error) {
@@ -364,21 +375,35 @@ class AlumilAuthHelper {
 
 // Initialize auth helper when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, checking Supabase availability');
+  
   // Check if Supabase is loaded
   if (typeof supabase !== 'undefined') {
+    console.log('✅ Supabase library is loaded');
+    
     // Look for Supabase credentials
-    const supabaseUrl = document.querySelector('meta[name="supabase-url"]')?.content;
-    const supabaseKey = document.querySelector('meta[name="supabase-key"]')?.content;
+    const urlMeta = document.querySelector('meta[name="supabase-url"]');
+    const keyMeta = document.querySelector('meta[name="supabase-key"]');
+    
+    console.log('Found supabase-url meta tag:', !!urlMeta);
+    console.log('Found supabase-key meta tag:', !!keyMeta);
+    
+    const supabaseUrl = urlMeta?.content;
+    const supabaseKey = keyMeta?.content;
     
     if (supabaseUrl && supabaseKey) {
       // Initialize auth helper
+      console.log('Initializing auth helper with credentials');
       window.authHelper = new AlumilAuthHelper(supabaseUrl, supabaseKey);
       console.log('✅ Auth helper initialized');
     } else {
       console.warn('⚠️ Supabase credentials not found in meta tags');
+      console.log('URL meta content:', urlMeta?.content ? 'present' : 'missing');
+      console.log('Key meta content:', keyMeta?.content ? 'present' : 'missing');
     }
   } else {
-    console.warn('⚠️ Supabase library not loaded');
+    console.error('⚠️ Supabase library not loaded');
+    console.log('Available global objects:', Object.keys(window).filter(k => k.includes('supa')));
   }
 });
 

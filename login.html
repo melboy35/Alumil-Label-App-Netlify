@@ -21,8 +21,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <!-- Supabase Configuration -->
   <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
   <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
@@ -32,6 +30,9 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  
+  <!-- Supabase JS Library (loading before auth helper) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Auth Helper -->
   <script src="/js/auth-helper.js"></script>
@@ -327,9 +328,88 @@
     </div>
 
     <p class="muted">Secure access to Alumil inventory system</p>
+    
+    <div style="margin-top: 15px; text-align: center;">
+      <button type="button" id="diagnostic-login" style="background: transparent; border: 1px dashed rgba(255,255,255,.2); color: rgba(255,255,255,.5); padding: 6px 12px; cursor: pointer; font-size: 12px; border-radius: 6px;">
+        Check Login Connection
+      </button>
+    </div>
+    
+    <script>
+      // Add diagnostic login button functionality
+      document.getElementById('diagnostic-login').addEventListener('click', async function() {
+        this.textContent = 'Testing connection...';
+        
+        try {
+          // Test Supabase availability
+          const supabaseAvailable = typeof supabase !== 'undefined';
+          if (!supabaseAvailable) {
+            throw new Error('Supabase library not loaded');
+          }
+          
+          // Test meta tags
+          const urlMeta = document.querySelector('meta[name="supabase-url"]');
+          const keyMeta = document.querySelector('meta[name="supabase-key"]');
+          
+          if (!urlMeta || !keyMeta || !urlMeta.content || !keyMeta.content) {
+            throw new Error('Supabase credentials missing in meta tags');
+          }
+          
+          // Test direct connection
+          const url = urlMeta.content;
+          const key = keyMeta.content;
+          const testClient = supabase.createClient(url, key);
+          
+          // Try a simple operation
+          const sessionResult = await testClient.auth.getSession();
+          
+          if (sessionResult.error) {
+            throw sessionResult.error;
+          }
+          
+          // All tests passed
+          this.textContent = 'Connection OK ✓';
+          this.style.borderColor = 'rgba(0,255,0,.3)';
+          this.style.color = 'rgba(0,255,0,.8)';
+          
+          setTimeout(() => {
+            this.textContent = 'Check Login Connection';
+            this.style.borderColor = 'rgba(255,255,255,.2)';
+            this.style.color = 'rgba(255,255,255,.5)';
+          }, 5000);
+          
+          console.log('Diagnostic test successful');
+        } catch (err) {
+          this.textContent = 'Connection Failed ✗';
+          this.style.borderColor = 'rgba(255,0,0,.3)';
+          this.style.color = 'rgba(255,0,0,.8)';
+          
+          console.error('Diagnostic test failed:', err);
+          
+          setTimeout(() => {
+            this.textContent = 'Check Login Connection';
+            this.style.borderColor = 'rgba(255,255,255,.2)';
+            this.style.color = 'rgba(255,255,255,.5)';
+          }, 5000);
+        }
+      });
+    </script>
   </main>
 
   <script>
+    // Initialize Supabase client directly for reliability
+    let directSupabase = null;
+    try {
+      const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
+      const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
+      console.log('Initializing direct Supabase client');
+      directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+      window._sbClient = directSupabase;
+      console.log('Direct Supabase client initialized');
+    } catch (e) {
+      console.error('Failed to initialize direct Supabase client:', e);
+    }
+    
     // Get authHelper reference from auth-helper.js
     document.addEventListener('DOMContentLoaded', () => {
       // Initialize elements
@@ -422,10 +502,20 @@
         loginBtn.innerHTML = isRegisterMode ? '<span>Registering...</span>' : '<span>Signing in...</span>';
         
         try {
-          // Get Supabase client directly if needed
-          const supabaseUrl = document.querySelector('meta[name="supabase-url"]').getAttribute('content');
-          const supabaseKey = document.querySelector('meta[name="supabase-key"]').getAttribute('content');
-          const directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+          // Use already initialized direct client or create one if needed
+          let supabaseClient = directSupabase;
+          if (!supabaseClient) {
+            try {
+              const supabaseUrl = document.querySelector('meta[name="supabase-url"]').getAttribute('content');
+              const supabaseKey = document.querySelector('meta[name="supabase-key"]').getAttribute('content');
+              console.log('Creating Supabase client on submit');
+              supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            } catch (e) {
+              console.error('Failed to create Supabase client:', e);
+              showError('Authentication system error. Please try again.');
+              return;
+            }
+          }
           
           // Use auth-helper.js methods as primary method
           if (window.authHelper) {
@@ -531,8 +621,20 @@
           }
           
         } catch (error) {
-          showError('An unexpected error occurred. Please try again.');
-          console.error('Auth error:', error);
+          console.error('Auth error details:', error);
+          console.log('Auth state:', {
+            authHelper: !!window.authHelper,
+            directClient: !!directSupabase,
+            supabaseGlobal: typeof supabase !== 'undefined'
+          });
+          
+          // Show more specific error message if possible
+          if (error.message) {
+            showError(`Error: ${error.message}`);
+          } else {
+            showError('An unexpected error occurred. Please try again.');
+          }
+          
           // Record failed attempt due to exception
           RateLimiter.recordAttempt(ipAddress);
         } finally {
@@ -546,14 +648,33 @@
       
       // Check if user is already logged in
       if (window.authHelper) {
+        console.log('Auth helper is available, checking authentication...');
         window.authHelper.isAuthenticated().then(isAuthenticated => {
           if (isAuthenticated) {
             // If already logged in, redirect to appropriate page
             window.authHelper.checkIsAdmin().then(isAdmin => {
               location.href = isAdmin ? 'admin.html' : 'home.html';
             });
+          } else {
+            console.log('User is not authenticated');
           }
         });
+      } else {
+        // Fallback initialization if auth helper not available
+        console.warn('Auth helper not available on page load, attempting to initialize...');
+        const supabaseUrl = document.querySelector('meta[name="supabase-url"]')?.content;
+        const supabaseKey = document.querySelector('meta[name="supabase-key"]')?.content;
+        
+        if (typeof supabase !== 'undefined' && supabaseUrl && supabaseKey) {
+          console.log('Creating auth helper manually...');
+          window.authHelper = new AlumilAuthHelper(supabaseUrl, supabaseKey);
+        } else {
+          console.error('Cannot create auth helper, missing dependencies:', {
+            supabase: typeof supabase !== 'undefined',
+            url: !!supabaseUrl,
+            key: !!supabaseKey
+          });
+        }
       }
     });
     
@@ -650,7 +771,33 @@
       }
     };
     
-    // Handle flag clicks for future internationalization
+          });
+      
+      // Add a direct login function for debugging and fallback
+      window.attemptDirectLogin = async function(email, password) {
+        try {
+          // Create direct client if not exists
+          if (!directSupabase) {
+            const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
+            const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
+            directSupabase = supabase.createClient(supabaseUrl, supabaseKey);
+          }
+          
+          // Attempt direct login
+          const result = await directSupabase.auth.signInWithPassword({
+            email, password
+          });
+          const { data, error } = result;
+          
+          console.log('Direct login result:', { success: !error, user: data?.user?.email });
+          return { success: !error, data, error };
+        } catch (e) {
+          console.error('Direct login failed:', e);
+          return { success: false, error: e };
+        }
+      };
+      
+      // Handle flag clicks for future internationalization
     document.querySelectorAll('.flag').forEach(flag => {
       flag.addEventListener('click', function() {
         const country = this.title;
