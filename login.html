@@ -222,16 +222,17 @@
       border-radius: 2px;
     }
 
-    .actions { display:flex; gap:10px; margin-top: 14px; }
+    .actions { display:flex; gap:10px; margin-top: 14px; justify-content: center; }
     .ghost {
-      flex:1;
+      flex: none;
       display:flex; align-items:center; justify-content:center;
-      padding: 12px 14px; border-radius: var(--radius);
+      padding: 12px 24px; border-radius: var(--radius);
       text-decoration:none; color:#eaeaea; font-weight: 500;
       border: 1px solid var(--input-border);
       background: var(--input-bg);
       transition: all 0.2s ease;
       font-size: 14px;
+      cursor: pointer;
     }
     .ghost:hover {
       background: rgba(255,255,255,.12);
@@ -309,9 +310,7 @@
     <div class="divider">OR</div>
 
     <div class="actions">
-      <button class="ghost" id="toggle-mode">Don't have an account? Register</button>
-      <a class="ghost" href="/home.html">Continue as Guest</a>
-      <a class="ghost" href="/admin.html">Admin Panel</a>
+      <button type="button" class="ghost" id="toggle-mode">Don't have an account? Register</button>
     </div>
 
     <p class="muted">Secure access to Alumil inventory system</p>
