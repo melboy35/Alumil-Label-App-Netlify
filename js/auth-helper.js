@@ -28,18 +28,34 @@ class AlumilAuthHelper {
       console.log('Auth helper init with key length:', supabaseKey?.length);
       
       // Use singleton pattern for Supabase client
-      if (window._sbClient) {
-        this.supabase = window._sbClient;
-        console.log('✅ Using existing Supabase client');
-      } else if (typeof window.getSupabaseClient === 'function') {
-        // Use the singleton getter if available from login.html
+      if (typeof window.getSupabaseClient === 'function') {
+        // Always use the singleton getter if available
         this.supabase = window.getSupabaseClient();
         console.log('✅ Got Supabase client from singleton getter');
+      } else if (window._sbClient) {
+        // Fallback to existing client if getter not available
+        this.supabase = window._sbClient;
+        console.log('✅ Using existing Supabase client');
       } else if (supabaseUrl && supabaseKey) {
-        // Create new Supabase client
+        // Create new Supabase client and store it globally
         console.log('Creating new Supabase client...');
-        this.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        this.supabase = supabase.createClient(supabaseUrl, supabaseKey, {
+          auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            storageKey: 'alumil_auth_token'
+          }
+        });
         window._sbClient = this.supabase;
+        
+        // Create the singleton getter if it doesn't exist
+        if (typeof window.getSupabaseClient !== 'function') {
+          window.getSupabaseClient = function() {
+            return window._sbClient;
+          };
+        }
+        
         console.log('✅ Created new Supabase client');
       } else {
         console.error('❌ Supabase URL or key missing');
@@ -95,10 +111,24 @@ class AlumilAuthHelper {
    */
   async refreshAuthState() {
     try {
-      if (!this.supabase) return;
+      // Ensure we're always using the singleton client
+      if (typeof window.getSupabaseClient === 'function') {
+        this.supabase = window.getSupabaseClient();
+      }
+      
+      if (!this.supabase) {
+        console.error('No Supabase client available');
+        return { isAuthenticated: false, isAdmin: false };
+      }
       
       // Get current session
-      const { data: { session } } = await this.supabase.auth.getSession();
+      const { data, error } = await this.supabase.auth.getSession();
+      const session = data?.session;
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        return { isAuthenticated: false, isAdmin: false };
+      }
       
       if (session) {
         this.user = session.user;

@@ -428,7 +428,7 @@
 
   <script>
     // Enhanced Singleton implementation for Supabase client to prevent "Multiple GoTrueClient instances" warning
-    let getSupabaseClient = function() {
+    window.getSupabaseClient = function() {
       // If we already have a client instance, return it
       if (window._sbClient) {
         console.log('Returning existing Supabase client instance');
@@ -452,6 +452,25 @@
         
         // Add to window for debugging
         window._supabaseClientCreatedAt = new Date().toISOString();
+        
+        // Clear duplicate localStorage keys that might be causing conflicts
+        try {
+          const storageKeys = Object.keys(localStorage);
+          const authKeys = storageKeys.filter(key => 
+            key.includes('supabase') || 
+            key.includes('auth') || 
+            key !== 'alumil_auth_token'
+          );
+          
+          authKeys.forEach(key => {
+            if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
+              console.log('Removing potential conflicting auth key:', key);
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (storageErr) {
+          console.warn('Could not clean localStorage:', storageErr);
+        }
         
         return window._sbClient;
       } catch (e) {
@@ -566,7 +585,20 @@
         
         try {
           // Use the singleton pattern to get Supabase client
-          let supabaseClient = getSupabaseClient();
+          // Clear any existing auth-related localStorage items first to prevent conflicts
+          try {
+            const storageKeys = Object.keys(localStorage);
+            storageKeys.forEach(key => {
+              if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
+                console.log('Removing conflicting auth key before login:', key);
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (err) {
+            console.warn('Error clearing localStorage:', err);
+          }
+          
+          let supabaseClient = window.getSupabaseClient();
           if (!supabaseClient) {
             console.error('Failed to get Supabase client');
             showError('Authentication system error. Please try again.');
@@ -705,8 +737,21 @@
       // Check if user is already logged in - use singleton pattern to prevent multiple instances
       async function checkExistingSession() {
         try {
+          // Clear any existing conflicting auth items
+          try {
+            const storageKeys = Object.keys(localStorage);
+            storageKeys.forEach(key => {
+              if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
+                console.log('Removing conflicting auth key before session check:', key);
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (err) {
+            console.warn('Error clearing localStorage:', err);
+          }
+          
           // Get the singleton client
-          const supabaseClient = getSupabaseClient();
+          const supabaseClient = window.getSupabaseClient();
           
           if (!supabaseClient) {
             console.error('Failed to get Supabase client');

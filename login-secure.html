@@ -41,15 +41,58 @@
     window.SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
     window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
     
-    // Initialize Supabase client with proper persistence options
-    window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
-      auth: {
-        persistSession: true,
-        storageKey: 'alumil_auth_token',
-        autoRefreshToken: true,
-        detectSessionInUrl: true
+    // Enhanced Singleton implementation for Supabase client
+    window.getSupabaseClient = function() {
+      // If we already have a client instance, return it
+      if (window._sbClient) {
+        console.log('Returning existing Supabase client instance');
+        return window._sbClient;
       }
-    });
+      
+      try {
+        console.log('Initializing Supabase client (singleton)');
+        
+        // Create client with persistence options to avoid session issues
+        window._sbClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
+          auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            storageKey: 'alumil_auth_token'
+          }
+        });
+        
+        // Add to window for debugging
+        window._supabaseClientCreatedAt = new Date().toISOString();
+        
+        // Clear duplicate localStorage keys that might be causing conflicts
+        try {
+          const storageKeys = Object.keys(localStorage);
+          const authKeys = storageKeys.filter(key => 
+            key.includes('supabase') || 
+            key.includes('auth') || 
+            key !== 'alumil_auth_token'
+          );
+          
+          authKeys.forEach(key => {
+            if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
+              console.log('Removing potential conflicting auth key:', key);
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (storageErr) {
+          console.warn('Could not clean localStorage:', storageErr);
+        }
+        
+        return window._sbClient;
+      } catch (e) {
+        console.error('Failed to initialize Supabase client:', e);
+        return null;
+      }
+    };
+    
+    // Initialize the client
+    window._sbClient = getSupabaseClient();
     console.log('✅ Supabase client initialized with session persistence');
   </script>
   
@@ -506,8 +549,21 @@
     // Check if we already have a session with enhanced error handling
     (async function() {
       try {
-        // Use either the supabase service or direct client
-        const supabaseClient = window._sbClient || window.SupabaseService?.init();
+        // Clear any existing auth-related localStorage items first to prevent conflicts
+        try {
+          const storageKeys = Object.keys(localStorage);
+          storageKeys.forEach(key => {
+            if (key !== 'alumil_auth_token' && (key.includes('supabase') || key.includes('auth'))) {
+              console.log('Removing conflicting auth key before session check:', key);
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (err) {
+          console.warn('Error clearing localStorage:', err);
+        }
+        
+        // Use the singleton getter
+        const supabaseClient = getSupabaseClient();
         if (!supabaseClient) {
           console.error('Failed to initialize Supabase client');
           return;
@@ -675,9 +731,9 @@
       try {
         let result;
         
-        // Determine which Supabase client to use (direct or via service)
+        // Always use the singleton getter for the Supabase client
         const supabaseService = window.SupabaseService;
-        const supabaseClient = window._sbClient;
+        const supabaseClient = getSupabaseClient();
         
         if (isRegisterMode) {
           // Register new user
