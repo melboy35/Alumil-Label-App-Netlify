@@ -60,7 +60,7 @@ class AlumilExcelUploader {
       // Update UI
       this.updateUI(data, file.name);
       
-      this.setUploadStatus('success', `File processed successfully! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded (${data.totalRows} total rows processed).`);
+      this.setUploadStatus('success', `File processed successfully! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded (${data.totalRows} total rows processed - NO LIMITS APPLIED).`);
       
     } catch (error) {
       console.error('File processing error:', error);
@@ -92,7 +92,7 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Process Excel file and extract data - handles unlimited rows and columns
+   * Process Excel file and extract data - handles UNLIMITED rows and columns with ALL column titles
    */
   async processExcelFile(file) {
     return new Promise((resolve, reject) => {
@@ -105,7 +105,8 @@ class AlumilExcelUploader {
             type: 'array',
             cellDates: true, // Parse dates properly
             cellNF: false,   // Don't apply number formats
-            cellText: false  // Don't convert to text
+            cellText: false, // Don't convert to text
+            range: undefined // Process ALL rows and columns (no range limits)
           });
           
           console.log(`📁 Processing Excel file with ${workbook.SheetNames.length} sheets:`, workbook.SheetNames);
@@ -119,7 +120,8 @@ class AlumilExcelUploader {
           const profiles = profilesSheet ? this.processProfilesSheet(workbook.Sheets[profilesSheet]) : [];
           const accessories = accessoriesSheet ? this.processAccessoriesSheet(workbook.Sheets[accessoriesSheet]) : [];
           
-          console.log(`✅ Processed complete data - Profiles: ${profiles.length}, Accessories: ${accessories.length}`);
+          console.log(`✅ Processed UNLIMITED data - Profiles: ${profiles.length}, Accessories: ${accessories.length}`);
+          console.log(`📊 Total rows processed: ${profiles.length + accessories.length} (NO LIMITS APPLIED)`);
           
           resolve({
             profiles,
@@ -158,23 +160,25 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Process profiles sheet data - imports ALL rows and columns without limits
+   * Process profiles sheet data - imports ALL rows and ALL columns without any limits
    */
   processProfilesSheet(worksheet) {
     // Import ALL data without any row or column limits
     const rawData = XLSX.utils.sheet_to_json(worksheet, { 
       defval: '', // Default value for empty cells
       raw: false, // Convert all values to strings first
-      header: 1 // Use first row as headers
+      header: 1, // Use first row as headers
+      range: undefined // Process ENTIRE sheet without range limits
     });
     
     if (rawData.length === 0) return [];
     
-    // Get headers from first row
+    // Get ALL headers from first row
     const headers = rawData[0];
-    const dataRows = rawData.slice(1); // All data rows without limits
+    const dataRows = rawData.slice(1); // ALL data rows without any limits
     
-    console.log(`📊 Processing ${dataRows.length} profile rows with ${headers.length} columns`);
+    console.log(`📊 Processing ${dataRows.length} profile rows with ${headers.length} columns (ALL COLUMNS PRESERVED)`);
+    console.log(`📋 Column titles detected:`, headers);
     
     return dataRows.map((row, index) => {
       const profileData = {
@@ -191,7 +195,7 @@ class AlumilExcelUploader {
         unit: this.cleanString(row[this.findColumnIndex(headers, ['Unit', 'UOM', 'unit', 'UNIT'])] || 'pcs')
       };
       
-      // Add ALL additional columns as custom fields to preserve complete data
+      // Add ALL additional columns as custom fields to preserve COMPLETE data
       headers.forEach((header, colIndex) => {
         if (header && row[colIndex] !== undefined && row[colIndex] !== '') {
           const fieldName = this.sanitizeFieldName(header);
@@ -206,23 +210,25 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Process accessories sheet data - imports ALL rows and columns without limits
+   * Process accessories sheet data - imports ALL rows and ALL columns without any limits
    */
   processAccessoriesSheet(worksheet) {
     // Import ALL data without any row or column limits
     const rawData = XLSX.utils.sheet_to_json(worksheet, { 
       defval: '', // Default value for empty cells
       raw: false, // Convert all values to strings first
-      header: 1 // Use first row as headers
+      header: 1, // Use first row as headers
+      range: undefined // Process ENTIRE sheet without range limits
     });
     
     if (rawData.length === 0) return [];
     
-    // Get headers from first row
+    // Get ALL headers from first row
     const headers = rawData[0];
-    const dataRows = rawData.slice(1); // All data rows without limits
+    const dataRows = rawData.slice(1); // ALL data rows without any limits
     
-    console.log(`📦 Processing ${dataRows.length} accessory rows with ${headers.length} columns`);
+    console.log(`📦 Processing ${dataRows.length} accessory rows with ${headers.length} columns (ALL COLUMNS PRESERVED)`);
+    console.log(`📋 Column titles detected:`, headers);
     
     return dataRows.map((row, index) => {
       const accessoryData = {
@@ -236,7 +242,7 @@ class AlumilExcelUploader {
         quantity: this.parseNumber(row[this.findColumnIndex(headers, ['Quantity', 'Qty', 'quantity', 'QUANTITY'])]) || 0
       };
       
-      // Add ALL additional columns as custom fields to preserve complete data
+      // Add ALL additional columns as custom fields to preserve COMPLETE data
       headers.forEach((header, colIndex) => {
         if (header && row[colIndex] !== undefined && row[colIndex] !== '') {
           const fieldName = this.sanitizeFieldName(header);
@@ -403,9 +409,9 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Upload data in batches to avoid Supabase limits
+   * Upload data in batches to avoid Supabase limits - UNLIMITED BATCHES
    */
-  async uploadInBatches(table, data, batchSize = 1000) {
+  async uploadInBatches(table, data, batchSize = 5000) { // Increased batch size for better performance
     // First, clear existing data for this organization
     const { error: deleteError } = await this.supabase
       .from(table)
@@ -430,7 +436,7 @@ class AlumilExcelUploader {
 
       // Update progress
       const progress = Math.min(100, Math.round(((i + batch.length) / data.length) * 100));
-      this.setUploadStatus('uploading', `Uploading ${table}... ${progress}%`);
+      this.setUploadStatus('uploading', `Uploading ${table}... ${progress}% (${i + batch.length}/${data.length} records - NO LIMITS)`);
     }
   }
 

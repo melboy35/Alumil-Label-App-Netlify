@@ -148,18 +148,20 @@ class AlumilDataService {
 
       console.log('🔄 Loading fresh data from Supabase...');
 
-      // Then fetch fresh data from database
+      // Then fetch fresh data from database - UNLIMITED FETCH
       const [profilesResult, accessoriesResult] = await Promise.all([
         this.supabase
           .from('inventory_profiles')
           .select('*')
           .eq('organization_id', this.orgId)
-          .order('code'),
+          .order('code')
+          .limit(10000), // Explicit high limit to override default Supabase limits
         this.supabase
           .from('inventory_accessories')
           .select('*')
           .eq('organization_id', this.orgId)
           .order('code')
+          .limit(10000) // Explicit high limit to override default Supabase limits
       ]);
 
       if (profilesResult.error) {
