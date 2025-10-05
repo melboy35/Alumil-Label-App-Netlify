@@ -30,6 +30,7 @@
   // Supabase project configuration
   window.SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
   window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
+  window.ORG_ID = '00000000-0000-0000-0000-000000000000';
   
   // Initialize Supabase client
   window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
@@ -367,7 +368,7 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
                 Publish to Database (All Users)
             </button>
 <!-- Upload Status -->
-<div aria-live="polite" class="text-sm p-3 rounded-lg mt-2 hidden" id="upload-status"></div>
+<div aria-live="polite" class="text-sm p-3 rounded-lg mt-2 upload-status" id="upload-status" style="display: none;"></div>
 <!-- File Name Display -->
 <div aria-live="polite" class="text-xs text-gray-400" id="file-name"></div>
 <button class="w-full text-sm text-gray-400 hover:text-red-400 transition-colors" id="clear-data-btn">Clear Local Data</button></div>
@@ -1788,27 +1789,132 @@ document.addEventListener('DOMContentLoaded', async () => {
   // First check admin access
   await checkAdminAccess();
   
-  // Initialize Excel uploader
-  if (window.AlumilExcelUploader && window._sbClient) {
-    const uploader = new window.AlumilExcelUploader(window._sbClient);
-    uploader.init();
-    console.log('✅ Excel uploader initialized');
+  // Wait for all scripts to load
+  setTimeout(() => {
+    // Initialize Excel uploader with better error handling
+    if (window.AlumilExcelUploader && window._sbClient) {
+      try {
+        const uploader = new window.AlumilExcelUploader(window._sbClient);
+        uploader.init();
+        console.log('✅ Excel uploader initialized successfully');
+      } catch (error) {
+        console.error('❌ Failed to initialize Excel uploader:', error);
+        initializeFallbackButtons();
+      }
+    } else {
+      console.warn('⚠️ Excel uploader or Supabase client not available');
+      console.log('AlumilExcelUploader:', !!window.AlumilExcelUploader);
+      console.log('_sbClient:', !!window._sbClient);
+      initializeFallbackButtons();
+    }
+  }, 1000);
+  
+  // Fallback button initialization
+  function initializeFallbackButtons() {
+    const uploadBtn = document.getElementById('excel-upload-btn');
+    const fileInput = document.getElementById('excel-file-input');
+    const publishBtn = document.getElementById('publish-live-btn');
+    const clearBtn = document.getElementById('clear-data-btn');
+    
+    if (uploadBtn && fileInput) {
+      uploadBtn.addEventListener('click', () => {
+        fileInput.click();
+        console.log('📁 File picker opened');
+      });
+      
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          console.log('📄 File selected:', file.name);
+          processFileBasic(file);
+        }
+      });
+    }
+    
+    if (publishBtn) {
+      publishBtn.addEventListener('click', () => {
+        alert('📊 Publish functionality requires Excel uploader. Please refresh the page.');
+      });
+    }
+    
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        localStorage.removeItem('excelCache');
+        alert('🗑️ Local data cleared');
+        location.reload();
+      });
+    }
+    
+    console.log('✅ Fallback buttons initialized');
   }
+  
+  // Basic file processing fallback
+  function processFileBasic(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        const profilesSheet = workbook.SheetNames.find(name => 
+          name.toLowerCase().includes('profile')) || workbook.SheetNames[0];
+        const accessoriesSheet = workbook.SheetNames.find(name => 
+          name.toLowerCase().includes('accessor')) || workbook.SheetNames[1];
+        
+        const profiles = profilesSheet ? XLSX.utils.sheet_to_json(workbook.Sheets[profilesSheet]) : [];
+        const accessories = accessoriesSheet ? XLSX.utils.sheet_to_json(workbook.Sheets[accessoriesSheet]) : [];
+        
+        localStorage.setItem('excelCache', JSON.stringify({
+          profiles,
+          accessories,
+          fileName: file.name,
+          loadedAt: new Date().toISOString()
+        }));
+        
+        updateDisplayCounts(profiles.length, accessories.length);
+        alert(`✅ File processed: ${profiles.length} profiles, ${accessories.length} accessories`);
+        
+      } catch (error) {
+        alert('❌ Error processing file: ' + error.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  
+  // Update display counters
+  function updateDisplayCounts(profilesCount, accessoriesCount) {
+    const totalEl = document.getElementById('stat-total-items');
+    const profilesEl = document.getElementById('profiles-count');
+    const accessoriesEl = document.getElementById('accessories-count');
+    
+    if (totalEl) totalEl.textContent = profilesCount + accessoriesCount;
+    if (profilesEl) profilesEl.textContent = profilesCount;
+    if (accessoriesEl) accessoriesEl.textContent = accessoriesCount;
+  }
+});
+
+// Additional debugging
+window.addEventListener('load', () => {
+  console.log('🔍 Debug info:');
+  console.log('- XLSX:', !!window.XLSX);
+  console.log('- Supabase:', !!window.supabase);
+  console.log('- _sbClient:', !!window._sbClient);
+  console.log('- AlumilExcelUploader:', !!window.AlumilExcelUploader);
+  
+  // Test button accessibility
+  const buttons = ['excel-upload-btn', 'publish-live-btn', 'clear-data-btn'];
+  buttons.forEach(id => {
+    const btn = document.getElementById(id);
+    console.log(`- Button ${id}:`, !!btn);
+  });
 });
 </script>
 <!-- Footer -->
 <footer class="alumil-footer">
 <p>Alumil Labeling App @2025</p>
 </footer>
-</input>
-<!-- Supabase v2 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
-  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
-  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
-  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-</script>
+</body>
+</html>
 
 <!-- Live Data: admin upload + publish -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
