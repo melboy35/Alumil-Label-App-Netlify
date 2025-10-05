@@ -41,9 +41,16 @@
     window.SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
     window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
     
-    // Initialize Supabase client
-    window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-    console.log('✅ Supabase client initialized');
+    // Initialize Supabase client with proper persistence options
+    window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        storageKey: 'alumil_auth_token',
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+    console.log('✅ Supabase client initialized with session persistence');
   </script>
   
   <!-- Theme initialization -->
@@ -54,6 +61,49 @@
         document.documentElement.setAttribute('data-theme', t);
       }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
     })();
+  </script>
+  
+  <!-- Advanced auth debugging -->
+  <script>
+    // Check for token issues on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      try {
+        // Log storage keys related to authentication
+        const keys = Object.keys(localStorage);
+        const authKeys = keys.filter(k => k.includes('auth') || k.includes('supabase'));
+        console.log('Auth-related localStorage keys:', authKeys);
+        
+        // Check for token expiration
+        const tokenStr = localStorage.getItem('alumil_auth_token') || 
+                         localStorage.getItem('supabase.auth.token');
+                         
+        if (tokenStr) {
+          try {
+            const tokenData = JSON.parse(tokenStr);
+            const expiresAt = tokenData?.expiresAt || tokenData?.expires_at;
+            
+            if (expiresAt) {
+              const expiryTime = new Date(expiresAt * 1000);
+              const now = new Date();
+              console.log('Token expires:', expiryTime);
+              console.log('Token valid:', expiryTime > now ? 'Yes' : 'No');
+              console.log('Minutes remaining:', Math.round((expiryTime - now) / 60000));
+              
+              // Clean up expired tokens
+              if (expiryTime <= now) {
+                console.warn('Removing expired token');
+                localStorage.removeItem('alumil_auth_token');
+                localStorage.removeItem('supabase.auth.token');
+              }
+            }
+          } catch (parseError) {
+            console.error('Error parsing token:', parseError);
+          }
+        }
+      } catch (e) {
+        console.error('Auth debugging error:', e);
+      }
+    });
   </script>
   
   <style>
@@ -453,7 +503,7 @@
       }
     };
 
-    // Check if we already have a session
+    // Check if we already have a session with enhanced error handling
     (async function() {
       try {
         // Use either the supabase service or direct client
@@ -463,25 +513,73 @@
           return;
         }
         
+        // Try to refresh the session first to handle potential token issues
+        await supabaseClient.auth.refreshSession();
+        
         // Check for existing session
-        const { data } = await supabaseClient.auth.getSession();
+        const { data, error } = await supabaseClient.auth.getSession();
+        
+        // Log session state for debugging
+        console.log('Session check:', { 
+          hasSession: !!data?.session, 
+          error: error?.message,
+          expiresAt: data?.session?.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : null
+        });
+        
         if (data?.session) {
-          // Determine user's role
-          const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', data.session.user.id)
-            .single();
+          // Check if token is about to expire (within 5 minutes)
+          const expiresAt = data.session.expires_at * 1000; // convert to milliseconds
+          const now = Date.now();
+          const fiveMinutes = 5 * 60 * 1000;
+          
+          if (expiresAt - now < fiveMinutes) {
+            // Token is about to expire, force refresh
+            console.log('Token expiring soon, refreshing...');
+            await supabaseClient.auth.refreshSession();
+          }
+          
+          // Determine user's role with error handling
+          try {
+            const { data: profile, error: profileError } = await supabaseClient
+              .from('profiles')
+              .select('is_admin,email')
+              .eq('id', data.session.user.id)
+              .single();
+              
+            if (profileError) throw profileError;
             
-          // Redirect based on user role
-          if (profile?.is_admin) {
-            location.href = 'admin.html';
-          } else {
+            // Log profile retrieval success
+            console.log('Profile retrieved:', { 
+              email: profile?.email, 
+              isAdmin: profile?.is_admin 
+            });
+            
+            // Redirect based on user role
+            if (profile?.is_admin) {
+              location.href = 'admin.html';
+            } else {
+              location.href = 'home.html';
+            }
+          } catch (profileError) {
+            console.error('Error fetching profile:', profileError);
+            // Still redirect to home if we can't determine admin status
+            // This prevents login loop issues
             location.href = 'home.html';
           }
+        } else if (error) {
+          console.error('Session error:', error.message);
+          // Clear potentially corrupted session data
+          await supabaseClient.auth.signOut({ scope: 'local' });
         }
       } catch (e) {
         console.warn('Session check failed:', e);
+        // Try to recover by clearing local storage items related to auth
+        try {
+          localStorage.removeItem('alumil_auth_token');
+          localStorage.removeItem('supabase.auth.token');
+        } catch (storageError) {
+          console.error('Failed to clear storage:', storageError);
+        }
       }
     })();
   
@@ -611,15 +709,39 @@
             return;
           }
         } else {
-          // Sign in existing user
+          // Sign in existing user with enhanced error handling and debugging
           if (supabaseService && typeof supabaseService.signIn === 'function') {
             result = await supabaseService.signIn(email, password);
+            console.log('Auth via service result:', { success: result.success, user: result.data?.user?.email });
           } else {
             // Direct Supabase client fallback
+            console.log('Attempting direct login for:', email);
+            
+            // Clear any existing session first to prevent conflicts
+            await supabaseClient.auth.signOut({ scope: 'local' });
+            
+            // Attempt sign in with detailed logging
             const { data, error } = await supabaseClient.auth.signInWithPassword({
               email,
               password
             });
+            
+            // Log the result for debugging
+            if (error) {
+              console.error('Login error details:', { 
+                message: error.message, 
+                status: error.status,
+                name: error.name
+              });
+            } else {
+              console.log('Login successful for:', data?.user?.email);
+              // Log session details for debugging
+              console.log('Session details:', {
+                expiresAt: data?.session?.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : null,
+                tokenType: data?.session?.token_type,
+                hasRefreshToken: !!data?.session?.refresh_token
+              });
+            }
             
             result = {
               success: !error,

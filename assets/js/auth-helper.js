@@ -4,11 +4,36 @@
 window.SUPABASE_URL = "https://grsikgldzkqntlotawyi.supabase.co";
 window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ";
 
-// Initialize the Supabase client once and store it in the window
-if (!window._sbClient && typeof supabase !== 'undefined') {
-  window._sbClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-  console.log('✅ Supabase client initialized in auth-helper.js');
+// Initialize the Supabase client using singleton pattern to prevent multiple GoTrueClient instances
+function getSupabaseClientSingleton() {
+  // If we already have a client instance, return it
+  if (window._sbClient) {
+    return window._sbClient;
+  }
+  
+  // Create a new instance if one doesn't exist
+  if (typeof supabase !== 'undefined') {
+    window._sbClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        storageKey: 'alumil_auth_token'
+      }
+    });
+    console.log('✅ Supabase client initialized in auth-helper.js');
+    return window._sbClient;
+  }
+  
+  console.error('❌ Supabase library not available');
+  return null;
 }
+
+// Make the singleton function available globally
+window.getSupabaseClient = getSupabaseClientSingleton;
+
+// Initialize client on load
+const _sbClient = getSupabaseClientSingleton();
 
 // Get the current user
 async function getCurrentUser() {

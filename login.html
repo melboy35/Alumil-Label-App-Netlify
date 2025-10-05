@@ -25,8 +25,8 @@
   <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
   <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
   
-  <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co wss://*.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-ancestors 'none'">
+  <!-- Security Headers with expanded CORS permissions -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co wss://*.supabase.co https://*.supabase.co https://api.supabase.io; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-ancestors 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -336,7 +336,7 @@
     </div>
     
     <script>
-      // Add diagnostic login button functionality
+      // Enhanced diagnostic login button functionality with GoTrueClient instance check
       document.getElementById('diagnostic-login').addEventListener('click', async function() {
         this.textContent = 'Testing connection...';
         
@@ -361,11 +361,40 @@
             throw new Error('Failed to initialize Supabase client');
           }
           
+          // Check for multiple GoTrueClient instances
+          const instanceCountTest = await testClient.functions.invoke('countGoTrueInstances')
+            .catch(() => ({ data: { count: 'unknown', error: 'function unavailable' } }));
+          
+          console.log('GoTrueClient instance check:', instanceCountTest.data || 'Not available');
+          
           // Try a simple operation
           const sessionResult = await testClient.auth.getSession();
           
           if (sessionResult.error) {
             throw sessionResult.error;
+          }
+          
+          // Clear any existing sessions in localStorage to ensure clean state
+          try {
+            const storageKeys = Object.keys(localStorage);
+            const authKeys = storageKeys.filter(key => 
+              key.includes('supabase') || 
+              key.includes('auth') || 
+              key.includes('token')
+            );
+            
+            console.log('Found auth-related localStorage keys:', authKeys);
+            
+            // Keep only the current session key
+            const currentKey = 'alumil_auth_token';
+            authKeys.forEach(key => {
+              if (key !== currentKey) {
+                console.log('Removing potential duplicate session key:', key);
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (storageErr) {
+            console.warn('Could not clean localStorage:', storageErr);
           }
           
           // All tests passed
@@ -398,10 +427,11 @@
   </main>
 
   <script>
-    // Singleton implementation for Supabase client to prevent multiple instances
+    // Enhanced Singleton implementation for Supabase client to prevent "Multiple GoTrueClient instances" warning
     let getSupabaseClient = function() {
       // If we already have a client instance, return it
       if (window._sbClient) {
+        console.log('Returning existing Supabase client instance');
         return window._sbClient;
       }
       
@@ -409,12 +439,35 @@
         const supabaseUrl = document.querySelector('meta[name="supabase-url"]').content;
         const supabaseKey = document.querySelector('meta[name="supabase-key"]').content;
         console.log('Initializing Supabase client (singleton)');
-        window._sbClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Create client with persistence options to avoid session issues
+        window._sbClient = supabase.createClient(supabaseUrl, supabaseKey, {
+          auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            storageKey: 'alumil_auth_token'
+          }
+        });
+        
+        // Add to window for debugging
+        window._supabaseClientCreatedAt = new Date().toISOString();
+        
         return window._sbClient;
       } catch (e) {
         console.error('Failed to initialize Supabase client:', e);
         return null;
       }
+    };
+    
+    // For debug purposes: log if multiple instances are being created
+    window.getSupabaseClientDebug = function() {
+      console.log('Debug info for Supabase client:', {
+        hasClient: !!window._sbClient,
+        createdAt: window._supabaseClientCreatedAt || 'unknown',
+        authObject: window._sbClient ? !!window._sbClient.auth : 'n/a'
+      });
+      return getSupabaseClient();
     };
     
     // Get the client instance
@@ -649,35 +702,65 @@
         }
       });
       
-      // Check if user is already logged in
-      if (window.authHelper) {
-        console.log('Auth helper is available, checking authentication...');
-        window.authHelper.isAuthenticated().then(isAuthenticated => {
-          if (isAuthenticated) {
-            // If already logged in, redirect to appropriate page
-            window.authHelper.checkIsAdmin().then(isAdmin => {
-              location.href = isAdmin ? 'admin.html' : 'home.html';
-            });
-          } else {
-            console.log('User is not authenticated');
+      // Check if user is already logged in - use singleton pattern to prevent multiple instances
+      async function checkExistingSession() {
+        try {
+          // Get the singleton client
+          const supabaseClient = getSupabaseClient();
+          
+          if (!supabaseClient) {
+            console.error('Failed to get Supabase client');
+            return;
           }
-        });
-      } else {
-        // Fallback initialization if auth helper not available
-        console.warn('Auth helper not available on page load, attempting to initialize...');
-        const supabaseUrl = document.querySelector('meta[name="supabase-url"]')?.content;
-        const supabaseKey = document.querySelector('meta[name="supabase-key"]')?.content;
-        
-        if (typeof supabase !== 'undefined' && supabaseUrl && supabaseKey) {
-          console.log('Creating auth helper manually...');
-          window.authHelper = new AlumilAuthHelper(supabaseUrl, supabaseKey);
-        } else {
-          console.error('Cannot create auth helper, missing dependencies:', {
-            supabase: typeof supabase !== 'undefined',
-            url: !!supabaseUrl,
-            key: !!supabaseKey
-          });
+          
+          // Check for existing session
+          const { data, error } = await supabaseClient.auth.getSession();
+          
+          if (error) {
+            console.error('Session check failed:', error.message);
+            return;
+          }
+          
+          if (data?.session) {
+            console.log('Found existing session, checking user role...');
+            
+            try {
+              // Get user profile to check role
+              const { data: profile, error: profileError } = await supabaseClient
+                .from('profiles')
+                .select('is_admin,email')
+                .eq('id', data.session.user.id)
+                .single();
+                
+              if (profileError) throw profileError;
+              
+              // Redirect based on role
+              if (profile?.is_admin) {
+                console.log('Admin user detected, redirecting to admin page');
+                location.href = 'admin.html';
+              } else {
+                console.log('Regular user detected, redirecting to home page');
+                location.href = 'home.html';
+              }
+            } catch (profileError) {
+              console.error('Error fetching profile:', profileError);
+              // Default to home page if we can't determine role
+              location.href = 'home.html';
+            }
+          } else {
+            console.log('No active session found');
+          }
+        } catch (e) {
+          console.error('Session check failed:', e);
         }
+      }
+      
+      // Run session check
+      checkExistingSession();
+      
+      // For compatibility with any existing code that might use authHelper
+      if (!window.authHelper && window.AuthHelper) {
+        window.authHelper = window.AuthHelper;
       }
     });
     
