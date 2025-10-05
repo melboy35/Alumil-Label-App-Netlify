@@ -225,10 +225,26 @@
 </div>
 <div class="p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 summary-card dark glow-hover">
 <div class="flex items-center justify-center mb-4">
-<svg aria-hidden="true" class="text-gray-400" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><rect height="40" rx="4" width="36" x="14" y="12"></rect><rect height="8" rx="2" width="16" x="24" y="6"></rect><path d="M26 10h12"></path><rect height="12" rx="1.5" width="12" x="18" y="20"></rect><path d="M20 22h3M25 22h3M20 26h3M25 26h3M23 24h3M23 28h3"></path><path d="M34 23h12M34 28h12M18 38h28M18 43h28"></path></svg>
+<svg aria-hidden="true" class="text-blue-500" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 64 64" width="32" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="20"></circle><path d="M22 22h20M22 32h20M22 42h20"></path></svg>
 </div>
-<h3 class="text-4xl font-bold text-gray-400" id="total-bincard">0</h3>
-<p class="mt-2 text-sm text-gray-400">Bin card</p>
+<h3 class="text-4xl font-bold text-blue-500" id="data-status-indicator">📊</h3>
+<p class="mt-2 text-sm text-gray-400" id="data-status-text">Loading...</p>
+</div>
+</section>
+
+<!-- Data Status Banner -->
+<section class="mb-6" id="data-status-banner" style="display: none;">
+<div class="p-4 rounded-lg border" id="status-card">
+<div class="flex items-center gap-3">
+<div class="flex-shrink-0">
+<div class="w-3 h-3 rounded-full" id="status-dot"></div>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium" id="status-title">Database Status</p>
+<p class="text-xs" id="status-message">Checking data availability...</p>
+</div>
+<button class="text-xs px-3 py-1 rounded-md border" onclick="refreshData()" id="refresh-btn">Refresh</button>
+</div>
 </div>
 </section>
 <!-- Actions -->
@@ -713,8 +729,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           const adminLink = document.getElementById('admin-link');
           
           if (user) {
-            // Show logout button
-            if (logoutBtn) logoutBtn.style.display = 'flex';
+            // Show logout button for ALL authenticated users
+            if (logoutBtn) {
+              logoutBtn.style.display = 'flex';
+              console.log('✅ Logout button shown for authenticated user');
+            }
             
             // Check if user is admin and show admin link
             const { data: profile, error } = await window._sbClient
@@ -725,6 +744,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (!error && profile?.is_admin && adminLink) {
               adminLink.style.display = 'flex';
+              console.log('✅ Admin link shown for admin user');
             }
           } else {
             // Not authenticated, redirect to login
@@ -733,8 +753,101 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
           console.error('Authentication check failed:', error);
           location.href = 'login.html';
+    });
+  </script>
+
+  <!-- Data Status and Counter Updates -->
+  <script>
+    // Update data counters and status
+    async function updateDataStatus() {
+      if (window.alumilData) {
+        try {
+          const stats = await window.alumilData.getStats();
+          
+          // Update counters
+          document.getElementById('total-profiles').textContent = stats.totalProfiles;
+          document.getElementById('total-accessories').textContent = stats.totalAccessories;
+          
+          // Update data status
+          const statusIndicator = document.getElementById('data-status-indicator');
+          const statusText = document.getElementById('data-status-text');
+          const statusBanner = document.getElementById('data-status-banner');
+          const statusCard = document.getElementById('status-card');
+          const statusDot = document.getElementById('status-dot');
+          const statusTitle = document.getElementById('status-title');
+          const statusMessage = document.getElementById('status-message');
+          
+          if (stats.totalItems > 0) {
+            statusIndicator.textContent = '✅';
+            statusText.textContent = 'Data Available';
+            
+            statusBanner.style.display = 'block';
+            statusCard.className = 'p-4 rounded-lg border border-green-200 bg-green-50';
+            statusDot.className = 'w-3 h-3 rounded-full bg-green-500';
+            statusTitle.textContent = '✅ Database Connected';
+            statusTitle.className = 'text-sm font-medium text-green-800';
+            statusMessage.textContent = `${stats.totalProfiles} profiles and ${stats.totalAccessories} accessories available`;
+            statusMessage.className = 'text-xs text-green-600';
+          } else {
+            statusIndicator.textContent = '⚠️';
+            statusText.textContent = 'No Data';
+            
+            statusBanner.style.display = 'block';
+            statusCard.className = 'p-4 rounded-lg border border-yellow-200 bg-yellow-50';
+            statusDot.className = 'w-3 h-3 rounded-full bg-yellow-500';
+            statusTitle.textContent = '⚠️ No Data Available';
+            statusTitle.className = 'text-sm font-medium text-yellow-800';
+            statusMessage.textContent = 'Waiting for admin to publish inventory data';
+            statusMessage.className = 'text-xs text-yellow-600';
+          }
+          
+          console.log('📊 Data status updated:', stats);
+          
+        } catch (error) {
+          console.error('Failed to update data status:', error);
+          
+          const statusIndicator = document.getElementById('data-status-indicator');
+          const statusText = document.getElementById('data-status-text');
+          
+          statusIndicator.textContent = '❌';
+          statusText.textContent = 'Connection Error';
         }
       }
+    }
+    
+    // Refresh data function
+    window.refreshData = async function() {
+      const refreshBtn = document.getElementById('refresh-btn');
+      if (refreshBtn) {
+        refreshBtn.textContent = 'Refreshing...';
+        refreshBtn.disabled = true;
+      }
+      
+      if (window.alumilData) {
+        await window.alumilData.loadData(true);
+        await updateDataStatus();
+      }
+      
+      if (refreshBtn) {
+        refreshBtn.textContent = 'Refresh';
+        refreshBtn.disabled = false;
+      }
+    };
+    
+    // Listen for data updates
+    window.addEventListener('alumilDataLoaded', (event) => {
+      console.log('🔄 Data updated event received:', event.detail);
+      updateDataStatus();
+    });
+    
+    // Initial data load
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        updateDataStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(updateDataStatus, 30000);
+      }, 2000);
     });
   </script>
 <!-- Footer -->

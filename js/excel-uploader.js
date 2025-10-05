@@ -423,6 +423,8 @@ class AlumilExcelUploader {
     if (statusElement) {
       statusElement.textContent = message;
       statusElement.className = `upload-status ${type}`;
+      statusElement.style.display = 'block'; // Ensure it's visible
+      console.log(`📊 Status: ${type} - ${message}`);
     }
 
     // Update button states
@@ -432,13 +434,16 @@ class AlumilExcelUploader {
 
     if (publishBtn) {
       publishBtn.disabled = type === 'processing' || type === 'uploading';
-      publishBtn.textContent = type === 'uploading' ? 'Publishing...' : 'Publish to Database';
+      publishBtn.textContent = type === 'uploading' ? 'Publishing...' : 'Publish to Database (All Users)';
     }
 
     // Auto-clear success/info messages after 5 seconds
     if (type === 'success' || type === 'info') {
       setTimeout(() => {
-        if (statusElement) statusElement.textContent = '';
+        if (statusElement) {
+          statusElement.textContent = '';
+          statusElement.style.display = 'none';
+        }
       }, 5000);
     }
   }

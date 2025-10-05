@@ -146,6 +146,8 @@ class AlumilDataService {
         this.loadFromLocalStorage();
       }
 
+      console.log('🔄 Loading fresh data from Supabase...');
+
       // Then fetch fresh data from database
       const [profilesResult, accessoriesResult] = await Promise.all([
         this.supabase
@@ -160,8 +162,14 @@ class AlumilDataService {
           .order('code')
       ]);
 
-      if (profilesResult.error) throw profilesResult.error;
-      if (accessoriesResult.error) throw accessoriesResult.error;
+      if (profilesResult.error) {
+        console.error('Profiles fetch error:', profilesResult.error);
+        throw profilesResult.error;
+      }
+      if (accessoriesResult.error) {
+        console.error('Accessories fetch error:', accessoriesResult.error);
+        throw accessoriesResult.error;
+      }
 
       // Update cache
       this.cache.profiles = profilesResult.data || [];
@@ -174,7 +182,7 @@ class AlumilDataService {
       // Notify listeners of data update
       this.notifyDataUpdated();
 
-      console.log(`✅ Data loaded: ${this.cache.profiles.length} profiles, ${this.cache.accessories.length} accessories`);
+      console.log(`✅ Data loaded from database: ${this.cache.profiles.length} profiles, ${this.cache.accessories.length} accessories`);
 
     } catch (error) {
       console.error('Failed to load data from database:', error);
@@ -182,7 +190,8 @@ class AlumilDataService {
       // Fall back to localStorage if database fails
       this.loadFromLocalStorage();
       
-      // Don't throw error - graceful degradation
+      // Show user-friendly message but don't throw error - graceful degradation
+      console.warn('📦 Using cached data due to database connection issue');
     }
   }
 

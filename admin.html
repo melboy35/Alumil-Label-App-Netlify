@@ -1832,8 +1832,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     if (publishBtn) {
-      publishBtn.addEventListener('click', () => {
-        alert('📊 Publish functionality requires Excel uploader. Please refresh the page.');
+      publishBtn.addEventListener('click', async () => {
+        if (window._sbClient) {
+          try {
+            const statusEl = document.getElementById('upload-status');
+            if (statusEl) {
+              statusEl.textContent = 'Publishing to database...';
+              statusEl.className = 'upload-status uploading';
+              statusEl.style.display = 'block';
+            }
+            
+            const cachedData = JSON.parse(localStorage.getItem('excelCache') || '{}');
+            if (!cachedData.profiles && !cachedData.accessories) {
+              throw new Error('No data to publish. Please upload an Excel file first.');
+            }
+            
+            // Get current user
+            const { data: { user } } = await window._sbClient.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+            
+            // Prepare data with organization ID
+            const profilesData = (cachedData.profiles || []).map(item => ({
+              ...item,
+              organization_id: window.ORG_ID || '00000000-0000-0000-0000-000000000000',
+              code: String(item.code || item.item_code || item.profile_code || '').trim(),
+              description: String(item.description || item.desc || item.name || ''),
+              updated_at: new Date().toISOString()
+            })).filter(x => x.code);
+            
+            const accessoriesData = (cachedData.accessories || []).map(item => ({
+              ...item,
+              organization_id: window.ORG_ID || '00000000-0000-0000-0000-000000000000',
+              code: String(item.code || item.item_code || item.accessory_code || '').trim(),
+              description: String(item.description || item.desc || item.name || ''),
+              updated_at: new Date().toISOString()
+            })).filter(x => x.code);
+            
+            // Upload to database
+            if (profilesData.length > 0) {
+              const { error } = await window._sbClient
+                .from('inventory_profiles')
+                .upsert(profilesData, { onConflict: 'organization_id,code' });
+              if (error) throw error;
+            }
+            
+            if (accessoriesData.length > 0) {
+              const { error } = await window._sbClient
+                .from('inventory_accessories')
+                .upsert(accessoriesData, { onConflict: 'organization_id,code' });
+              if (error) throw error;
+            }
+            
+            if (statusEl) {
+              statusEl.textContent = `✅ Published successfully! ${profilesData.length} profiles and ${accessoriesData.length} accessories are now available to all users.`;
+              statusEl.className = 'upload-status success';
+              setTimeout(() => {
+                statusEl.style.display = 'none';
+              }, 5000);
+            }
+            
+            alert(`✅ Data published! ${profilesData.length} profiles and ${accessoriesData.length} accessories are now available to all users.`);
+            
+          } catch (error) {
+            console.error('Publish error:', error);
+            const statusEl = document.getElementById('upload-status');
+            if (statusEl) {
+              statusEl.textContent = `❌ Publish failed: ${error.message}`;
+              statusEl.className = 'upload-status error';
+              statusEl.style.display = 'block';
+            }
+            alert('❌ Failed to publish: ' + error.message);
+          }
+        } else {
+          alert('📊 Database connection not available. Please refresh the page.');
+        }
       });
     }
     
