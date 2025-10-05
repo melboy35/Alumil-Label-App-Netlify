@@ -380,6 +380,23 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <li>• <strong>Step 3:</strong> Click "Publish to Database" to make data available to all users</li>
 <li>• <strong>Live Access:</strong> All users can instantly search and print from published data</li>
 </ul>
+
+<div class="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg mb-4">
+<h4 class="text-blue-300 font-semibold text-sm mb-2">🗄️ Database Setup Required</h4>
+<p class="text-xs text-blue-200 mb-2">
+If you get "table not found" errors, you need to set up the database first:
+</p>
+<ol class="text-xs space-y-1 text-blue-200">
+<li>1. Go to your Supabase Dashboard → SQL Editor</li>
+<li>2. Run the database-schema.sql script</li>
+<li>3. Set your user as admin in the profiles table</li>
+<li>4. Come back and try publishing again</li>
+</ol>
+<button class="mt-2 text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-500" onclick="showDatabaseSetupInstructions()">
+View Detailed Setup Instructions
+</button>
+</div>
+
 <div class="p-3 bg-green-900/20 border border-green-700/30 rounded-lg mb-4">
 <h4 class="text-green-300 font-semibold text-sm mb-2">🚀 Database Publishing</h4>
 <p class="text-xs text-green-200">
@@ -1851,12 +1868,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: { user } } = await window._sbClient.auth.getUser();
             if (!user) throw new Error('User not authenticated');
             
+            // Check if tables exist, create if not
+            await ensureTablesExist();
+            
             // Prepare data with organization ID
             const profilesData = (cachedData.profiles || []).map(item => ({
               ...item,
               organization_id: window.ORG_ID || '00000000-0000-0000-0000-000000000000',
               code: String(item.code || item.item_code || item.profile_code || '').trim(),
               description: String(item.description || item.desc || item.name || ''),
+              length: parseFloat(item.length) || null,
+              color: String(item.color || ''),
+              alloy: String(item.alloy || ''),
+              system: String(item.system || ''),
+              warehouse_no: String(item.warehouse_no || item.warehouse || ''),
+              rack_no: String(item.rack_no || item.rack || ''),
+              quantity: parseInt(item.quantity) || 0,
+              unit: String(item.unit || 'pcs'),
               updated_at: new Date().toISOString()
             })).filter(x => x.code);
             
@@ -1865,11 +1893,17 @@ document.addEventListener('DOMContentLoaded', async () => {
               organization_id: window.ORG_ID || '00000000-0000-0000-0000-000000000000',
               code: String(item.code || item.item_code || item.accessory_code || '').trim(),
               description: String(item.description || item.desc || item.name || ''),
+              unit: String(item.unit || 'pcs'),
+              category: String(item.category || ''),
+              warehouse_no: String(item.warehouse_no || item.warehouse || ''),
+              rack_no: String(item.rack_no || item.rack || ''),
+              quantity: parseInt(item.quantity) || 0,
               updated_at: new Date().toISOString()
             })).filter(x => x.code);
             
             // Upload to database
             if (profilesData.length > 0) {
+              if (statusEl) statusEl.textContent = 'Publishing profiles...';
               const { error } = await window._sbClient
                 .from('inventory_profiles')
                 .upsert(profilesData, { onConflict: 'organization_id,code' });
@@ -1877,6 +1911,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             if (accessoriesData.length > 0) {
+              if (statusEl) statusEl.textContent = 'Publishing accessories...';
               const { error } = await window._sbClient
                 .from('inventory_accessories')
                 .upsert(accessoriesData, { onConflict: 'organization_id,code' });
@@ -1896,17 +1931,71 @@ document.addEventListener('DOMContentLoaded', async () => {
           } catch (error) {
             console.error('Publish error:', error);
             const statusEl = document.getElementById('upload-status');
+            
+            let errorMessage = error.message;
+            
+            // Handle specific database errors
+            if (error.message.includes('table') && error.message.includes('schema cache')) {
+              errorMessage = '⚠️ Database tables not found. Please set up the database first.';
+              showDatabaseSetupInstructions();
+            } else if (error.message.includes('permission')) {
+              errorMessage = '🔒 Database permission denied. Please check your Supabase configuration.';
+            }
+            
             if (statusEl) {
-              statusEl.textContent = `❌ Publish failed: ${error.message}`;
+              statusEl.textContent = `❌ Publish failed: ${errorMessage}`;
               statusEl.className = 'upload-status error';
               statusEl.style.display = 'block';
             }
-            alert('❌ Failed to publish: ' + error.message);
+            alert('❌ Failed to publish: ' + errorMessage);
           }
         } else {
           alert('📊 Database connection not available. Please refresh the page.');
         }
       });
+    }
+    
+    // Function to ensure database tables exist
+    async function ensureTablesExist() {
+      try {
+        // Test if tables exist by trying a simple query
+        const { error: profilesError } = await window._sbClient
+          .from('inventory_profiles')
+          .select('id')
+          .limit(1);
+          
+        const { error: accessoriesError } = await window._sbClient
+          .from('inventory_accessories')
+          .select('id')
+          .limit(1);
+          
+        if (profilesError || accessoriesError) {
+          throw new Error('Tables do not exist');
+        }
+      } catch (error) {
+        throw new Error('Database tables not found. Please run the database schema setup first.');
+      }
+    }
+    
+    // Function to show database setup instructions
+    function showDatabaseSetupInstructions() {
+      const instructions = `
+🔧 DATABASE SETUP REQUIRED
+
+To use the Excel upload feature, you need to set up the database tables first:
+
+1. Go to your Supabase Dashboard
+2. Navigate to SQL Editor
+3. Copy and paste the contents of 'database-schema.sql'
+4. Run the SQL script
+5. Come back and try publishing again
+
+The database-schema.sql file contains all the necessary tables and security policies.
+      `;
+      
+      setTimeout(() => {
+        alert(instructions);
+      }, 1000);
     }
     
     if (clearBtn) {
