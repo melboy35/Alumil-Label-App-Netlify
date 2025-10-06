@@ -249,26 +249,27 @@ body {
 <!-- Header -->
 <header class="app-header fixed top-0 left-0 right-0 z-20 w-full flex flex-col sm:flex-row justify-between items-center p-2 sm:p-3 rounded-xl shadow-lg card dark animating" id="header">
 <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-0">
-<div class="logo-container">
-<img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+  <div class="logo-container">
+    <img alt="Alumil Logo" loading="eager" src="assets/images/alumil-logo.svg"/>
+  </div>
+  <span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
+  <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
 </div>
-<span class="brand-title font-semibold text-lg sm:text-2xl tracking-tight hidden sm:inline">Alumil Inventory System</span>
-<span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
-</div>
-<nav class="flex items-center space-x-4 text-sm sm:text-base">
-<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
-<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Home
-            </a>
-<a class="flex items-center icon-color font-medium" href="admin.html">
-<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
-            </a>
-<div class="flex items-center gap-2">
-<!-- Theme toggle -->
-<button aria-label="Toggle theme" class="icon-btn" id="themeToggle">
-<i class="fa-regular fa-moon" id="themeIcon"></i>
-</button>
-</div></nav>
+<nav class="flex items-center gap-4 text-sm sm:text-base">
+  <a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+    <svg class="lucide lucide-home icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    Home
+  </a>
+  <a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="admin.html">
+    <svg class="lucide lucide-user-cog icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg>
+    Admin
+  </a>
+  <div class="flex items-center gap-2">
+    <button aria-label="Toggle theme" class="icon-btn" id="themeToggle">
+      <i class="fa-regular fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+</nav>
 </header>
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
 <!-- Page title row -->
@@ -289,14 +290,14 @@ body {
 <label class="block text-sm font-medium subtitle-text mb-1">Search Item</label>
 <div class="relative flex items-center gap-2">
 <div class="relative flex-1">
-<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-<input autocomplete="off" class="input-field w-full pl-12 pr-12" id="q" placeholder="Type code, description, or system…" type="search"/>
-<div class="absolute left-0 right-0 top-full mt-2 z-50 hidden" id="sugWrap">
-<ul class="card p-2 max-h-72 overflow-y-auto divide-y divide-slate-700" id="sugList"></ul>
-</div>
-<button class="btn-scan" id="scanBtn" title="Scan barcode">
-<i class="fa-solid fa-camera"></i>
-</button>
+  <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+  <input autocomplete="off" class="input-field w-full pl-12 pr-12" id="q" placeholder="Type code, description, or system…" type="search"/>
+  <button class="btn-scan absolute right-2 top-1/2 -translate-y-1/2" id="scanBtn" title="Scan barcode" style="z-index:10; padding:0 10px; height:32px; width:32px;">
+    <i class="fa-solid fa-camera"></i>
+  </button>
+  <div class="absolute left-0 right-0 top-full mt-2 z-50 hidden" id="sugWrap">
+    <ul class="card p-2 max-h-72 overflow-y-auto divide-y divide-slate-700" id="sugList"></ul>
+  </div>
 </div>
 </div>
 </div>
@@ -1115,44 +1116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 <p>Alumil Labeling App @2025</p>
 </footer>
 
-<!-- Supabase v2 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
-  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
-  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
-  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-</script>
-
-<!-- Live Data: consumer fetch + realtime -->
-<script>
-(function(){
-  const sb = window._sbClient, ORG = window.ORG_ID;
-  async function fetchLiveData(){
-    try{
-      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
-        sb.from('profiles').select('*').eq('org_id', ORG),
-        sb.from('accessories').select('*').eq('org_id', ORG)
-      ]);
-      if(pe) throw pe; if(ae) throw ae;
-      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
-      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
-      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
-      return data;
-    }catch(err){
-      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
-      catch { return { profiles:[], accessories:[] }; }
-    }
-  }
-  document.addEventListener('DOMContentLoaded', fetchLiveData);
-  sb.channel('version-bumps')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
-      if (payload?.new?.org_id === ORG) await fetchLiveData();
-    })
-    .subscribe();
-  // expose for pages that want it
-  window.fetchLiveData = fetchLiveData;
-})();
-</script>
+<!-- Global Data Service for inventory access -->
+<script src="js/data-service.js"></script>
 </body>
 </html>

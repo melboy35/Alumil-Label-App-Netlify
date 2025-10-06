@@ -277,19 +277,23 @@ body {
 <span class="brand-title font-semibold text-sm tracking-tight sm:hidden">Alumil</span>
 </div>
 <nav class="flex items-center space-x-4 text-sm sm:text-base">
-<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
-<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Home
-            </a>
-<a class="flex items-center icon-color font-medium" href="admin.html">
-<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
-            </a>
-<div class="flex items-center gap-2">
-<!-- Theme toggle -->
-<button aria-label="Toggle theme" class="icon-btn" id="themeToggle">
-<i class="fa-regular fa-moon" id="themeIcon"></i>
+<a class="flex items-center gap-2 icon-color font-medium" href="home.html">
+  <svg class="lucide lucide-home icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+  <span>Home</span>
+</a>
+<a class="flex items-center gap-2 icon-color font-medium" href="admin.html">
+  <svg class="lucide lucide-user-cog icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg>
+  <span>Admin</span>
+</a>
+<button class="flex items-center gap-2 icon-color hover:text-red-400 transition-colors" id="logout-btn" onclick="window.AuthHelper.handleLogout()">
+  <svg class="lucide lucide-log-out icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+  <span>Logout</span>
 </button>
-</div></nav>
+<button aria-label="Toggle theme" class="flex items-center gap-2 icon-color" id="theme-toggle" style="margin-left: 0.5rem;" title="Toggle theme">
+  <svg fill="none" height="20" id="theme-toggle-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 </header>
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--header-h)+48px)] pb-16">
 <!-- Page title row -->
@@ -1409,44 +1413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 <p>Alumil Labeling App @2025</p>
 </footer>
 
-<!-- Supabase v2 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
-  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
-  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
-  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-</script>
-
-<!-- Live Data: consumer fetch + realtime -->
-<script>
-(function(){
-  const sb = window._sbClient, ORG = window.ORG_ID;
-  async function fetchLiveData(){
-    try{
-      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
-        sb.from('profiles').select('*').eq('org_id', ORG),
-        sb.from('accessories').select('*').eq('org_id', ORG)
-      ]);
-      if(pe) throw pe; if(ae) throw ae;
-      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
-      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
-      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
-      return data;
-    }catch(err){
-      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
-      catch { return { profiles:[], accessories:[] }; }
-    }
-  }
-  document.addEventListener('DOMContentLoaded', fetchLiveData);
-  sb.channel('version-bumps')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
-      if (payload?.new?.org_id === ORG) await fetchLiveData();
-    })
-    .subscribe();
-  // expose for pages that want it
-  window.fetchLiveData = fetchLiveData;
-})();
-</script>
+<!-- Global Data Service for inventory access -->
+<script src="js/data-service.js"></script>
 </body>
 </html>

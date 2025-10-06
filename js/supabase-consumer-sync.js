@@ -16,39 +16,37 @@ async function fetchLiveData() {
   try {
     console.log('Fetching live data from Supabase...');
     
-    // Pull both tables (you can filter columns to what the page needs)
-    const [{ data: profiles, error: profilesError }, { data: accessories, error: accessoriesError }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('org_id', ORG_ID).limit(10000),
-        supabase.from('accessories').select('*').eq('org_id', ORG_ID).limit(10000)
-    ]);
-    
-    if (profilesError || accessoriesError) {
-      throw profilesError || accessoriesError;
-    }
-
-    const cache = { 
-      profiles: profiles || [], 
-      accessories: accessories || [], 
-      loadedAt: new Date().toISOString(),
-      source: 'live'
+    // Always fetch all rows from DB using pagination
+    const fetchAll = async (table) => {
+      const pageSize = 10000;
+      let allRows = [], page = 0, hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .eq('org_id', ORG_ID)
+          .order('code')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) { hasMore = false; }
+        else {
+          allRows = allRows.concat(data);
+          if (data.length < pageSize) hasMore = false;
+          else page++;
+        }
+      }
+      return allRows;
     };
-    
-    // Update local cache to keep your current code working
-    localStorage.setItem('excelCache', JSON.stringify(cache));
-    
-    console.log(`Loaded ${cache.profiles.length} profiles and ${cache.accessories.length} accessories from cloud`);
-    return cache;
+    const [profiles, accessories] = await Promise.all([
+      fetchAll('profiles'),
+      fetchAll('accessories')
+    ]);
+    console.log(`Loaded ${profiles.length} profiles and ${accessories.length} accessories from cloud`);
+    return { profiles, accessories, loadedAt: new Date().toISOString(), source: 'live' };
     
   } catch (error) {
-    console.warn('Live fetch failed, using local cache:', error);
-    
-    try {
-      const localCache = JSON.parse(localStorage.getItem('excelCache') || '{}');
-      localCache.source = 'cache';
-      return localCache;
-    } catch {
-      return { profiles: [], accessories: [], source: 'empty' };
-    }
+    console.warn('Live fetch failed:', error);
+    return { profiles: [], accessories: [], source: 'empty' };
   }
 }
 
@@ -84,19 +82,8 @@ async function getCurrentVersions() {
  */
 async function needsRefresh() {
   try {
-    const localCache = JSON.parse(localStorage.getItem('excelCache') || '{}');
-    const localVersions = localCache.versions || {};
-    const remoteVersions = await getCurrentVersions();
-    
-    for (const kind of ['profiles', 'accessories']) {
-      const localVer = localVersions[kind] || 0;
-      const remoteVer = remoteVersions[kind]?.version || 0;
-      if (remoteVer > localVer) {
-        return true;
-      }
-    }
-    
-    return false;
+    // Always refresh for now, since we no longer cache versions locally
+    return true;
   } catch {
     return true; // Refresh on error
   }

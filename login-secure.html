@@ -610,12 +610,11 @@
               isAdmin: profile?.is_admin 
             });
             
-            // Redirect based on user role
-            if (profile?.is_admin) {
-              location.href = 'admin.html';
-            } else {
-              location.href = 'home.html';
-            }
+            // Redirect based on user role with forced navigation
+            console.log('Redirecting to:', profile?.is_admin ? 'admin.html' : 'home.html');
+            setTimeout(() => {
+              window.location.replace(profile?.is_admin ? 'admin.html' : 'home.html');
+            }, 100);
           } catch (profileError) {
             console.error('Error fetching profile:', profileError);
             // Still redirect to home if we can't determine admin status

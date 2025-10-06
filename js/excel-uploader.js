@@ -68,7 +68,7 @@ class AlumilExcelUploader {
   }
 
   /**
-   * Handle file selection and processing
+   * Handle file selection and processing (refactored: always use storage URL)
    */
   async handleFileSelect(event) {
     const file = event.target.files[0];
@@ -77,35 +77,82 @@ class AlumilExcelUploader {
     if (!this.validateFile(file)) return;
 
     try {
-      this.setUploadStatus('processing', `Processing ${file.name}...`);
-      
-      // Store the raw file data for later upload to storage
-      let rawExcelData = null;
-      try {
-        rawExcelData = await this.readFileAsArrayBuffer(file);
-      } catch (err) {
-        console.warn('Failed to read raw file data', err);
-        // Continue with processing as normal even if we can't store the raw data
-      }
-      
-      const data = await this.processExcelFile(file);
-      
-      // Add the raw data if we have it
-      if (rawExcelData) {
-        data.rawExcelData = rawExcelData;
-      }
-      
-      // Store locally first
-      this.storeDataLocally(data, file.name);
-      
-      // Update UI
+      this.setUploadStatus('processing', `Uploading ${file.name} to cloud storage...`);
+
+      // Upload file to Supabase Storage
+      const storagePath = `uploads/${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await this.supabase
+        .storage
+        .from('excel-files')
+        .upload(storagePath, file, { upsert: true });
+
+      if (uploadError) throw new Error('Failed to upload file to storage: ' + uploadError.message);
+
+      // Get public URL for the uploaded file
+      const { data: publicUrlData } = this.supabase
+        .storage
+        .from('excel-files')
+        .getPublicUrl(storagePath);
+      const fileUrl = publicUrlData?.publicUrl;
+      if (!fileUrl) throw new Error('Could not get public URL for uploaded file.');
+
+      this.setUploadStatus('processing', 'Fetching and parsing Excel from storage...');
+
+      // Fetch the file from the storage URL
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to fetch uploaded file from storage.');
+      const arrayBuffer = await response.arrayBuffer();
+
+      // Parse Excel from arrayBuffer
+      const data = await this.processExcelFileFromBuffer(arrayBuffer, file.name);
+
+      // Update UI (show counts, etc.)
       this.updateUI(data, file.name);
-      
-      this.setUploadStatus('success', `File processed successfully! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded (${data.totalRows} total rows processed - NO LIMITS APPLIED).`);
-      
+
+      // Optionally store file URL/version for UX
+      localStorage.setItem('excelFileMeta', JSON.stringify({ fileUrl, uploadedAt: new Date().toISOString() }));
+
+      this.setUploadStatus('success', `File uploaded and parsed! ${data.profiles.length} profiles and ${data.accessories.length} accessories loaded. Ready to publish to database.`);
+
+      // Optionally, you can trigger the upsert here or require a separate publish action
+      // await this.publishToDatabaseFromData(data, fileUrl);
+
     } catch (error) {
-      console.error('File processing error:', error);
-      this.setUploadStatus('error', `Error processing file: ${error.message}`);
+      console.error('File upload/parse error:', error);
+      this.setUploadStatus('error', `Error uploading or parsing file: ${error.message}`);
+    }
+  }
+
+  /**
+   * Parse Excel file from ArrayBuffer (from storage URL)
+   */
+  async processExcelFileFromBuffer(arrayBuffer, fileName) {
+    try {
+      const data = new Uint8Array(arrayBuffer);
+      const workbook = XLSX.read(data, {
+        type: 'array',
+        cellDates: true,
+        cellNF: false,
+        cellText: false,
+        range: undefined
+      });
+
+      // Find profiles and accessories sheets
+      const profilesSheet = this.findSheet(workbook, ['profiles', 'profile', 'prof']);
+      const accessoriesSheet = this.findSheet(workbook, ['accessories', 'accessory', 'acc']);
+
+      const profiles = profilesSheet ? this.processProfilesSheet(workbook.Sheets[profilesSheet]) : [];
+      const accessories = accessoriesSheet ? this.processAccessoriesSheet(workbook.Sheets[accessoriesSheet]) : [];
+
+      return {
+        profiles,
+        accessories,
+        fileName,
+        processedAt: new Date().toISOString(),
+        totalRows: profiles.length + accessories.length
+      };
+    } catch (error) {
+      throw new Error('Failed to parse Excel file from buffer: ' + error.message);
     }
   }
   
@@ -362,57 +409,7 @@ class AlumilExcelUploader {
     return standardFields.includes(fieldName);
   }
 
-  /**
-   * Store data locally in storage (uses both sessionStorage and localStorage)
-   */
-  storeDataLocally(data, fileName) {
-    const meta = {
-      fileName: fileName,
-      fileSize: data.fileSize,
-      loadedAt: data.processedAt,
-      profilesCount: data.profiles.length,
-      accessoriesCount: data.accessories.length,
-      version: Date.now() // Simple versioning
-    };
-    
-    // Store in sessionStorage (better for large datasets)
-    try {
-      sessionStorage.setItem('excelCache_profiles', JSON.stringify(data.profiles));
-      sessionStorage.setItem('excelCache_accessories', JSON.stringify(data.accessories));
-      sessionStorage.setItem('excelCache_meta', JSON.stringify(meta));
-      console.log(`📦 Data saved to sessionStorage: ${data.profiles.length} profiles, ${data.accessories.length} accessories`);
-    } catch (sessionError) {
-      console.warn('Failed to save to sessionStorage (likely size limit):', sessionError);
-    }
-    
-    // Try to store in localStorage for persistence (may fail if data is too large)
-    try {
-      const cacheData = {
-        profiles: data.profiles,
-        accessories: data.accessories,
-        fileName: fileName,
-        fileSize: data.fileSize,
-        loadedAt: data.processedAt,
-        version: meta.version
-      };
-      
-      localStorage.setItem('excelCache', JSON.stringify(cacheData));
-      console.log(`📦 Data also saved to localStorage: ${data.profiles.length} profiles, ${data.accessories.length} accessories`);
-    } catch (localError) {
-      console.warn('Failed to save full data to localStorage (likely size limit) - will use sessionStorage for large data:', localError);
-      
-      // Try to save just metadata to localStorage
-      try {
-        localStorage.setItem('excelCache_meta', JSON.stringify({
-          ...meta,
-          noticeUseSessionStorage: true,
-          fullDataInSessionStorage: true
-        }));
-      } catch (metaError) {
-        console.warn('Failed to save even metadata to localStorage:', metaError);
-      }
-    }
-  }
+  // Removed storeDataLocally: no longer storing arrays in localStorage/sessionStorage. Only keep file URL/version if needed.
 
   /**
    * Publish data to Supabase database using the InventoryStateManager
@@ -584,51 +581,7 @@ class AlumilExcelUploader {
     }
   }
 
-  /**
-   * Load existing data from localStorage
-   */
-  loadExistingData() {
-    try {
-      const cachedData = JSON.parse(localStorage.getItem('excelCache') || '{}');
-      if (cachedData.profiles || cachedData.accessories) {
-        this.updateUI(cachedData, cachedData.fileName || 'Cached Data');
-        this.setUploadStatus('info', `Loaded cached data: ${cachedData.profiles?.length || 0} profiles, ${cachedData.accessories?.length || 0} accessories`);
-      }
-    } catch (error) {
-      console.warn('Could not load cached data:', error);
-    }
-  }
 
-  /**
-   * Update UI with current data
-   */
-  updateUI(data, fileName) {
-    // Update counters
-    const profilesCount = data.profiles?.length || 0;
-    const accessoriesCount = data.accessories?.length || 0;
-    const totalCount = profilesCount + accessoriesCount;
-
-    // Update dashboard counters
-    this.updateElement('stat-total-items', totalCount);
-    this.updateElement('profiles-count', profilesCount);
-    this.updateElement('accessories-count', accessoriesCount);
-
-    // Update modal indicators
-    this.updateElement('count-profiles', `${profilesCount} item${profilesCount === 1 ? '' : 's'}`);
-    this.updateElement('count-accessories', `${accessoriesCount} item${accessoriesCount === 1 ? '' : 's'}`);
-
-    // Update file name display
-    this.updateElement('file-name-display', fileName ? `File: ${fileName}` : 'No file loaded');
-
-    // Update status indicators
-    this.updateStatusDots(profilesCount > 0, accessoriesCount > 0);
-
-    // Show data status
-    const dataStatus = document.getElementById('data-status');
-    if (dataStatus) {
-      dataStatus.classList.toggle('hidden', !fileName);
-    }
-  }
 
   /**
    * Update element text content safely

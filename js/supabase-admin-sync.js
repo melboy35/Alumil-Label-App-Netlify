@@ -2,15 +2,33 @@
  * Fetch all profiles and accessories for admin display (removes 1000-row limit)
  */
 async function fetchAllAdminData() {
+  // Always fetch all rows from DB using pagination
   try {
-    const [{ data: profiles, error: profilesError }, { data: accessories, error: accessoriesError }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('org_id', ORG_ID).limit(10000),
-      supabase.from('accessories').select('*').eq('org_id', ORG_ID).limit(10000)
+    const fetchAll = async (table) => {
+      const pageSize = 10000;
+      let allRows = [], page = 0, hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .eq('org_id', ORG_ID)
+          .order('code')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) { hasMore = false; }
+        else {
+          allRows = allRows.concat(data);
+          if (data.length < pageSize) hasMore = false;
+          else page++;
+        }
+      }
+      return allRows;
+    };
+    const [profiles, accessories] = await Promise.all([
+      fetchAll('profiles'),
+      fetchAll('accessories')
     ]);
-    if (profilesError || accessoriesError) {
-      throw profilesError || accessoriesError;
-    }
-    return { profiles: profiles || [], accessories: accessories || [] };
+    return { profiles, accessories };
   } catch (error) {
     console.error('Admin fetch failed:', error);
     return { profiles: [], accessories: [] };
@@ -139,17 +157,8 @@ async function makeLive(profilesRows, accessoriesRows) {
     await chunkedUpsert('accessories', aRows);
     const accessoryVersion = await recordVersion('accessories', aRows.length);
 
-    // Keep local cache for offline (unchanged from your current behavior)
-    localStorage.setItem('excelCache', JSON.stringify({
-      profiles: pRows, 
-      accessories: aRows,
-      fileName: 'Live dataset', 
-      loadedAt: new Date().toISOString(),
-      versions: {
-        profiles: profileVersion,
-        accessories: accessoryVersion
-      }
-    }));
+    // Optionally, store only file URL/version if needed for UX (not for data)
+    // localStorage.setItem('excelFileMeta', JSON.stringify({ fileUrl, profileVersion, accessoryVersion }));
 
     console.log('Live sync completed successfully');
     return { success: true, profiles: pRows.length, accessories: aRows.length };

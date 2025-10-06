@@ -28,81 +28,19 @@
 <!-- Dexie.js for IndexedDB -->
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
 <!-- Supabase Configuration -->
-<meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
-<meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
-
-<!-- Legacy JavaScript configuration for compatibility -->
 <script>
-  // Legacy configuration for existing code
+  // Supabase project configuration
   window.SUPABASE_URL = 'https://grsikgldzkqntlotawyi.supabase.co';
   window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ';
   window.ORG_ID = '00000000-0000-0000-0000-000000000000';
   
-  // Use singleton pattern for Supabase client
-  window.getSupabaseClient = function() {
-    if (window._sbClient) {
-      return window._sbClient;
-    }
-    
-    window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        storageKey: 'alumil_auth_token'
-      }
-    });
-    
-    return window._sbClient;
-  };
-  
-  // Initialize client
-  window._sbClient = window.getSupabaseClient();
-  console.log('✅ Supabase client initialized with singleton pattern');
-</script>
-<script>
-// Fetch all admin data and update counts on page load
-document.addEventListener('DOMContentLoaded', async () => {
-  if (typeof fetchAllAdminData === 'function') {
-    // Fetch all data arrays (for table rendering if needed)
-    const { profiles, accessories } = await fetchAllAdminData();
-
-    // Fetch DB counts (always accurate, even if arrays are paginated)
-    let profilesCount = 0, accessoriesCount = 0;
-    if (typeof getProfilesCount === 'function' && typeof getAccessoriesCount === 'function') {
-      [profilesCount, accessoriesCount] = await Promise.all([
-        getProfilesCount(),
-        getAccessoriesCount()
-      ]);
-    } else {
-      // fallback to array length if count functions missing
-      profilesCount = profiles.length;
-      accessoriesCount = accessories.length;
-    }
-
-    // Update all count elements
-    const profilesCountEl = document.getElementById('profiles-count');
-    const accessoriesCountEl = document.getElementById('accessories-count');
-    const statTotalItemsEl = document.getElementById('stat-total-items');
-    const countProfilesEl = document.getElementById('count-profiles');
-    const countAccessoriesEl = document.getElementById('count-accessories');
-
-    if (profilesCountEl) profilesCountEl.textContent = profilesCount;
-    if (accessoriesCountEl) accessoriesCountEl.textContent = accessoriesCount;
-    if (statTotalItemsEl) statTotalItemsEl.textContent = profilesCount + accessoriesCount;
-    if (countProfilesEl) countProfilesEl.textContent = `${profilesCount} items`;
-    if (countAccessoriesEl) countAccessoriesEl.textContent = `${accessoriesCount} items`;
-
-    // Optionally: render tables or lists here
-    // renderProfilesTable(profiles);
-    // renderAccessoriesTable(accessories);
-  }
-});
+  // Initialize Supabase client
+  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+  console.log('✅ Supabase client initialized');
 </script>
 <!-- Supabase Overlay -->
 <script src="assets/js/supabase-overlay.js"></script>
-<script src="js/auth-helper.js"></script>
-<script src="js/session-checker.js"></script>
+<script src="/js/auth-helper.js"></script>
 <script src="/js/data-sync.js"></script>
 <script src="/js/user-display.js"></script>
 <script src="/js/activity-logger.js"></script>
@@ -294,23 +232,23 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
 <span class="brand-title font-semibold text-sm tracking-tight leading-tight sm:hidden">Alumil</span>
 </div>
 <nav class="flex items-center space-x-4 text-sm sm:text-base">
-<a class="flex items-center gap-2 icon-color font-medium" href="home.html">
-  <svg class="lucide lucide-home icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-  <span>Home</span>
-</a>
-<a class="flex items-center gap-2 icon-color font-medium" href="admin.html">
-  <svg class="lucide lucide-user-cog icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg>
-  <span>Admin</span>
-</a>
-<button class="flex items-center gap-2 icon-color hover:text-red-400 transition-colors" id="logout-btn" onclick="handleLogout()" style="display: none;">
-  <svg class="lucide lucide-log-out icon-color" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
-  <span class="hidden sm:inline">Logout</span>
-  <span class="sm:hidden">Logout</span>
+<a class="flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors" href="home.html">
+<svg class="lucide lucide-home mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Home
+            </a>
+<a class="flex items-center icon-color font-medium" href="admin.html">
+<svg class="lucide lucide-user-cog mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><circle cx="17" cy="17" r="3"></circle><path d="M19.5 14.5l.7.7"></path><path d="M14.3 19.7l.7.7"></path><path d="M20.9 17l.7-.7"></path><path d="M15.7 14.3l-.7-.7"></path><path d="M17 11.5v-1"></path><path d="M17 21.5v-1"></path><path d="M12.5 17h-1"></path><path d="M21.5 17h-1"></path></svg> Admin
+            </a>
+<button class="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors" id="logout-btn" onclick="handleLogout()" style="display: none;">
+<svg class="lucide lucide-log-out mr-1" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+<span class="hidden sm:inline">Logout</span>
+<span class="sm:hidden">Logout</span>
 </button>
-<button aria-label="Toggle theme" class="flex items-center gap-2 icon-color" id="theme-toggle" style="margin-left: 0.5rem;" title="Toggle theme">
-  <svg fill="none" height="20" id="theme-toggle-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
+<button aria-label="Toggle theme" class="flex items-center icon-color" id="theme-toggle" style="margin-left: 0.5rem;" title="Toggle theme">
+<!-- default moon; script will swap if dark -->
+<svg fill="none" height="20" id="theme-toggle-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+</svg>
 </button>
 </nav>
 </header>
@@ -1006,23 +944,44 @@ Common column names: <em>Code, Description, Length, Color, Warehouse, Rack, etc.
 <div id="alumil-bottom-safe-pad" style="height: calc(88px + env(safe-area-inset-bottom, 0px));"></div>
 <nav aria-label="Primary" class="alumil-bottom-nav" id="alumil-bottom-nav">
 <button aria-label="Home" class="nav-btn" data-nav="home" onclick="location.href='home.html'">
-  <svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-  <span>Home</span>
+<svg class="lucide lucide-home" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
 </button>
 <button aria-label="Admin" class="nav-btn" data-nav="admin" onclick="location.href='admin.html'">
-  <svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17h-5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
-  <span>Admin</span>
+<svg class="lucide lucide-settings-2" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 7h-9"></path>
+<path d="M14 17h-5"></path>
+<circle cx="17" cy="17" r="3"></circle>
+<circle cx="7" cy="7" r="3"></circle>
+</svg>
+<span>Admin</span>
 </button>
 <button aria-label="Barcode scan (open)" class="scan-btn" id="alumil-scan-btn">
-  <svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
+<svg class="lucide lucide-scan-line" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+<path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+<path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+<path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+</svg>
 </button>
 <button aria-label="Rack Label" class="nav-btn" data-nav="rack" onclick="location.href='rack-label-printing.html'">
-  <svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"></path><path d="m3.29 7.39 8.31 3.23"></path><path d="m12 22.95 8.71-3.26"></path></svg>
-  <span>Rack Label</span>
+<svg class="lucide lucide-package" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="m7.5 4.27 9 5.15"></path>
+<path d="M21 8.24v9.42a2 2 0 0 1-1 .51l-8 2.8a2 2 0 0 1-2 0l-8-2.8a2 2 0 0 1-1-.51V8.24a2 2 0 0 1 1-.51l8-2.8a2 2 0 0 1 2 0l8 2.8a2 2 0 0 1 1 .51Z"></path>
+<path d="m3.29 7.39 8.31 3.23"></path>
+<path d="m12 22.95 8.71-3.26"></path>
+</svg>
+<span>Rack Label</span>
 </button>
 <button aria-label="Search Inventory" class="nav-btn" data-nav="search" onclick="location.href='search-inventory.html'">
-  <svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-  <span>Search</span>
+<svg class="lucide lucide-search" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="11" cy="11" r="8"></circle>
+<path d="m21 21-4.3-4.3"></path>
+</svg>
+<span>Search</span>
 </button>
 </nav>
 <footer class="alumil-footer" id="alumil-fixed-footer" role="contentinfo">

@@ -538,44 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 <script src="js/sharepoint_loader.js"></script>
 
-<!-- Supabase v2 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  window.SUPABASE_URL = "https://gkptehearoiapyujkuvc.supabase.co";
-  window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHRlaGVhcm9pYXB5dWprdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODgyMjgsImV4cCI6MjA3MTM2NDIyOH0.5F_dZECmQHGj7r8wsekm_pria4T6tVxnac_IA1qDvdQ";
-  window.ORG_ID = "00000000-0000-0000-0000-000000000000";
-  window._sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
-</script>
-
-<!-- Live Data: consumer fetch + realtime -->
-<script>
-(function(){
-  const sb = window._sbClient, ORG = window.ORG_ID;
-  async function fetchLiveData(){
-    try{
-      const [{ data:profiles, error:pe }, { data:accessories, error:ae }] = await Promise.all([
-        sb.from('profiles').select('*').eq('org_id', ORG),
-        sb.from('accessories').select('*').eq('org_id', ORG)
-      ]);
-      if(pe) throw pe; if(ae) throw ae;
-      const data = { profiles: profiles||[], accessories: accessories||[], loadedAt: new Date().toISOString() };
-      try { localStorage.setItem('excelCache', JSON.stringify(data)); } catch {}
-      if (typeof window.onDataLoaded === 'function') window.onDataLoaded(data);
-      return data;
-    }catch(err){
-      try { return JSON.parse(localStorage.getItem('excelCache') || '{}'); }
-      catch { return { profiles:[], accessories:[] }; }
-    }
-  }
-  document.addEventListener('DOMContentLoaded', fetchLiveData);
-  sb.channel('version-bumps')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'dataset_versions' }, async (payload)=>{
-      if (payload?.new?.org_id === ORG) await fetchLiveData();
-    })
-    .subscribe();
-  // expose for pages that want it
-  window.fetchLiveData = fetchLiveData;
-})();
-</script>
+<!-- Global Data Service for inventory access -->
+<script src="js/data-service.js"></script>
 </body>
 </html>
