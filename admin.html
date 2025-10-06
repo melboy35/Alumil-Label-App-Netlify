@@ -60,6 +60,22 @@
   window._sbClient = window.getSupabaseClient();
   console.log('✅ Supabase client initialized with singleton pattern');
 </script>
+<script>
+// Fetch all admin data and update counts on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof fetchAllAdminData === 'function') {
+    const { profiles, accessories } = await fetchAllAdminData();
+    // Update counts if elements exist
+    const profilesCountEl = document.getElementById('profiles-count');
+    const accessoriesCountEl = document.getElementById('accessories-count');
+    if (profilesCountEl) profilesCountEl.textContent = profiles.length;
+    if (accessoriesCountEl) accessoriesCountEl.textContent = accessories.length;
+    // Optionally: render tables or lists here
+    // renderProfilesTable(profiles);
+    // renderAccessoriesTable(accessories);
+  }
+});
+</script>
 <!-- Supabase Overlay -->
 <script src="assets/js/supabase-overlay.js"></script>
 <script src="js/auth-helper.js"></script>

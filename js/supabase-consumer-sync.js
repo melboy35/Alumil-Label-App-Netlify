@@ -18,8 +18,8 @@ async function fetchLiveData() {
     
     // Pull both tables (you can filter columns to what the page needs)
     const [{ data: profiles, error: profilesError }, { data: accessories, error: accessoriesError }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('org_id', ORG_ID),
-      supabase.from('accessories').select('*').eq('org_id', ORG_ID)
+        supabase.from('profiles').select('*').eq('org_id', ORG_ID).limit(10000),
+        supabase.from('accessories').select('*').eq('org_id', ORG_ID).limit(10000)
     ]);
     
     if (profilesError || accessoriesError) {

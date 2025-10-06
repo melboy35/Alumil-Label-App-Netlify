@@ -17,8 +17,8 @@ async function fetchLiveData() {
     
     // Pull both tables without org_id filter
     const [{ data: profiles, error: profilesError }, { data: accessories, error: accessoriesError }] = await Promise.all([
-      supabase.from('profiles').select('*'),
-      supabase.from('accessories').select('*')
+      supabase.from('profiles').select('*').limit(10000),
+      supabase.from('accessories').select('*').limit(10000)
     ]);
     
     if (profilesError || accessoriesError) {

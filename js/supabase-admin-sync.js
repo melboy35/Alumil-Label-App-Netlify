@@ -1,4 +1,22 @@
 /**
+ * Fetch all profiles and accessories for admin display (removes 1000-row limit)
+ */
+async function fetchAllAdminData() {
+  try {
+    const [{ data: profiles, error: profilesError }, { data: accessories, error: accessoriesError }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('org_id', ORG_ID).limit(10000),
+      supabase.from('accessories').select('*').eq('org_id', ORG_ID).limit(10000)
+    ]);
+    if (profilesError || accessoriesError) {
+      throw profilesError || accessoriesError;
+    }
+    return { profiles: profiles || [], accessories: accessories || [] };
+  } catch (error) {
+    console.error('Admin fetch failed:', error);
+    return { profiles: [], accessories: [] };
+  }
+}
+/**
  * Supabase Live Sync - Admin Implementation
  * Add this to your admin.html file for real-time data synchronization
  */
