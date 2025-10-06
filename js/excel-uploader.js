@@ -79,11 +79,12 @@ class AlumilExcelUploader {
     try {
       this.setUploadStatus('processing', `Uploading ${file.name} to cloud storage...`);
 
+
       // Upload file to Supabase Storage
       const storagePath = `uploads/${Date.now()}_${file.name}`;
       const { data: uploadData, error: uploadError } = await this.supabase
         .storage
-        .from('excel-files')
+        .from('inventory')
         .upload(storagePath, file, { upsert: true });
 
       if (uploadError) throw new Error('Failed to upload file to storage: ' + uploadError.message);
@@ -91,7 +92,7 @@ class AlumilExcelUploader {
       // Get public URL for the uploaded file
       const { data: publicUrlData } = this.supabase
         .storage
-        .from('excel-files')
+        .from('inventory')
         .getPublicUrl(storagePath);
       const fileUrl = publicUrlData?.publicUrl;
       if (!fileUrl) throw new Error('Could not get public URL for uploaded file.');
