@@ -16,6 +16,9 @@
 <meta content="#ffc107" name="msapplication-TileColor"/>
 <meta content="favicon/browserconfig.xml?v=6" name="msapplication-config"/>
 <meta content="#ffffff" name="theme-color"/>
+<!-- Supabase Configuration (added for live data sync) -->
+<meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
+<meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
 <script src="https://cdn.tailwindcss.com"></script><link href="assets/css/logo-theme.css" rel="stylesheet"/>
 <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" referrerpolicy="no-referrer" rel="stylesheet"/>
 <script defer="" src="https://unpkg.com/lucide@latest"></script>
@@ -23,6 +26,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="js/logout-helper.js"></script>
+<!-- Supabase + Auth/Data helpers for live inventory -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth-helper.js"></script>
+<script src="js/data-service.js"></script>
+<script src="js/search-inventory-live.js"></script>
 <!-- Footer Styles -->
 <style>
     .alumil-footer {
@@ -612,6 +620,55 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   let data = sampleData;
+  // Expose hook for live Supabase-backed updates
+  window.setLiveInventory = function(profilesRaw, accessoriesRaw, lastUpdatedTs){
+    try {
+      const normProfiles = Array.isArray(profilesRaw) ? profilesRaw.map(p=>({
+        profile_code: p.code || p.profile_code || p.item_code || '',
+        description: p.description || '',
+        profile_title: p.profile_title || p.title || '',
+        system: p.system || p.system_name || '',
+        alloy: p.alloy || '',
+        finish: p.finish || p.colour || p.color || '',
+        length: p.length == null ? '' : String(p.length),
+        inventory: p.status || p.inventory || p.category || 'OK',
+        rack_no: p.rack_no || p.rack || '',
+        warehouse_no: p.warehouse_no || p.warehouse || '',
+        comments: p.comments || p.remark || p.remarks || '',
+        suppliers: p.suppliers || {},
+        sides: p.sides || {},
+        polyamide: p.polyamide || {},
+        image: p.image || ''
+      })) : [];
+      const normAccessories = Array.isArray(accessoriesRaw) ? accessoriesRaw.map(a=>({
+        code: a.code || a.item_code || '',
+        description: a.description || '',
+        accessory_type: a.accessory_type || a.category || a.type || '',
+        supplier_name: a.supplier_name || a.supplier || a.vendor || '',
+        status: a.status || a.inventory || 'OK',
+        mrp_comments: a.mrp_comments || a.comments || '',
+        uom: a.unit || a.uom || 'pcs',
+        supplier_code: a.supplier_code || '',
+        warehouse_no: a.warehouse_no || a.warehouse || '',
+        rack_no: a.rack_no || a.rack || '',
+        image: a.image || '',
+        supplier_codes: a.supplier_codes || {},
+        other_color_codes: a.other_color_codes || {}
+      })) : [];
+      data = { inventory: normProfiles, accessories: normAccessories, lastUpdated: lastUpdatedTs || Date.now() };
+      dataSourceText.textContent = 'Live Data';
+      dataIndicator.classList.remove('bg-orange-500'); dataIndicator.classList.add('bg-green-500');
+      if (lastUpdatedTs){ lastUpdated.textContent = 'Last updated: ' + new Date(lastUpdatedTs).toLocaleString(); lastUpdated.classList.remove('hidden'); }
+      populateProfileFilterSelects();
+      populateAccessoryFilterSelect();
+      refreshCountsAndLabels();
+      setFilterModeByKind();
+      if (segAll.dataset.active === 'true') {
+        renderCurrentKindCards(applyFilterSet());
+      }
+      console.log('🔁 Inventory search data refreshed from live source');
+    } catch (e) { console.error('Failed to set live inventory', e); }
+  };
 
   (function initFromCache(){
     try{
