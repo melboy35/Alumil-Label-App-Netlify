@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alumil • Request Access</title>
+
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' data: blob:;
+                 script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self' data:;
+                 connect-src 'self' https://*.supabase.co">
+
+  <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
+  <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/auth-helper.js"></script>
+  <script src="/js/session-checker.js"></script>
+
+  <style>
+    :root{ --overlay-top: .35; --overlay-bottom: .45; --card-bg: rgb(255 255 255 / .08); --card-border: rgb(255 255 255 / .15); --text-dim: rgb(255 255 255 /.85); --accent: #ffc107; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #f8f9fa; background:#111; overflow:hidden; }
+    .bg { position:fixed; inset:0; background: linear-gradient(180deg, rgb(0 0 0 / var(--overlay-top)) 0%, rgb(0 0 0 / var(--overlay-bottom)) 100%), url("./Gemini_Generated_Image_xhx5yxxhx5yxxhx5.png") center/cover no-repeat fixed; z-index:-1; }
+    .bg::after{content:"";position:absolute;inset:0;pointer-events:none; background: radial-gradient(60% 60% at 70% 30%, rgb(255 255 255 / .06) 0%, transparent 60%), radial-gradient(50% 50% at 10% 90%, rgb(255 193 7 / .08) 0%, transparent 50%); mix-blend-mode:screen; }
+    .wrap{ position:relative; height:100%; display:grid; place-items:center; padding:24px; }
+    .card{ width:100%; max-width:480px; backdrop-filter: blur(8px); background: var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:22px 22px 18px; box-shadow:0 10px 30px rgb(0 0 0 / .35); }
+    .brand{ display:grid; place-items:center; gap:6px; margin-bottom:6px; text-align:center; }
+    .brand img{ display:block; height:40px; width:auto; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+    .tagline{ font-size:12px; color:var(--text-dim); letter-spacing:.2px; }
+    label{ display:block; font-size:13px; opacity:.9; margin:12px 0 6px; }
+    input{ width:100%; height:44px; border-radius:10px; border:1px solid rgb(255 255 255 / .25); background: rgb(255 255 255 / .1); color:#fff; padding:0 12px; outline:none; }
+    .btn{ position:relative; width:100%; height:46px; margin-top:16px; border:0; border-radius:12px; background: var(--accent); color:#222; font-weight:700; cursor:pointer; box-shadow: 0 6px 18px rgb(0 0 0 / .25); transition: transform .15s ease, box-shadow .2s ease, filter .2s ease; overflow:hidden; isolation:isolate; }
+    .btn::after{ content:""; position:absolute; top:-100%; left:-30%; width:60%; height:300%; transform: rotate(25deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0)); animation: sheen 2.4s infinite; opacity:.9; }
+    @keyframes sheen{ 0%{transform:translateX(-140%) rotate(25deg);} 60%,100%{transform:translateX(240%) rotate(25deg);} }
+    .aux{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:13px; color:var(--text-dim); }
+    .aux a{ color:#ffd54f; text-decoration:none; } .aux a:hover{ text-decoration:underline; }
+    .error-message { background: rgba(255, 80, 80, .15); color: #ffd1d1; border: 1px solid rgba(255, 120, 120, .3); padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; display: none; }
+    .success-message { background: rgba(80, 255, 120, .08); color: #ddffd9; border: 1px solid rgba(120, 255, 150, .15); padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">
+        <img src="./assets/images/alumil-logo.svg" alt="Alumil logo" />
+        <div class="tagline">Building excellence every day</div>
+      </div>
+
+      <h1>Request Access</h1>
+      <p class="sub">Request an account to access the Inventory Management System</p>
+
+      <div class="error-message" id="error-message"></div>
+      <div class="success-message" id="success-message"></div>
+
+      <form id="signup-form">
+        <label for="name">Full name</label>
+        <input id="name" type="text" placeholder="Jane Doe" required />
+
+        <label for="email">Work email</label>
+        <input id="email" type="email" placeholder="you@company.com" required />
+
+        <label for="company">Company / Department</label>
+        <input id="company" type="text" placeholder="Alumil - Sales" />
+
+        <button class="btn" type="submit" id="signup-btn">Request Access</button>
+      </form>
+
+      <div class="or"><span>OR</span></div>
+
+      <div class="aux">
+        <a href="./login.html">Back to sign in</a>
+        <a href="mailto:it-support@alumil.com">Contact IT</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getSupabaseClient() {
+      if (window._sbClient) return window._sbClient;
+      try {
+        const url = document.querySelector('meta[name="supabase-url"]').content;
+        const key = document.querySelector('meta[name="supabase-key"]').content;
+        window._sbClient = supabase.createClient(url, key, { auth: { autoRefreshToken: true, persistSession: true } });
+        return window._sbClient;
+      } catch (e) { console.error(e); return null; }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('signup-form');
+      const errorEl = document.getElementById('error-message');
+      const successEl = document.getElementById('success-message');
+      const btn = document.getElementById('signup-btn');
+
+      function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+      function hideError() { errorEl.style.display = 'none'; }
+      function showSuccess(msg) { successEl.textContent = msg; successEl.style.display = 'block'; }
+      function hideSuccess() { successEl.style.display = 'none'; }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); hideError(); hideSuccess();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const company = document.getElementById('company').value.trim();
+
+        if (!name || !email) { showError('Please provide your name and email'); return; }
+
+        btn.disabled = true; btn.textContent = 'Requesting...';
+
+        const supabase = getSupabaseClient();
+        if (!supabase) { showError('Service unavailable'); btn.disabled = false; btn.textContent = 'Request Access'; return; }
+
+        try {
+          // Try to insert into an 'access_requests' table (if exists)
+          const { error } = await supabase.from('access_requests').insert([{ name, email, company, status: 'pending' }]);
+          if (error) {
+            // Fallback: open mailto if table doesn't exist or insertion failed
+            console.warn('Insert error, falling back to mailto:', error);
+            window.location.href = 'mailto:it-support@alumil.com?subject=Access request from ' + encodeURIComponent(name) + '&body=Name:%20' + encodeURIComponent(name) + '%0AEmail:%20' + encodeURIComponent(email) + '%0ACompany:%20' + encodeURIComponent(company);
+            return;
+          }
+
+          showSuccess('Request submitted. IT will contact you shortly.');
+          form.reset();
+        } catch (err) {
+          console.error(err);
+          showError('Failed to submit request. You can email it-support@alumil.com');
+        } finally {
+          btn.disabled = false; btn.textContent = 'Request Access';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

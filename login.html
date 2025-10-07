@@ -219,8 +219,8 @@
       <div class="or"><span>OR</span></div>
 
       <div class="aux">
-        <a href="#" onclick="alert('Password reset flow goes here');return false;">Forgot password?</a>
-        <a href="/signup.html">Don't have an account? Request access</a>
+        <a href="./forgot-password.html">Forgot password?</a>
+        <a href="./signup.html">Don't have an account? Request access</a>
       </div>
     </div>
   </div>
@@ -340,7 +340,7 @@
           }
         } catch (error) {
           if (error.message) {
-            showError(`Error: ${error.message}`);
+            showError('Error: ' + error.message);
           } else {
             showError('An unexpected error occurred. Please try again.');
           }
@@ -350,85 +350,7 @@
         }
       });
       
-      signupLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        signupModal.style.display = 'flex';
-        signupSuccess.style.display = 'none';
-        signupError.style.display = 'none';
-        signupForm.reset();
-      });
-      
-      closeSignupModal.addEventListener('click', () => {
-        signupModal.style.display = 'none';
-      });
-      
-      signupModal.addEventListener('click', (e) => {
-        if (e.target === signupModal) signupModal.style.display = 'none';
-      });
-      
-      signupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        signupSuccess.style.display = 'none';
-        signupError.style.display = 'none';
-        
-        const email = document.getElementById('signup-email').value.trim();
-        const name = document.getElementById('signup-name').value.trim();
-        const password = document.getElementById('signup-password').value.trim();
-        const confirmPassword = document.getElementById('signup-confirm-password').value.trim();
-        
-        if (!email || !name || !password || !confirmPassword) {
-          signupError.textContent = 'Please fill in all fields.';
-          signupError.style.display = 'block';
-          return;
-        }
-        
-        if (password !== confirmPassword) {
-          signupError.textContent = 'Passwords do not match.';
-          signupError.style.display = 'block';
-          return;
-        }
-        
-        if (password.length < 6) {
-          signupError.textContent = 'Password must be at least 6 characters long.';
-          signupError.style.display = 'block';
-          return;
-        }
-        
-        signupBtn.disabled = true;
-        signupBtn.textContent = 'Creating Account...';
-        
-        try {
-          const supabaseClient = window.getSupabaseClient();
-          if (!supabaseClient) {
-            throw new Error('Unable to connect to authentication service');
-          }
-          
-          // Sign up the user
-          const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              data: {
-                full_name: name
-              }
-            }
-          });
-          
-          if (error) {
-            throw error;
-          }
-          
-          signupSuccess.style.display = 'block';
-          signupForm.reset();
-          
-        } catch (error) {
-          signupError.textContent = error.message || 'Failed to create account. Please try again.';
-          signupError.style.display = 'block';
-        } finally {
-          signupBtn.disabled = false;
-          signupBtn.textContent = 'Create Account';
-        }
-      });
+      // Signup modal code removed: site uses separate signup.html page instead of modal.
       
       // Check if user is already logged in
       async function checkExistingSession() {
