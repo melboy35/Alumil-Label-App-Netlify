@@ -1,62 +1,56 @@
-// logout-helper.js
-// Provides a resilient logout that clears Supabase session and local storage
-(function(){
-  async function performLogout(options = {}) {
-    const redirect = options.redirect || 'login.html';
+// logout-helper.js (idempotent unified logout)
+(() => {
+  const getSb = () => (window.getSupabaseClient ? window.getSupabaseClient() : window._sbClient);
+
+  if (!window.AuthHelper) window.AuthHelper = {};
+
+  window.AuthHelper.handleLogout = async function handleLogout(opts = {}) {
     const logger = window.alumilLogger;
-    function log(type, payload){ if(logger) logger.log(type, payload); else console.log('[logout]', type, payload||''); }
+    const log = (t,p) => { if(logger) logger.log(t,p); else console.log('[logout]', t, p||''); };
     try {
       log('logout_attempt');
-      // Clear using Supabase client if available
-      const client = (typeof window.getSupabaseClient === 'function') ? window.getSupabaseClient() : window._sbClient;
-      if (client && client.auth && client.auth.signOut) {
-        try {
-          // First clear local scope then global (defensive)
-          await client.auth.signOut({ scope: 'local' }).catch(()=>{});
-          await client.auth.signOut().catch(()=>{});
-          log('logout_supabase_done');
-        } catch (e) {
-          log('logout_supabase_error', { message: e.message });
-        }
+      const sb = getSb();
+      if (sb?.auth?.signOut) {
+        try { await sb.auth.signOut(); log('logout_supabase_ok'); } catch(e){ log('logout_supabase_err',{m:e.message}); }
       }
-      // Clear known storage keys
+      // Preserve theme
+      let theme=null; try { theme = localStorage.getItem('theme') || localStorage.getItem('alumil:theme'); } catch {}
+
+      // Clear localStorage fully
+      try { localStorage.clear(); } catch {}
+      if (theme) { try { localStorage.setItem('theme', theme); localStorage.setItem('alumil:theme', theme);} catch{} }
+
+      // IndexedDB cleanup (best-effort)
       try {
-        localStorage.removeItem('alumil_auth_token');
-        // Remove any Supabase v2 persisted keys pattern
-        Object.keys(localStorage).forEach(k => { if(k.includes('supabase') || k.includes('sb-')) localStorage.removeItem(k); });
-      } catch(e){ log('logout_storage_error', { message: e.message }); }
-      // Small delay to allow network call flush
-      setTimeout(()=>{ window.location.replace(redirect + '?logged_out=1&ts=' + Date.now()); }, 50);
+        const toDelete = ['DexieDatabase','alumil-cache','inventory-state-db'];
+        toDelete.forEach(name => { try { window.indexedDB.deleteDatabase(name); } catch {} });
+      } catch {}
+
+      // Service worker caches (optional)
+      try {
+        if (window.caches?.keys) {
+          const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+      } catch {}
+
+      await new Promise(r => setTimeout(r, 100));
+      const redirectTo = opts.redirectTo || 'login.html';
+      log('logout_redirect', { to: redirectTo });
+      window.location.replace(redirectTo + '?logged_out=1');
     } catch (err) {
-      log('logout_fatal_error', { message: err.message });
-      window.location.replace(redirect + '?logged_out=1&err=1&ts=' + Date.now());
+      console.error('Logout failed:', err);
+      window.location.reload();
+    }
+  };
+
+  // Wire button by ID if inline handler removed
+  function wire(){
+    const btn = document.getElementById('logout-btn');
+    if (btn && !btn.__logoutWired) {
+      btn.addEventListener('click', e => { e.preventDefault(); window.AuthHelper.handleLogout(); });
+      btn.__logoutWired = true;
     }
   }
-
-  // Expose
-  window.forceLogout = performLogout;
-
-  // Attach to existing logout button(s) if present
-  function wireButtons(){
-    const btns = [
-      document.getElementById('logout-btn'),
-      document.getElementById('logoutButton'),
-      document.getElementById('mobile-logout-btn')
-    ].filter(Boolean);
-    btns.forEach(btn => {
-      if(!btn.__logoutWired){
-        btn.addEventListener('click', (e)=>{
-          e.preventDefault();
-          performLogout();
-        });
-        btn.__logoutWired = true;
-      }
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireButtons);
-  } else {
-    wireButtons();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();
