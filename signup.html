@@ -43,12 +43,12 @@
   <div class="wrap">
     <div class="card">
       <div class="brand">
-        <img src="./assets/images/alumil-logo.svg" alt="Alumil logo" />
+        <img src="/assets/images/alumil-logo.svg" alt="Alumil logo" />
         <div class="tagline">Building excellence every day</div>
       </div>
 
-      <h1>Request Access</h1>
-      <p class="sub">Request an account to access the Inventory Management System</p>
+      <h1>Create account</h1>
+  <p class="sub">Sign up with your work email. You&#39;ll receive a verification email to activate your account.</p>
 
       <div class="error-message" id="error-message"></div>
       <div class="success-message" id="success-message"></div>
@@ -60,10 +60,13 @@
         <label for="email">Work email</label>
         <input id="email" type="email" placeholder="you@company.com" required />
 
-        <label for="company">Company / Department</label>
-        <input id="company" type="text" placeholder="Alumil - Sales" />
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="At least 8 characters" required />
 
-        <button class="btn" type="submit" id="signup-btn">Request Access</button>
+        <label for="confirm_password">Confirm password</label>
+        <input id="confirm_password" type="password" placeholder="Re-type your password" required />
+
+        <button class="btn" type="submit" id="signup-btn">Sign Up</button>
       </form>
 
       <div class="or"><span>OR</span></div>

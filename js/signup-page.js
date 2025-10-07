@@ -26,32 +26,42 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault(); hideError(); hideSuccess();
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const company = document.getElementById('company').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
 
-    if (!name || !email) { showError('Please provide your name and email'); return; }
+    if (!name || !email || !password || !confirm) { showError('Please complete all fields'); return; }
+    if (password.length < 8) { showError('Password must be at least 8 characters'); return; }
+    if (password !== confirm) { showError('Passwords do not match'); return; }
 
-    btn.disabled = true; btn.textContent = 'Requesting...';
+    btn.disabled = true; btn.textContent = 'Signing up...';
 
     const supabase = getSupabaseClient();
-    if (!supabase) { showError('Service unavailable'); btn.disabled = false; btn.textContent = 'Request Access'; return; }
+    if (!supabase) { showError('Service unavailable'); btn.disabled = false; btn.textContent = 'Sign Up'; return; }
 
     try {
-      // Try to insert into an 'access_requests' table (if exists)
-      const { error } = await supabase.from('access_requests').insert([{ name, email, company, status: 'pending' }]);
+      // Use Supabase auth signUp which triggers email verification by default
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      }, {
+        data: { full_name: name }
+      });
+
       if (error) {
-        // Fallback: open mailto if table doesn't exist or insertion failed
-        console.warn('Insert error, falling back to mailto:', error);
-        window.location.href = 'mailto:it-support@alumil.com?subject=Access request from ' + encodeURIComponent(name) + '&body=Name:%20' + encodeURIComponent(name) + '%0AEmail:%20' + encodeURIComponent(email) + '%0ACompany:%20' + encodeURIComponent(company);
+        console.warn('Sign up error:', error);
+        // If insertion into auth failed, fallback to previous behavior (mailto)
+        window.location.href = 'mailto:it-support@alumil.com?subject=Signup failed for ' + encodeURIComponent(name) + '&body=Please create an account for:%0AName:%20' + encodeURIComponent(name) + '%0AEmail:%20' + encodeURIComponent(email);
         return;
       }
 
-      showSuccess('Request submitted. IT will contact you shortly.');
+      // Supabase returns user or session info but we mainly need to inform the user to check email
+      showSuccess('Check your inbox: a verification email has been sent to ' + email + '. Follow the link to activate your account.');
       form.reset();
     } catch (err) {
       console.error(err);
-      showError('Failed to submit request. You can email it-support@alumil.com');
+      showError('Sign up failed. Please try again or contact it-support@alumil.com');
     } finally {
-      btn.disabled = false; btn.textContent = 'Request Access';
+      btn.disabled = false; btn.textContent = 'Sign Up';
     }
   });
 });
