@@ -70,15 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loginBtn.disabled = true;
     loginBtn.textContent = 'Signing in...';
     pulse(loginBtn);
+  if (window.alumilLogger) window.alumilLogger.log('login_attempt', { email });
     
     try {
       if (window.authHelper) {
         const result = await window.authHelper.loginWithEmail(email, password);
         
-        if (!result.success) {
-          showError(result.error?.message || "Login failed");
-          return;
-        }
+            if (!result.success) {
+              if (window.alumilLogger) window.alumilLogger.log('login_error', { source: 'authHelper', error: result.error });
+              showError(result.error?.message || "Login failed");
+              return;
+            }
         
         const isAdmin = await window.authHelper.checkIsAdmin();
         setTimeout(() => {
@@ -92,9 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
             if (result.error) {
-          showError(result.error.message || "Login failed");
-          return;
-        }
+              if (window.alumilLogger) window.alumilLogger.log('login_error', { source: 'supabase', error: result.error.message || result.error });
+              showError(result.error.message || "Login failed");
+              return;
+            }
         
         const user = result.data.user;
         const { data: profile } = await directSupabase
@@ -103,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
           .eq('id', user.id)
           .single();
         
-        const isAdmin = (profile && (profile.role === 'admin' || profile.is_admin === true));
+            const isAdmin = (profile && (profile.role === 'admin' || profile.is_admin === true));
+            if (window.alumilLogger) window.alumilLogger.log('login_success', { email, userId: user?.id, isAdmin });
         
         setTimeout(() => {
           window.location.replace(isAdmin ? 'admin.html' : 'home.html');
