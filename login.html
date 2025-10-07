@@ -323,26 +323,28 @@
 
       <div class="aux">
         <a href="#" onclick="alert('Password reset flow goes here');return false;">Forgot password?</a>
-        <a href="#" id="request-access-link">Don't have an account? Request access</a>
+        <a href="#" id="signup-link">Don't have an account? Sign up</a>
       </div>
     </div>
   </div>
 
-  <!-- Request Access Modal -->
-  <div id="request-access-modal" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+  <!-- Sign Up Modal -->
+  <div id="signup-modal" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
     <div style="background:#222; color:#fff; border-radius:14px; padding:32px 28px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.35); position:relative;">
-      <button id="close-request-modal" style="position:absolute; top:10px; right:14px; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">&times;</button>
-      <h2 style="margin-top:0; font-size:20px; font-weight:700;">Request Access</h2>
-      <form id="request-access-form">
-        <label for="req-email">Email Address</label>
-        <input id="req-email" name="email" type="email" placeholder="you@example.com" required style="width:100%;margin-bottom:12px;" />
-        <label for="req-name">Full Name</label>
-        <input id="req-name" name="name" type="text" placeholder="Your Name" required style="width:100%;margin-bottom:12px;" />
-        <label for="req-message">Message (optional)</label>
-        <textarea id="req-message" name="message" placeholder="Reason for access, company, etc." style="width:100%;margin-bottom:16px;"></textarea>
-        <button type="submit" class="btn" style="width:100%;">Submit Request</button>
-        <div id="request-access-success" style="display:none; color:#aaffaa; margin-top:10px;">Request sent! We'll contact you soon.</div>
-        <div id="request-access-error" style="display:none; color:#ffaaaa; margin-top:10px;"></div>
+      <button id="close-signup-modal" style="position:absolute; top:10px; right:14px; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">&times;</button>
+      <h2 style="margin-top:0; font-size:20px; font-weight:700;">Create Account</h2>
+      <form id="signup-form">
+        <label for="signup-email">Email Address</label>
+        <input id="signup-email" name="email" type="email" placeholder="you@example.com" required style="width:100%;margin-bottom:12px;" />
+        <label for="signup-name">Full Name</label>
+        <input id="signup-name" name="name" type="text" placeholder="Your Name" required style="width:100%;margin-bottom:12px;" />
+        <label for="signup-password">Password</label>
+        <input id="signup-password" name="password" type="password" placeholder="••••••••" required style="width:100%;margin-bottom:12px;" />
+        <label for="signup-confirm-password">Confirm Password</label>
+        <input id="signup-confirm-password" name="confirmPassword" type="password" placeholder="••••••••" required style="width:100%;margin-bottom:16px;" />
+        <button type="submit" class="btn" style="width:100%;" id="signup-btn">Create Account</button>
+        <div id="signup-success" style="display:none; color:#aaffaa; margin-top:10px;">Account created! Please check your email to verify your account.</div>
+        <div id="signup-error" style="display:none; color:#ffaaaa; margin-top:10px;"></div>
       </form>
     </div>
   </div>
@@ -381,12 +383,13 @@
       const loginForm = document.getElementById('login-form');
       const loginBtn = document.getElementById('login-btn');
       const errorMessage = document.getElementById('error-message');
-      const requestAccessLink = document.getElementById('request-access-link');
-      const requestAccessModal = document.getElementById('request-access-modal');
-      const closeRequestModal = document.getElementById('close-request-modal');
-      const requestAccessForm = document.getElementById('request-access-form');
-      const requestAccessSuccess = document.getElementById('request-access-success');
-      const requestAccessError = document.getElementById('request-access-error');
+      const signupLink = document.getElementById('signup-link');
+      const signupModal = document.getElementById('signup-modal');
+      const closeSignupModal = document.getElementById('close-signup-modal');
+      const signupForm = document.getElementById('signup-form');
+      const signupSuccess = document.getElementById('signup-success');
+      const signupError = document.getElementById('signup-error');
+      const signupBtn = document.getElementById('signup-btn');
       
       function showError(message) {
         errorMessage.textContent = message;
@@ -477,43 +480,83 @@
         }
       });
       
-      requestAccessLink.addEventListener('click', (e) => {
+      signupLink.addEventListener('click', (e) => {
         e.preventDefault();
-        requestAccessModal.style.display = 'flex';
-        requestAccessSuccess.style.display = 'none';
-        requestAccessError.style.display = 'none';
-        requestAccessForm.reset();
+        signupModal.style.display = 'flex';
+        signupSuccess.style.display = 'none';
+        signupError.style.display = 'none';
+        signupForm.reset();
       });
       
-      closeRequestModal.addEventListener('click', () => {
-        requestAccessModal.style.display = 'none';
+      closeSignupModal.addEventListener('click', () => {
+        signupModal.style.display = 'none';
       });
       
-      requestAccessModal.addEventListener('click', (e) => {
-        if (e.target === requestAccessModal) requestAccessModal.style.display = 'none';
+      signupModal.addEventListener('click', (e) => {
+        if (e.target === signupModal) signupModal.style.display = 'none';
       });
       
-      requestAccessForm.addEventListener('submit', async (e) => {
+      signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        requestAccessSuccess.style.display = 'none';
-        requestAccessError.style.display = 'none';
-        const email = document.getElementById('req-email').value.trim();
-        const name = document.getElementById('req-name').value.trim();
-        const message = document.getElementById('req-message').value.trim();
-        if (!email || !name) {
-          requestAccessError.textContent = 'Please enter your name and email.';
-          requestAccessError.style.display = 'block';
+        signupSuccess.style.display = 'none';
+        signupError.style.display = 'none';
+        
+        const email = document.getElementById('signup-email').value.trim();
+        const name = document.getElementById('signup-name').value.trim();
+        const password = document.getElementById('signup-password').value.trim();
+        const confirmPassword = document.getElementById('signup-confirm-password').value.trim();
+        
+        if (!email || !name || !password || !confirmPassword) {
+          signupError.textContent = 'Please fill in all fields.';
+          signupError.style.display = 'block';
           return;
         }
-        // Send request to backend (replace with your endpoint or email logic)
+        
+        if (password !== confirmPassword) {
+          signupError.textContent = 'Passwords do not match.';
+          signupError.style.display = 'block';
+          return;
+        }
+        
+        if (password.length < 6) {
+          signupError.textContent = 'Password must be at least 6 characters long.';
+          signupError.style.display = 'block';
+          return;
+        }
+        
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Creating Account...';
+        
         try {
-          // Example: send to a webhook or Supabase function
-          // await fetch('/api/request-access', { method: 'POST', body: JSON.stringify({ email, name, message }) });
-          requestAccessSuccess.style.display = 'block';
-          requestAccessForm.reset();
-        } catch (err) {
-          requestAccessError.textContent = 'Failed to send request. Please try again later.';
-          requestAccessError.style.display = 'block';
+          const supabaseClient = window.getSupabaseClient();
+          if (!supabaseClient) {
+            throw new Error('Unable to connect to authentication service');
+          }
+          
+          // Sign up the user
+          const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                full_name: name
+              }
+            }
+          });
+          
+          if (error) {
+            throw error;
+          }
+          
+          signupSuccess.style.display = 'block';
+          signupForm.reset();
+          
+        } catch (error) {
+          signupError.textContent = error.message || 'Failed to create account. Please try again.';
+          signupError.style.display = 'block';
+        } finally {
+          signupBtn.disabled = false;
+          signupBtn.textContent = 'Create Account';
         }
       });
       
