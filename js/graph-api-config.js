@@ -4,7 +4,7 @@
  * 
  * SETUP INSTRUCTIONS:
  * 1. Follow GRAPH_API_SETUP.md for complete setup guide
- * 2. Replace 'YOUR_AZURE_AD_CLIENT_ID_HERE' with your actual client ID
+ * 2. Client ID configured: 1f06e228-fb33-47ec-9735-6f86a4b398e1
  * 3. Update SharePoint configuration if needed
  */
 
@@ -12,7 +12,7 @@ window.GraphAPIConfig = {
   // Azure AD Application Configuration
   // IMPORTANT: Replace with your actual Azure AD app registration client ID
   // Get this from: Azure Portal > Azure AD > App registrations > Your App > Overview
-  clientId: 'YOUR_AZURE_AD_CLIENT_ID_HERE',
+  clientId: '1f06e228-fb33-47ec-9735-6f86a4b398e1',
   
   // SharePoint Configuration
   sharePoint: {
@@ -43,7 +43,7 @@ window.GraphAPIConfig = {
   
   // MSAL Authentication Configuration
   msal: {
-    authority: 'https://login.microsoftonline.com/common',
+    authority: 'https://login.microsoftonline.com/0ac1dc26-ec64-42c1-8f72-cb0a8b173849',
     cacheLocation: 'localStorage',
     storeAuthStateInCookie: false
   },
@@ -83,7 +83,7 @@ window.validateGraphAPIConfig = function() {
   const warnings = [];
   
   // Check required configuration
-  if (!config.clientId || config.clientId === 'YOUR_AZURE_AD_CLIENT_ID_HERE') {
+  if (!config.clientId) {
     errors.push('❌ Azure AD Client ID not configured');
   }
   
@@ -101,7 +101,7 @@ window.validateGraphAPIConfig = function() {
   }
   
   // Check client ID format (should be a GUID)
-  if (config.clientId && config.clientId !== 'YOUR_AZURE_AD_CLIENT_ID_HERE') {
+  if (config.clientId) {
     const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!guidRegex.test(config.clientId)) {
       warnings.push('⚠️ Client ID format may be incorrect (should be a GUID)');
@@ -173,7 +173,7 @@ window.validateGraphAPIConfig = function() {
   
   const errors = [];
   
-  if (!config.clientId || config.clientId === 'YOUR_AZURE_AD_CLIENT_ID_HERE') {
+  if (!config.clientId) {
     errors.push('Azure AD Client ID not configured');
   }
   
