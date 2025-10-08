@@ -31,6 +31,10 @@
 <meta name="supabase-url" content="https://grsikgldzkqntlotawyi.supabase.co">
 <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
 
+<!-- Microsoft Graph API Configuration -->
+<script src="js/graph-api-config.js"></script>
+<script src="js/microsoft-graph-api.js"></script>
+
 <!-- Legacy JavaScript configuration for compatibility -->
 <script>
   // Legacy configuration for existing code
@@ -441,6 +445,16 @@ body { position: relative; min-height: 100vh; -webkit-overflow-scrolling: touch;
     </svg>
     Load from URL
   </button>
+  <button class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-500 transition-colors" id="sharepoint-graph-btn">
+    <svg class="mr-2 inline-block" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+    </svg>
+    Import from SharePoint (Graph API)
+  </button>
+</div>
+<!-- Graph API Status -->
+<div class="mt-4" id="graph-api-status-container">
+  <div class="upload-status" id="graph-api-status" style="display: none;"></div>
 </div>
 </div>
 <div aria-hidden="true" class="fixed inset-0 z-50 hidden grid place-items-center p-4 modal-overlay overscroll-contain" id="settings-modal-overlay">
@@ -1544,6 +1558,43 @@ document.addEventListener('DOMContentLoaded', async () => {
       activityTile.addEventListener('click', function(e) {
         e.preventDefault();
         openActivityModal();
+      });
+    }
+
+    // Initialize Microsoft Graph API functionality
+    const sharePointBtn = document.getElementById('sharepoint-graph-btn');
+    if (sharePointBtn) {
+      sharePointBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (window.graphClient) {
+          // Initialize with configuration
+          if (window.GraphAPIConfig && window.GraphAPIConfig.clientId) {
+            await window.graphClient.init(window.GraphAPIConfig.clientId);
+            await window.graphClient.uploadFromSharePoint();
+          } else {
+            alert('Microsoft Graph API not configured. Please configure Azure AD application settings in graph-api-config.js');
+          }
+        } else {
+          alert('Microsoft Graph client not available. Please refresh the page.');
+        }
+      });
+    }
+
+    // Add test connection button functionality
+    const testGraphBtn = document.getElementById('test-graph-connection-btn');
+    if (testGraphBtn) {
+      testGraphBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (window.graphClient) {
+          if (window.GraphAPIConfig && window.GraphAPIConfig.clientId) {
+            await window.graphClient.init(window.GraphAPIConfig.clientId);
+            await window.graphClient.testConnection();
+          } else {
+            alert('Microsoft Graph API not configured.');
+          }
+        }
       });
     }
   });

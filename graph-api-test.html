@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Graph API Configuration Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .status.success {
+            background-color: #f0f9ff;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .status.error {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .status.warning {
+            background-color: #fffbeb;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .status.info {
+            background-color: #f0f9ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .config-display {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .config-item {
+            margin: 8px 0;
+            font-family: monospace;
+        }
+        .config-label {
+            font-weight: bold;
+            color: #374151;
+        }
+        .config-value {
+            color: #059669;
+        }
+        .steps {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Microsoft Graph API Configuration Test</h1>
+        
+        <p>This utility helps you test and verify your Microsoft Graph API configuration for SharePoint integration.</p>
+        
+        <div id="status-container">
+            <div class="status info">
+                <strong>Ready to test:</strong> Click the buttons below to test different aspects of your configuration.
+            </div>
+        </div>
+
+        <div class="config-display">
+            <h3>Current Configuration:</h3>
+            <div class="config-item">
+                <span class="config-label">Client ID:</span> 
+                <span class="config-value" id="config-client-id">Loading...</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">SharePoint URL:</span> 
+                <span class="config-value" id="config-sharepoint-url">Loading...</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Target File:</span> 
+                <span class="config-value" id="config-file-name">Loading...</span>
+            </div>
+        </div>
+
+        <div>
+            <h3>Configuration Tests:</h3>
+            <button onclick="testConfiguration()">1. Test Configuration</button>
+            <button onclick="testAuthentication()" id="auth-btn">2. Test Authentication</button>
+            <button onclick="testSharePointAccess()" id="sharepoint-btn" disabled>3. Test SharePoint Access</button>
+            <button onclick="testFileAccess()" id="file-btn" disabled>4. Test File Access</button>
+            <button onclick="downloadTestFile()" id="download-btn" disabled>5. Download Test File</button>
+        </div>
+
+        <div class="steps">
+            <h3>Setup Steps:</h3>
+            <ol>
+                <li><strong>Azure AD App Registration:</strong> Create an app registration in Azure Portal</li>
+                <li><strong>API Permissions:</strong> Add Sites.Read.All, Files.Read.All, Files.ReadWrite.All</li>
+                <li><strong>Admin Consent:</strong> Grant admin consent for the permissions</li>
+                <li><strong>Client ID:</strong> Copy the client ID to js/graph-api-config.js</li>
+                <li><strong>SharePoint URL:</strong> Verify the SharePoint site URL and file path</li>
+            </ol>
+            <p><strong>📖 Complete guide:</strong> <a href="GRAPH_API_SETUP.md" target="_blank">GRAPH_API_SETUP.md</a></p>
+        </div>
+
+        <div id="console-output">
+            <h3>Console Output:</h3>
+            <div id="console-log" style="background-color: #1a1a1a; color: #fff; padding: 15px; border-radius: 5px; font-family: monospace; height: 200px; overflow-y: auto;">
+                <div>Graph API Test Console - Ready</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Configuration -->
+    <script src="js/graph-api-config.js"></script>
+    <script src="js/microsoft-graph-api.js"></script>
+
+    <script>
+        let graphClient = null;
+        let isAuthenticated = false;
+
+        function log(message, type = 'info') {
+            const consoleLog = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#fff';
+            
+            consoleLog.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const container = document.getElementById('status-container');
+            container.innerHTML = `<div class="status ${type}"><strong>${type.toUpperCase()}:</strong> ${message}</div>`;
+        }
+
+        function loadConfiguration() {
+            if (window.GraphAPIConfig) {
+                const config = window.GraphAPIConfig;
+                document.getElementById('config-client-id').textContent = 
+                    config.clientId === 'YOUR_AZURE_AD_CLIENT_ID_HERE' ? 'Not configured' : config.clientId.substring(0, 8) + '...';
+                document.getElementById('config-sharepoint-url').textContent = 
+                    config.sharePoint.baseUrl + config.sharePoint.sitePath;
+                document.getElementById('config-file-name').textContent = 
+                    config.sharePoint.fileName;
+                
+                log('Configuration loaded successfully', 'success');
+            } else {
+                log('Configuration not found', 'error');
+            }
+        }
+
+        async function testConfiguration() {
+            log('Testing configuration...');
+            
+            if (!window.GraphAPIConfig) {
+                showStatus('Configuration file not found', 'error');
+                log('❌ graph-api-config.js not loaded', 'error');
+                return;
+            }
+
+            const isValid = window.validateGraphAPIConfig();
+            
+            if (isValid) {
+                showStatus('Configuration is valid', 'success');
+                log('✅ Configuration validation passed', 'success');
+                document.getElementById('auth-btn').disabled = false;
+            } else {
+                showStatus('Configuration has errors - check console for details', 'error');
+                log('❌ Configuration validation failed', 'error');
+            }
+        }
+
+        async function testAuthentication() {
+            log('Testing authentication...');
+            
+            try {
+                if (!graphClient) {
+                    graphClient = new MicrosoftGraphClient();
+                    await graphClient.init(window.GraphAPIConfig.clientId);
+                }
+                
+                await graphClient.authenticate();
+                isAuthenticated = true;
+                
+                showStatus('Authentication successful', 'success');
+                log('✅ Authentication successful', 'success');
+                
+                document.getElementById('sharepoint-btn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`Authentication failed: ${error.message}`, 'error');
+                log(`❌ Authentication failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSharePointAccess() {
+            log('Testing SharePoint access...');
+            
+            try {
+                const site = await graphClient.getSiteInfo();
+                
+                showStatus(`SharePoint site accessed: ${site.displayName}`, 'success');
+                log(`✅ SharePoint site: ${site.displayName}`, 'success');
+                log(`📍 Site ID: ${site.id}`, 'info');
+                
+                document.getElementById('file-btn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`SharePoint access failed: ${error.message}`, 'error');
+                log(`❌ SharePoint access failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFileAccess() {
+            log('Testing file access...');
+            
+            try {
+                const file = await graphClient.findInventoryFile();
+                
+                showStatus(`File found: ${file.name}`, 'success');
+                log(`✅ File found: ${file.name}`, 'success');
+                log(`📄 File size: ${(file.size / 1024).toFixed(2)} KB`, 'info');
+                log(`📅 Last modified: ${file.lastModifiedDateTime}`, 'info');
+                
+                document.getElementById('download-btn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`File access failed: ${error.message}`, 'error');
+                log(`❌ File access failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function downloadTestFile() {
+            log('Testing file download...');
+            
+            try {
+                const fileData = await graphClient.downloadInventoryFile();
+                
+                showStatus(`File downloaded successfully: ${fileData.name}`, 'success');
+                log(`✅ File downloaded: ${fileData.name}`, 'success');
+                log(`📊 File size: ${(fileData.size / 1024).toFixed(2)} KB`, 'info');
+                
+                // Try to parse Excel content
+                if (window.XLSX) {
+                    const workbook = window.XLSX.read(fileData.content, { type: 'array' });
+                    log(`📋 Excel sheets found: ${workbook.SheetNames.join(', ')}`, 'info');
+                    
+                    workbook.SheetNames.forEach(sheetName => {
+                        const sheet = workbook.Sheets[sheetName];
+                        const data = window.XLSX.utils.sheet_to_json(sheet);
+                        log(`📊 Sheet "${sheetName}": ${data.length} rows`, 'info');
+                    });
+                } else {
+                    log('⚠️ XLSX library not loaded - cannot parse Excel content', 'warning');
+                }
+                
+            } catch (error) {
+                showStatus(`File download failed: ${error.message}`, 'error');
+                log(`❌ File download failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfiguration();
+            log('Graph API Configuration Test Tool ready');
+        });
+    </script>
+
+    <!-- Load XLSX for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</body>
+</html>
