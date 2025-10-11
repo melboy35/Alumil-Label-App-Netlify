@@ -200,10 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!supabase) return;
       
       const { data, error } = await supabase.auth.getSession();
-      if (error) return;
+      if (error) {
+        console.warn('Session check error:', error);
+        return;
+      }
       
-      if (data?.session) {
+      if (data?.session?.user) {
         // User is already logged in, redirect to appropriate page
+        console.log('User already logged in, redirecting...');
         try {
           const { data: profile } = await supabase
             .from('profiles')
@@ -212,12 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .single();
           
           if (profile?.is_admin) {
-            location.href = 'admin.html';
+            window.location.replace('./admin.html');
           } else {
-            location.href = 'home.html';
+            window.location.replace('./home.html');
           }
         } catch (profileError) {
-          location.href = 'home.html';
+          console.warn('Profile fetch error:', profileError);
+          window.location.replace('./home.html');
         }
       }
     } catch (e) {
@@ -225,7 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  checkExistingSession();
+  // Only check session after a small delay to prevent redirect loops
+  setTimeout(checkExistingSession, 1000);
 
   // Pre-fill email if passed as URL parameter
   const urlParams = new URLSearchParams(window.location.search);

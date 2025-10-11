@@ -20,6 +20,7 @@
       ],
       "exclude": [
         "/login.html",
+        "/signup.html",
         "/index.html"
       ],
       "headers": {
@@ -32,6 +33,20 @@
     },
     {
       "route": "/login.html",
+      "allowedRoles": [
+        "anonymous",
+        "authenticated"
+      ],
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff", 
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://grsikgldzkqntlotawyi.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none';"
+      }
+    },
+    {
+      "route": "/signup.html",
       "allowedRoles": [
         "anonymous",
         "authenticated"
