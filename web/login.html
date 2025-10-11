@@ -217,7 +217,41 @@
 
       <div class="aux">
         <a href="#" onclick="alert('Password reset flow goes here');return false;">Forgot password?</a>
-        <a href="/signup.html">Don't have an account? Sign up</a>
+        <a href="#" id="open-signup-modal">Don't have an account? Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div id="signup-modal" aria-hidden="true" class="modal" style="display:none; position:fixed; inset:0; z-index:1000;">
+    <div class="modal-backdrop" id="signup-modal-backdrop" style="position:absolute; inset:0; background:rgba(0,0,0,.6);"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="signup-modal-title" style="position:relative; max-width:520px; margin:60px auto;">
+      <div class="card" style="padding:18px;">
+        <div class="brand">
+          <img src="./assets/images/alumil-logo black.svg" alt="Alumil logo" />
+          <div class="tagline">Create a new account</div>
+        </div>
+        <h2 id="signup-modal-title" style="margin:8px 0 12px; text-align:center;">Sign Up</h2>
+
+        <div class="error-message" id="signup-error-message" style="display:none;"></div>
+        <div class="success-message" id="signup-success-message" style="display:none;"></div>
+
+        <form id="signup-form">
+          <label for="name">Full Name</label>
+          <input id="name" type="text" placeholder="Jane Doe" required />
+
+          <label for="email">Email Address</label>
+          <input id="email" type="email" placeholder="you@company.com" required />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="At least 8 characters" required />
+
+          <label for="confirm_password">Confirm password</label>
+          <input id="confirm_password" type="password" placeholder="Re-type your password" required />
+
+          <button class="btn" type="submit" id="signup-btn">Create Account</button>
+          <button type="button" id="signup-cancel" style="margin-top:10px; background:transparent; border:1px solid rgba(255,255,255,.12); color:var(--text-dim); padding:10px 14px; border-radius:10px;">Cancel</button>
+        </form>
       </div>
     </div>
   </div>
@@ -380,6 +414,15 @@
       checkExistingSession();
     });
   </script>
-
+  <script src="./js/signup-modal.js"></script>
+  <script src="./js/signup-page.js"></script>
+  <script>
+    // initialize signup form inside modal with prefix for scoped selectors
+    document.addEventListener('DOMContentLoaded', function(){
+      if (window.initSignupUI) {
+        window.initSignupUI('#signup-modal ');
+      }
+    });
+  </script>
 </body>
 </html>

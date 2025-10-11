@@ -20,11 +20,13 @@ function getSupabaseClient() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('signup-form');
-  const errorEl = document.getElementById('error-message');
-  const successEl = document.getElementById('success-message');
-  const btn = document.getElementById('signup-btn');
+function initSignupUI(prefix = '') {
+  // prefix allows the same form to be embedded in a modal (prefix = '#signup-modal ')
+  const qs = (s) => document.querySelector(prefix + s);
+  const form = qs('#signup-form');
+  const errorEl = qs('#error-message') || qs('#signup-error-message');
+  const successEl = qs('#success-message') || qs('#signup-success-message');
+  const btn = qs('#signup-btn');
 
   function showError(msg) { 
     errorEl.textContent = msg; 
@@ -172,14 +174,23 @@ document.addEventListener('DOMContentLoaded', () => {
         window.alumilLogger.log('signup_success', { email, user_id: authData.user.id });
       }
 
-      // Show success message and redirect
+      // Show success message
       showSuccess('Account created successfully! Redirecting to login...');
       form.reset();
       
-      // Auto-redirect to login page after 2 seconds
-      setTimeout(() => {
-        window.location.href = './login.html?email=' + encodeURIComponent(email);
-      }, 2000);
+      // If embedded in modal, close modal and navigate login with email param
+      if (prefix) {
+        // close modal if available
+        if (window.signupModal && window.signupModal.close) window.signupModal.close();
+        setTimeout(() => {
+          window.location.href = './login.html?email=' + encodeURIComponent(email);
+        }, 800);
+      } else {
+        // Auto-redirect to login page after 2 seconds
+        setTimeout(() => {
+          window.location.href = './login.html?email=' + encodeURIComponent(email);
+        }, 2000);
+      }
 
     } catch (err) {
       console.error('Signup error:', err);
