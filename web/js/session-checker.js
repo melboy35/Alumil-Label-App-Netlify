@@ -82,10 +82,21 @@
               const resp = await fetch('/.auth/me', { method: 'GET', cache: 'no-store' });
               if (resp.ok) {
                 const body = await resp.json();
-                // body may be { clientPrincipal: {...} } or an object/array depending on platform
-                const principal = body.clientPrincipal || body;
-                const userDetails = principal?.userDetails || principal?.user?.userDetails || null;
-                const roles = principal?.userRoles || principal?.user?.userRoles || principal?.roles || [];
+
+                // Normalize different possible shapes of the /.auth/me response
+                // Prefer clientPrincipal when present
+                let principal = null;
+                if (body.clientPrincipal) {
+                  principal = body.clientPrincipal;
+                } else if (Array.isArray(body) && body.length > 0) {
+                  // Some platforms return an array of provider principals
+                  principal = body[0].clientPrincipal || body[0];
+                } else if (typeof body === 'object') {
+                  principal = body;
+                }
+
+                const userDetails = principal?.userDetails || principal?.user?.email || principal?.user?.userDetails || null;
+                const roles = principal?.userRoles || principal?.roles || [];
 
                 if (userDetails) {
                   console.log('Static Web Apps identity detected for', userDetails);
@@ -121,7 +132,29 @@
                   } catch (e) {
                     console.warn('Error mapping SWA identity to Supabase profile:', e);
                   }
+
+                  // Broadcast a SIGNED_IN event so other parts of the app react
+                  window.dispatchEvent(new CustomEvent('authStateChanged', {
+                    detail: {
+                      event: 'SIGNED_IN',
+                      isSignedIn: true,
+                      isAdmin: isAdmin,
+                      email: userDetails
+                    }
+                  }));
+
+                  // If we're on a public page, redirect immediately to home/admin
+                  const currentPathInner = location.pathname.split('/').pop() || 'index.html';
+                  if (PUBLIC_PAGES.includes(currentPathInner)) {
+                    console.log('Redirecting after SWA sign-in to', isAdmin ? 'admin.html' : 'home.html');
+                    location.replace(isAdmin ? 'admin.html' : 'home.html');
+                    return; // stop further checks
+                  }
+                } else {
+                  console.log('No user details found in /.auth/me principal:', principal);
                 }
+              } else {
+                console.log('/.auth/me returned', resp.status);
               }
             } catch (e) {
               console.warn('Failed to fetch /.auth/me:', e);
