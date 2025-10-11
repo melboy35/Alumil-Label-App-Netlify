@@ -79,7 +79,7 @@
     }
   ],
   "navigationFallback": {
-    "rewrite": "/login.html"
+    "rewrite": "/index.html"
   },
   "responseOverrides": {
     "401": {

@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Check if user is already logged in
+  // Check if user is already logged in (disabled to prevent redirect loops)
   async function checkExistingSession() {
     try {
       const supabase = getSupabaseClient();
@@ -206,23 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (data?.session?.user) {
-        // User is already logged in, redirect to appropriate page
-        console.log('User already logged in, redirecting...');
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin,email')
-            .eq('id', data.session.user.id)
-            .single();
-          
-          if (profile?.is_admin) {
-            window.location.replace('./admin.html');
-          } else {
-            window.location.replace('./home.html');
-          }
-        } catch (profileError) {
-          console.warn('Profile fetch error:', profileError);
-          window.location.replace('./home.html');
+        // User is already logged in - show message instead of redirect to prevent loops
+        console.log('User already logged in');
+        showSuccess('You are already logged in. Click here to go to your dashboard.');
+        const successEl = document.getElementById('success-message');
+        if (successEl) {
+          successEl.innerHTML = 'You are already logged in. <a href="./home.html" style="color: #007bff; text-decoration: underline;">Click here to go to your dashboard</a>';
         }
       }
     } catch (e) {
@@ -230,8 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Only check session after a small delay to prevent redirect loops
-  setTimeout(checkExistingSession, 1000);
+  // Check session without auto-redirect to prevent loops
+  setTimeout(checkExistingSession, 500);
 
   // Pre-fill email if passed as URL parameter
   const urlParams = new URLSearchParams(window.location.search);
