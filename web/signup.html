@@ -11,16 +11,16 @@
   <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdyc2lrZ2xkemtxbnRsb3Rhd3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTQ0NTQsImV4cCI6MjA3NTE3MDQ1NH0.RtGvQ7vDNFNiabghTWVEzFroA4Z_fc8ZTr9p07fk_eQ">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/auth-helper.js"></script>
-  <script src="/js/session-checker.js"></script>
-  <script src="/js/client-logging.js"></script>
+  <script src="./js/auth-helper.js"></script>
+  <script src="./js/session-checker.js"></script>
+  <script src="./js/client-logging.js"></script>
 
   <style>
     :root{ --overlay-top: .35; --overlay-bottom: .45; --card-bg: rgb(255 255 255 / .08); --card-border: rgb(255 255 255 / .15); --text-dim: rgb(255 255 255 /.85); --accent: #ffc107; }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #f8f9fa; background:#111; overflow:hidden; }
-  .bg { position:fixed; inset:0; background: linear-gradient(180deg, rgb(0 0 0 / var(--overlay-top)) 0%, rgb(0 0 0 / var(--overlay-bottom)) 100%), url("/assets/images/bg-login.png") center/cover no-repeat fixed, url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23111111'/%3E%3C/svg%3E") center/cover no-repeat fixed; z-index:-1; }
+  .bg { position:fixed; inset:0; background: linear-gradient(180deg, rgb(0 0 0 / var(--overlay-top)) 0%, rgb(0 0 0 / var(--overlay-bottom)) 100%), url("./assets/images/bg-login.png") center/cover no-repeat fixed, url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23111111'/%3E%3C/svg%3E") center/cover no-repeat fixed; z-index:-1; }
     .bg::after{content:"";position:absolute;inset:0;pointer-events:none; background: radial-gradient(60% 60% at 70% 30%, rgb(255 255 255 / .06) 0%, transparent 60%), radial-gradient(50% 50% at 10% 90%, rgb(255 193 7 / .08) 0%, transparent 50%); mix-blend-mode:screen; }
     .wrap{ position:relative; height:100%; display:grid; place-items:center; padding:24px; }
     .card{ width:100%; max-width:480px; backdrop-filter: blur(8px); background: var(--card-bg); border:1px solid var(--card-border); border-radius:20px; padding:22px 22px 18px; box-shadow:0 10px 30px rgb(0 0 0 / .35); }
@@ -46,12 +46,12 @@
   </style>
 </head>
 <body>
-  <link rel="preload" as="image" href="/assets/images/bg-login.png" />
+  <link rel="preload" as="image" href="./assets/images/bg-login.png" />
   <div class="bg"></div>
   <div class="wrap">
     <div class="card">
       <div class="brand">
-  <img src="/assets/images/alumil-logo black.svg" alt="Alumil logo" />
+  <img src="./assets/images/alumil-logo black.svg" alt="Alumil logo" />
         <div class="tagline">Building excellence every day</div>
       </div>
 
@@ -84,6 +84,6 @@
     </div>
   </div>
 
-  <script src="/js/signup-page.js"></script>
+  <script src="./js/signup-page.js"></script>
 </body>
 </html>
