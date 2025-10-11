@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alumil • Request Access</title>
+  <title>Alumil • Sign Up</title>
 
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://*.supabase.co">
 
@@ -28,14 +28,21 @@
     .brand img{ display:block; height:40px; width:auto; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
     .tagline{ font-size:12px; color:var(--text-dim); letter-spacing:.2px; }
     label{ display:block; font-size:13px; opacity:.9; margin:12px 0 6px; }
-    input{ width:100%; height:44px; border-radius:10px; border:1px solid rgb(255 255 255 / .25); background: rgb(255 255 255 / .1); color:#fff; padding:0 12px; outline:none; }
+    input{ width:100%; height:44px; border-radius:10px; border:1px solid rgb(255 255 255 / .25); background: rgb(255 255 255 / .1); color:#fff; padding:0 12px; outline:none; transition: border-color 0.2s ease; }
+    input:focus{ border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2); }
+    input::placeholder{ color: rgb(255 255 255 / .7); }
     .btn{ position:relative; width:100%; height:46px; margin-top:16px; border:0; border-radius:12px; background: var(--accent); color:#222; font-weight:700; cursor:pointer; box-shadow: 0 6px 18px rgb(0 0 0 / .25); transition: transform .15s ease, box-shadow .2s ease, filter .2s ease; overflow:hidden; isolation:isolate; }
+    .btn:hover:not(:disabled){ transform: translateY(-1px); box-shadow:0 10px 22px rgb(0 0 0 / .30); filter: brightness(1.03); }
+    .btn:active:not(:disabled){ transform: translateY(0); box-shadow:0 6px 18px rgb(0 0 0 / .25); filter: brightness(.98); }
+    .btn:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn::after{ content:""; position:absolute; top:-100%; left:-30%; width:60%; height:300%; transform: rotate(25deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0)); animation: sheen 2.4s infinite; opacity:.9; }
     @keyframes sheen{ 0%{transform:translateX(-140%) rotate(25deg);} 60%,100%{transform:translateX(240%) rotate(25deg);} }
     .aux{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:13px; color:var(--text-dim); }
     .aux a{ color:#ffd54f; text-decoration:none; } .aux a:hover{ text-decoration:underline; }
     .error-message { background: rgba(255, 80, 80, .15); color: #ffd1d1; border: 1px solid rgba(255, 120, 120, .3); padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; display: none; }
     .success-message { background: rgba(80, 255, 120, .08); color: #ddffd9; border: 1px solid rgba(120, 255, 150, .15); padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; display: none; }
+    h1{ margin:8px 0 12px; font-size:24px; font-weight:800; letter-spacing:.2px; text-align:center; }
+    p.sub{ margin:0 0 16px; font-size:14px; color:var(--text-dim); text-align:center; }
   </style>
 </head>
 <body>
@@ -48,17 +55,17 @@
         <div class="tagline">Building excellence every day</div>
       </div>
 
-      <h1>Create account</h1>
-  <p class="sub">Sign up with your work email. You&#39;ll receive a verification email to activate your account.</p>
+      <h1>Create Account</h1>
+  <p class="sub">Join the Alumil Inventory Management System</p>
 
       <div class="error-message" id="error-message"></div>
       <div class="success-message" id="success-message"></div>
 
       <form id="signup-form">
-        <label for="name">Full name</label>
+        <label for="name">Full Name</label>
         <input id="name" type="text" placeholder="Jane Doe" required />
 
-        <label for="email">Work email</label>
+        <label for="email">Email Address</label>
         <input id="email" type="email" placeholder="you@company.com" required />
 
         <label for="password">Password</label>
@@ -67,16 +74,12 @@
         <label for="confirm_password">Confirm password</label>
         <input id="confirm_password" type="password" placeholder="Re-type your password" required />
 
-        <button class="btn" type="submit" id="signup-btn">Sign Up</button>
+        <button class="btn" type="submit" id="signup-btn">Create Account</button>
       </form>
 
-      <p class="sub" style="margin-top:12px; font-size:12px; color:rgb(255 255 255 / .7);">After signing up you'll get a verification email — click the link in that email to activate your account, then return here to sign in.</p>
-
-      <div class="or"><span>OR</span></div>
-
       <div class="aux">
-        <a href="./login.html">Back to sign in</a>
-        <a href="mailto:it-support@alumil.com">Contact IT</a>
+        <a href="./login.html">Already have an account? Sign in</a>
+        <a href="mailto:it-support@alumil.com">Need help?</a>
       </div>
     </div>
   </div>
