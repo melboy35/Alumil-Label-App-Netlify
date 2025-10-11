@@ -54,7 +54,7 @@
           const supabase = window.getSupabaseClient();
           const { data } = await supabase.auth.getSession();
           isAuthenticated = !!data?.session;
-          
+
           // Check admin status if authenticated
           if (isAuthenticated && data?.session?.user?.id) {
             try {
@@ -63,7 +63,7 @@
                 .select('is_admin, role')
                 .eq('id', data.session.user.id)
                 .single();
-              
+
               isAdmin = !!(profile && (
                 profile.is_admin === true || 
                 profile.role === 'admin' || 
@@ -71,6 +71,60 @@
               ));
             } catch (e) {
               console.warn('Failed to check admin status:', e);
+            }
+          }
+
+          // If Supabase does not show a session, also check Static Web Apps auth (AAD)
+          // This handles users who signed-in with Microsoft via the SWA auth endpoint.
+          if (!isAuthenticated) {
+            try {
+              console.log('No Supabase session found — checking Static Web Apps /.auth/me');
+              const resp = await fetch('/.auth/me', { method: 'GET', cache: 'no-store' });
+              if (resp.ok) {
+                const body = await resp.json();
+                // body may be { clientPrincipal: {...} } or an object/array depending on platform
+                const principal = body.clientPrincipal || body;
+                const userDetails = principal?.userDetails || principal?.user?.userDetails || null;
+                const roles = principal?.userRoles || principal?.user?.userRoles || principal?.roles || [];
+
+                if (userDetails) {
+                  console.log('Static Web Apps identity detected for', userDetails);
+                  isAuthenticated = true;
+
+                  // Try to map by email to your Supabase profiles table to determine admin status
+                  try {
+                    const email = userDetails; // typically the email
+                    const { data: profileByEmail, error: profErr } = await supabase
+                      .from('profiles')
+                      .select('is_admin, role, id')
+                      .eq('email', email)
+                      .maybeSingle();
+
+                    if (profErr) {
+                      console.warn('Error querying profile by email:', profErr);
+                    }
+
+                    if (profileByEmail) {
+                      isAdmin = !!(profileByEmail.is_admin === true || profileByEmail.role === 'admin' || profileByEmail.role === 'ADMIN');
+                      // set authHelper state if available
+                      if (window.authHelper) {
+                        window.authHelper.user = { id: profileByEmail.id, email };
+                        window.authHelper.userProfile = profileByEmail;
+                        window.authHelper.isAdmin = isAdmin;
+                      }
+                    } else {
+                      // No profile found - check AAD roles if present
+                      if (Array.isArray(roles) && roles.includes('admin')) {
+                        isAdmin = true;
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('Error mapping SWA identity to Supabase profile:', e);
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to fetch /.auth/me:', e);
             }
           }
         }
