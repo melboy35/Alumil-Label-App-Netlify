@@ -1,0 +1,105 @@
+{
+  "name": "alumil-label-app",
+  "version": "2.0.0",
+  "description": "Advanced inventory management and label printing system with Microsoft Graph API SharePoint integration",
+  "keywords": [
+    "inventory",
+    "label-printing",
+    "sharepoint",
+    "microsoft-graph",
+    "supabase",
+    "pwa"
+  ],
+  "author": "Alumil",
+  "license": "UNLICENSED",
+  "private": true,
+  "homepage": "https://github.com/melboy35/Alumil-Label-App-Netlify",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/melboy35/Alumil-Label-App-Netlify.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000",
+    "deploy": "npm run deploy:netlify",
+    "deploy:netlify": "netlify deploy --prod --dir .",
+    "deploy:vercel": "vercel --prod",
+    "build": "echo 'No build step required for static site'",
+    "test": "npm run test:config && npm run test:lint",
+    "test:config": "node scripts/validate-config.js",
+    "test:lint": "echo 'Linting not configured'",
+    "validate": "node scripts/validate-config.js",
+    "setup": "node scripts/setup.js",
+    "clean": "rm -rf node_modules package-lock.json",
+    "postinstall": "echo 'Installation complete. Run npm run setup to configure the application.'"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0",
+    "vercel": "^32.0.0"
+  },
+  "optionalDependencies": {
+    "@azure/msal-browser": "^3.0.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "config": {
+    "deploymentTargets": [
+      "netlify",
+      "vercel",
+      "azure-static-web-apps"
+    ],
+    "requiredEnvVars": [
+      "SUPABASE_URL",
+      "SUPABASE_KEY",
+      "AZURE_CLIENT_ID"
+    ]
+  },
+  "deployment": {
+    "netlify": {
+      "buildCommand": "",
+      "publishDir": ".",
+      "envVars": [
+        "SUPABASE_URL",
+        "SUPABASE_KEY",
+        "AZURE_CLIENT_ID"
+      ]
+    },
+    "vercel": {
+      "buildCommand": "",
+      "outputDirectory": ".",
+      "envVars": [
+        "SUPABASE_URL",
+        "SUPABASE_KEY", 
+        "AZURE_CLIENT_ID"
+      ]
+    },
+    "azure": {
+      "appLocation": "/",
+      "apiLocation": "api",
+      "outputLocation": ".",
+      "envVars": [
+        "SUPABASE_URL",
+        "SUPABASE_KEY",
+        "AZURE_CLIENT_ID"
+      ]
+    }
+  },
+  "features": {
+    "microsoftGraphAPI": true,
+    "sharepointIntegration": true,
+    "labelPrinting": true,
+    "userAuthentication": true,
+    "mobileSupport": true,
+    "offlineMode": true,
+    "activityLogging": true
+  }
+}
